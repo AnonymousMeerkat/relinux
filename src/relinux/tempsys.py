@@ -3,7 +3,7 @@ Generates a temporary filesystem to hack on
 @author: lkjoel
 '''
 
-from relinux.lib import logger, config, maketree
+from relinux import logger, config, maketree
 import os, stat
 
 def genTempSys():

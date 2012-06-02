@@ -3,7 +3,7 @@ ISO Tree Generator
 @author: lkjoel
 '''
 
-from relinux.lib import logger, config, maketree
+from relinux import logger, config, maketree
 
 def genISOTree():
     logger.logI("Generating ISO Tree")
