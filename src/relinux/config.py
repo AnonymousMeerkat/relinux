@@ -14,3 +14,6 @@ VStatus = True
 VVStatus = True
 ISOTree = ""
 TempSys = ""
+
+# GUI Section
+background = "lightgrey"

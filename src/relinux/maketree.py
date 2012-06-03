@@ -1,6 +1,6 @@
 '''
 Creates a tree
-@author: lkjoel
+@author: Anonymous Meerkat
 '''
 
 import os
