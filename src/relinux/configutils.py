@@ -4,15 +4,15 @@ Utilities to manage configuration files
 '''
 
 from re import *
-from relinux import versionsort
+from relinux import versionsort, config
 import os
 import glob
 
 # Checks if it matched
 def checkMatched(m):
-    if m == None or m.groups(0) == None:
+    if m == None or m.group(0) == None:
         return False
-    elif m != None and m.groups(0) != None:
+    elif m != None and m.group(0) != None:
         return True
     else:
         return False
@@ -78,6 +78,16 @@ def getLinesWithinSection(buffer, section):
                 returnme.append(i)
     return returnme
 
+# Returns the parsed options in a dictionary (the buffer has to be compressed though)
+def getOptions(buffer):
+    patt = compile(r"^(.*?):(.*)")
+    returnme = {}
+    for i in buffer:
+        m = patt.match(i)
+        if checkMatched(m):
+            returnme[m.group(1)] = m.group(2).strip()
+    return returnme
+
 # Returns the value for an option (it will only show the first result, so you have to run getLinesWithinSection)
 def getOption(buffer, option):
     patt = compile("^ *" + option + " *:.*")
@@ -128,3 +138,31 @@ def getKernel(buffer1):
         return _getKernel(2)
     return _getKernel(0, buffer)
 
+# Returns a human-readable version of a compressed buffer (if it isn't compressed, it will look weird)
+def beautify(buffer):
+    returnme = []
+    returnme.append("# " + config.product + " Configuration File")
+    returnme.append("")
+    returnme.append("")
+    for i in getSections(buffer):
+        returnme.append("Section " + i)
+        returnme.append("")
+        buffer1 = getLinesWithinSection(buffer, i)
+        opts = getOptions(buffer1)
+        for i in opts.keys():
+            returnme.append("  " + i + ": " + opts[i])
+        returnme.append("")
+        returnme.append("EndSection")
+        returnme.append("")
+        returnme.append("")
+    return returnme
+        
+# Returns a buffer from a configuration file
+def getBuffer(file):
+    returnme = []
+    for line in file:
+        if not line or line == None:
+            break
+        returnme.append(line.rstrip())
+    print(len(returnme))
+    return returnme
