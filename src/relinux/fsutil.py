@@ -1,5 +1,5 @@
 '''
-Creates a tree
+General filesystem utilities
 @author: Anonymous Meerkat
 '''
 
