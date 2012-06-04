@@ -24,7 +24,7 @@ def main():
         version()
     if args.__dict__["verbose"] is False:
         config.IStatus = False
-    buffer = configutils.getBuffer(open("../../fastweaver.conf"))
+    buffer = configutils.getBuffer(open("../../relinux.conf"))
     buffer1 = configutils.compress(buffer)
     for i in configutils.beautify(buffer1):
         print(i)

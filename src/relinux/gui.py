@@ -18,6 +18,10 @@ class About:
 
 
 class Wizard(ttk.Notebook):
+    def on_change_tab(self, *args):
+        w = self.select()
+        self.current = self.index(w)
+
     def __init__(self, master=None, **kw):
         npages = kw.pop('npages', 3)
         kw['style'] = 'Wizard.TNotebook'
@@ -31,25 +35,24 @@ class Wizard(ttk.Notebook):
 
         self.current = 0
         self._wizard_buttons()
+        self.bind("<<NotebookTabChanged>>", self.on_change_tab)
 
     def _wizard_buttons(self):
         """Place wizard buttons in the pages."""
         for indx, child in self._children.items():
             btnframe = ttk.Frame(child)
             btnframe.pack(side='bottom', fill='x', padx=6, pady=12)
-
             nextbtn = ttk.Button(btnframe, text="Next", command=self.next_page)
             nextbtn.pack(side='right', anchor='e', padx=6)
             quitbtn = ttk.Button(btnframe, text="Quit", command=self.close)
             quitbtn.pack(side="left", anchor="w", padx=6)
-            if indx != 0:
+            if indx > 0:
                 prevbtn = ttk.Button(btnframe, text="Previous",
                     command=self.prev_page)
                 prevbtn.pack(side='right', anchor='e', padx=6)
-
                 if indx == len(self._children) - 1:
                     nextbtn.configure(text="Finish", command=self.close)
-
+    
     def next_page(self):
         self.current += 1
 
