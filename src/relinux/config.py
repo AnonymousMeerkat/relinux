@@ -16,4 +16,5 @@ ISOTree = ""
 TempSys = ""
 
 # GUI Section
+GUIStatus = True
 background = "lightgrey"

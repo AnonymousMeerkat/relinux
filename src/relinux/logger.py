@@ -3,7 +3,7 @@ Contains streams for logging information
 @author: lkjoel
 '''
 
-from relinux.lib import config
+from relinux import config
 
 # Log to essential stream
 def logE(text):
