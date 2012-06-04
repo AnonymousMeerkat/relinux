@@ -57,4 +57,3 @@ def chmod(file, mod):
         c = c + 1
     print(val)
     os.chmod(file, val)
-chmod("../../test.txt", "5506")
