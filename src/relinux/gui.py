@@ -95,9 +95,8 @@ class GUI:
         self.root.title(config.product)
         wizard = Wizard(npages=3)
         wizard.master.minsize(400, 350)
-        page0 = ttk.Label(wizard.page_container(0), text='Welcome to relinux 0.4!\nClick on next to get started')
         page1 = tkinter.Frame(wizard.page_container(1))
-        
+        page0 = ttk.Label(wizard.page_container(0), text='Welcome to relinux 0.4!\nClick on next to get started')
         page2 = ttk.Label(wizard.page_container(2), text='Page 3')
         wizard.add_page_body(0, "Welcome", page0)
         wizard.add_page_body(1, "Configure", page1)

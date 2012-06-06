@@ -20,7 +20,10 @@ def _chmod(c, mi):
     wbit = 0
     ebit = 0
     if c == 0:
-        return returnme
+        # These are not execution/write/read bits, but they work in the same way
+        ebit = stat.S_ISVTX
+        wbit = stat.S_ISGID
+        rbit = stat.S_ISUID
     elif c == 1:
         rbit = stat.S_IREAD
         wbit = stat.S_IWRITE
@@ -41,7 +44,6 @@ def _chmod(c, mi):
         mi = mi - 2
     if mi >= 1 :
         returnme = returnme | ebit
-    print(returnme)
     return returnme
 
 def chmod(file, mod):
