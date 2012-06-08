@@ -12,9 +12,11 @@ EStatus = True
 IStatus = True
 VStatus = True
 VVStatus = True
-ISOTree = ""
-TempSys = ""
 
 # GUI Section
 GUIStatus = True
 background = "lightgrey"
+
+# Configuration File Section
+ISOTree = ""
+TempSys = ""
