@@ -5,29 +5,58 @@ General filesystem utilities
 
 import os, stat, shutil, fnmatch
 
+# Reads the link location of a file or returns None
 def delink(file):
     if os.path.islink(file):
         return os.readlink(file)
     return None
 
+# Lengthener for files to exclude
+def exclude(names, files):
+    excludes = []
+    for i in files:
+        excludes.extend(fnmatch.filter(names, i))
+    return excludes
+
+# Makes a directory
 def makedir(dirs):
     if not os.path.exists(dirs):
         os.makedirs(dirs)
 
+# Makes a directory tree
 def maketree(arr):
     for i in arr:
         makedir(i)
 
-def rm(file):
+# Simple implementation of the touch utility
+def touch(file):
+    if os.path.exists(file):
+        os.utime(file, None)
+    else:
+        open(file, "w").close()
+
+# Same as maketree, but for files instead
+def makefiles(arr):
+    for i in arr:
+        touch(i)
+
+# Removes a file
+# If followlink is True, then it will remove both the link and the origin
+def rm(file, followlink=False):
     rfile = file
     dfile = delink(file)
     if dfile != None:
         file = dfile
     if os.path.isfile(file):
         os.remove(rfile)
+        if followlink == True and dfile != None:
+            os.remove(file)
     elif os.path.isdir(file):
         shutil.rmtree(rfile)
+        if followlink == True and dfile != None:
+            os.remove(file)
 
+# Removes a list of files
 def rmfiles(arr):
     for i in arr:
         rm(i)
@@ -77,7 +106,7 @@ def _chmod(c, mi):
         returnme = returnme | ebit
     return returnme
 
-# Implementation of the chmod utility/C function
+# Simple implementation of the chmod utility
 def chmod(file, mod):
     val = 0x00
     c = 0
@@ -89,21 +118,14 @@ def chmod(file, mod):
     # Chmod it
     os.chmod(file, val)
 
-# Lengthener for files to exclude
-def exclude(names, files):
-    excludes = []
-    for i in files:
-        excludes.extend(fnmatch.filter(names, i))
-    return excludes
-
 # Filesystem copier (like rsync --exclude... -a SRC DST)
-def fscopy(src, dst, excludes):
+def fscopy(src, dst, excludes1):
     # Get a list of all files
     files = os.listdir(src)
     # Exclude the files that are not wanted
     excludes = []
     if len(excludes) > 0:
-        excludes = exclude(files, excludes)
+        excludes = exclude(files, excludes1)
     makedir(dst)
     # Copy the files
     for file in files:
@@ -120,3 +142,49 @@ def fscopy(src, dst, excludes):
         else:
             shutil.copy2(fullpath, newpath)
     shutil.copystat(src, dst)
+
+# Removes the contents of a directory with excludes and options
+# Current options:
+#     excludes (True or False): If True, exclude the files listed in excludes
+#     remdirs (True or False): If True, remove directories too
+def adrm(dirs, options, excludes1):
+    # Get a list of all files inside the directory
+    files = os.listdir(dirs)
+    excludes = []
+    # Exclude the files listed to exclude
+    if options.excludes == True:
+        excludes = exclude(files, excludes1)
+    # Remove the wanted files
+    for file in files:
+        # Make sure we don't remove files that are listed to exclude from removal
+        if file in excludes:
+            continue
+        fullpath = os.path.join(dirs, file)
+        dfile = delink(fullpath)
+        if dfile != None:
+            if os.path.isfile(dfile):
+                rm(fullpath)
+                continue
+        elif os.path.isdir(fullpath):
+            adrm(fullpath, options, excludes1)
+        else:
+            rm(fullpath)
+    if options.remdirs == True:
+        rm(dirs)
+
+# Returns the stat of a file
+def getStat(file):
+    return os.stat(file)
+
+# Returns the mode of the stat of a file (can be used like this: getMode(getStat(file))
+def getMode(stat):
+    return stat.S_IMODE(stat.st_mode)
+
+# Specific implementation of shutil's copystat function
+def copystat(stat, dst):
+    if hasattr(os, "utime"):
+        os.utime(dst, (stat.st_atime, stat.st_mtime))
+    if hasattr(os, "chmod"):
+        os.chmod(dst, getMode(stat))
+    if hasattr(os, "chflags") and hasattr(stat, "st_flags"):
+        os.chflags(dst, stat.st_flags)

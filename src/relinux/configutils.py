@@ -8,11 +8,9 @@ from relinux import versionsort, config
 import os
 import glob
 
-# Checks if it matched
+# Checks if something matched
 def checkMatched(m):
-    if m == None or m.group(0) == None:
-        return False
-    elif m != None and m.group(0) != None:
+    if m != None and m.group(0) != None:
         return True
     else:
         return False
