@@ -125,7 +125,7 @@ def fscopy(src, dst, excludes1):
     # Exclude the files that are not wanted
     excludes = []
     if len(excludes) > 0:
-        excludes = exclude(files, excludes1)
+        excludes = shutil.ignore_patterns(files, excludes1)
     makedir(dst)
     # Copy the files
     for file in files:
@@ -153,7 +153,7 @@ def adrm(dirs, options, excludes1):
     excludes = []
     # Exclude the files listed to exclude
     if options.excludes == True:
-        excludes = exclude(files, excludes1)
+        excludes = shutil.ignore_patterns(files, excludes1)
     # Remove the wanted files
     for file in files:
         # Make sure we don't remove files that are listed to exclude from removal
