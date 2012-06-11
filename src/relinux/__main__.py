@@ -6,7 +6,7 @@ from relinux import config, gui, configutils
 #sys.path.append("./lib/.")
 #from .lib import *
 from argparse import ArgumentParser
-from tkinter import *
+import tkinter
 
 def version():
     print((config.version_string))
@@ -28,8 +28,9 @@ def main():
     buffer1 = configutils.compress(buffer)
     for i in configutils.beautify(buffer1):
         print(i)
-    root = Tk()
-    App = gui.GUI(root)
+    root = tkinter.Tk()
+    #App = gui.GUI(root)
+    gui.GUI(root)
     root.mainloop()
 
 if __name__ == '__main__':

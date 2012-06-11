@@ -3,7 +3,7 @@ Utilities to manage configuration files
 @author: Anonymous Meerkat
 '''
 
-from re import *
+import re
 from relinux import versionsort, config
 import os
 import glob
@@ -17,7 +17,7 @@ def checkMatched(m):
 
 # Returns an empty-line-cleaned version of the buffer
 def cleanEmptyLines(buffer):
-    patt = compile("^ *$")
+    patt = re.compile("^ *$")
     returnme = []
     for i in buffer:
         m = patt.match(i)
@@ -29,12 +29,12 @@ def cleanEmptyLines(buffer):
 def unIndent(buffer):
     returnme = []
     for i in buffer:
-        returnme.append(sub("^ *", "", i))
+        returnme.append(re.sub("^ *", "", i))
     return returnme
 
 # Returns a comment-cleaned version of the buffer
 def cleanComments(buffer):
-    patt = compile("^ *#.*")
+    patt = re.compile("^ *#.*")
     returnme = []
     for i in buffer:
         m = patt.match(i)
@@ -50,7 +50,7 @@ def compress(buffer):
 
 # Returns the different sections of the buffer
 def getSections(buffer):
-    patt = compile("^ *Section *.*")
+    patt = re.compile("^ *Section *.*")
     returnme = []
     for i in buffer:
         m = patt.match(i)
@@ -60,8 +60,8 @@ def getSections(buffer):
 
 # Returns all lines within a section of the buffer (it will not parse them though)
 def getLinesWithinSection(buffer, section):
-    patt = compile("^ *Section *" + section + ".*")
-    patte = compile("^ *EndSection *.*")
+    patt = re.compile("^ *Section *" + section + ".*")
+    patte = re.compile("^ *EndSection *.*")
     returnme = []
     x = 0
     for i in buffer:
@@ -78,7 +78,7 @@ def getLinesWithinSection(buffer, section):
 
 # Returns the parsed options in a dictionary (the buffer has to be compressed though)
 def getOptions(buffer):
-    patt = compile(r"^(.*?):(.*)")
+    patt = re.compile(r"^(.*?):(.*)")
     returnme = {}
     for i in buffer:
         m = patt.match(i)
@@ -88,7 +88,7 @@ def getOptions(buffer):
 
 # Returns the value for an option (it will only show the first result, so you have to run getLinesWithinSection)
 def getOption(buffer, option):
-    patt = compile("^ *" + option + " *:.*")
+    patt = re.compile("^ *" + option + " *:.*")
     for i in buffer:
         m = patt.match(i)
         if checkMatched(m):

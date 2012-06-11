@@ -4,7 +4,7 @@ Generates a temporary filesystem to hack on
 '''
 
 from relinux import logger, config, configutils, fsutil, pwdmanip
-import os, stat
+#import os, stat
 
 threadname = "TempSys"
 tn = logger.genTN(threadname)
@@ -77,7 +77,8 @@ def genTempSys(excludes):
                 return
             if x["user"] in i["users"]:
                 i["users"].remove(x["user"])
-        groupfile.write(pwdmanip.PGtoEntry(i))
+        if addme == True:
+            groupfile.write(pwdmanip.PGtoEntry(i))
     fsutil.copystat(groupstat, groupf)
     groupfile.close()
     
