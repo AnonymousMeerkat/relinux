@@ -3,13 +3,19 @@ General filesystem utilities
 @author: Anonymous Meerkat
 '''
 
-import os, stat, shutil, fnmatch
+import os
+import stat
+import shutil
+import fnmatch
+from relinux import configutils, pwdmanip
+
 
 # Reads the link location of a file or returns None
 def delink(file):
     if os.path.islink(file):
         return os.readlink(file)
     return None
+
 
 # Lengthener for files to exclude
 def exclude(names, files):
@@ -18,15 +24,18 @@ def exclude(names, files):
         excludes.extend(fnmatch.filter(names, i))
     return excludes
 
+
 # Makes a directory
 def makedir(dirs):
     if not os.path.exists(dirs):
         os.makedirs(dirs)
 
+
 # Makes a directory tree
 def maketree(arr):
     for i in arr:
         makedir(i)
+
 
 # Simple implementation of the touch utility
 def touch(file):
@@ -35,10 +44,12 @@ def touch(file):
     else:
         open(file, "w").close()
 
+
 # Same as maketree, but for files instead
 def makefiles(arr):
     for i in arr:
         touch(i)
+
 
 # Removes a file
 # If followlink is True, then it will remove both the link and the origin
@@ -56,10 +67,12 @@ def rm(file, followlink=False):
         if followlink == True and dfile != None:
             os.remove(file)
 
+
 # Removes a list of files
 def rmfiles(arr):
     for i in arr:
         rm(i)
+
 
 # Helper function for chmod
 def _chmod(c, mi):
@@ -102,9 +115,10 @@ def _chmod(c, mi):
         returnme = returnme | wbit
         mi = mi - 2
     # Execute
-    if mi >= 1 :
+    if mi >= 1:
         returnme = returnme | ebit
     return returnme
+
 
 # Simple implementation of the chmod utility
 def chmod(file, mod):
@@ -117,6 +131,7 @@ def chmod(file, mod):
         c = c + 1
     # Chmod it
     os.chmod(file, val)
+
 
 # Filesystem copier (like rsync --exclude... -a SRC DST)
 def fscopy(src, dst, excludes1):
@@ -142,6 +157,7 @@ def fscopy(src, dst, excludes1):
         else:
             shutil.copy2(fullpath, newpath)
     shutil.copystat(src, dst)
+
 
 # Removes the contents of a directory with excludes and options
 # Current options:
@@ -172,13 +188,16 @@ def adrm(dirs, options, excludes1):
     if options.remdirs == True:
         rm(dirs)
 
+
 # Returns the stat of a file
 def getStat(file):
     return os.stat(file)
 
+
 # Returns the mode of the stat of a file (can be used like this: getMode(getStat(file))
 def getMode(stat):
     return stat.S_IMODE(stat.st_mode)
+
 
 # Specific implementation of shutil's copystat function
 def copystat(stat, dst):
@@ -188,3 +207,34 @@ def copystat(stat, dst):
         os.chmod(dst, getMode(stat))
     if hasattr(os, "chflags") and hasattr(stat, "st_flags"):
         os.chflags(dst, stat.st_flags)
+
+
+# Interactive file editor - Get all buffers needed
+# 0 = stat
+# 1 = filename
+# 2 = write buffer
+# 3 = file contents
+def ife_getbuffers(file):
+    returnme = []
+    returnme[0] = getStat(file)
+    returnme[1] = file
+    fbuff = open(file, "r")
+    rbuff = configutils.getBuffer(fbuff)
+    fbuff.close()
+    fbuff = open(file, "w")
+    returnme[2] = fbuff
+    returnme[3] = rbuff
+    return returnme
+
+
+# Interactive file editor
+# Function must return an array:
+#     0 = Write line? True or False
+#     1 = Line to write (which, of course, will not be written if 0 = False), String
+def ife(buffers, func):
+    for i in buffers[3]:
+        r = func(i)
+        if r[0] == True:
+            buffers[2].write(r[1])
+    copystat(buffers[0], buffers[1])
+    buffers[2].close()

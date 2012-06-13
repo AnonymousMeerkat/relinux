@@ -7,6 +7,7 @@ from tkinter import ttk
 import tkinter
 from relinux import config
 
+
 class About:
     def __init__(self, master):
         top = self.top = tkinter.Toplevel(master, background=config.background)
@@ -52,7 +53,7 @@ class Wizard(ttk.Notebook):
                 prevbtn.pack(side='right', anchor='e', padx=6)
                 if indx == len(self._children) - 1:
                     nextbtn.configure(text="Finish", command=self.close)
-    
+
     def next_page(self):
         self.current += 1
 
@@ -79,7 +80,7 @@ class Wizard(ttk.Notebook):
 
     def _get_current(self):
         return self._current
-    
+
     def _set_current(self, curr):
         if curr not in self._children:
             raise KeyError("Invalid page: %s" % curr)
@@ -88,6 +89,7 @@ class Wizard(ttk.Notebook):
         self.select(self._children[self._current])
 
     current = property(_get_current, _set_current)
+
 
 class GUI:
     def __init__(self, master):
@@ -102,4 +104,3 @@ class GUI:
         wizard.add_page_body(1, "Configure", page1)
         wizard.add_page_body(2, "Page 3", page2)
         wizard.pack(fill='both', expand=True)
-

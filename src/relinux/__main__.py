@@ -8,8 +8,10 @@ from relinux import config, gui, configutils
 from argparse import ArgumentParser
 import tkinter
 
+
 def version():
     print((config.version_string))
+
 
 def main():
     parser = ArgumentParser()

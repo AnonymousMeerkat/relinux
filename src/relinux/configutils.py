@@ -8,12 +8,14 @@ from relinux import versionsort, config
 import os
 import glob
 
+
 # Checks if something matched
 def checkMatched(m):
     if m != None and m.group(0) != None:
         return True
     else:
         return False
+
 
 # Returns an empty-line-cleaned version of the buffer
 def cleanEmptyLines(buffer):
@@ -25,12 +27,14 @@ def cleanEmptyLines(buffer):
             returnme.append(i)
     return returnme
 
+
 # Returns a flat version of the buffer (i.e. no indenting)
 def unIndent(buffer):
     returnme = []
     for i in buffer:
         returnme.append(re.sub("^ *", "", i))
     return returnme
+
 
 # Returns a comment-cleaned version of the buffer
 def cleanComments(buffer):
@@ -42,11 +46,13 @@ def cleanComments(buffer):
             returnme.append(i)
     return returnme
 
+
 # Returns a compressed version of the buffer
 def compress(buffer):
     buffer = cleanComments(buffer)
     buffer = cleanEmptyLines(buffer)
     return unIndent(buffer)
+
 
 # Returns the different sections of the buffer
 def getSections(buffer):
@@ -57,6 +63,7 @@ def getSections(buffer):
         if checkMatched(m):
             returnme.append(i.split()[1].strip())
     return returnme
+
 
 # Returns all lines within a section of the buffer (it will not parse them though)
 def getLinesWithinSection(buffer, section):
@@ -76,6 +83,7 @@ def getLinesWithinSection(buffer, section):
                 returnme.append(i)
     return returnme
 
+
 # Returns the parsed options in a dictionary (the buffer has to be compressed though)
 def getOptions(buffer):
     patt = re.compile(r"^(.*?):(.*)")
@@ -86,6 +94,7 @@ def getOptions(buffer):
             returnme[m.group(1)] = m.group(2).strip()
     return returnme
 
+
 # Returns the value for an option (it will only show the first result, so you have to run getLinesWithinSection)
 def getOption(buffer, option):
     patt = re.compile("^ *" + option + " *:.*")
@@ -94,6 +103,7 @@ def getOption(buffer, option):
         if checkMatched(m):
             return i.split(":")[1].strip()
     return ""
+
 
 # Returns the kernel list
 def getKernelList():
@@ -105,6 +115,7 @@ def getKernelList():
         #                        0....5....0....5.7
         returnme.append(i[17:])
     return returnme
+
 
 # Helper function for getKernel
 # Types:
@@ -125,6 +136,7 @@ def _getKernel(t, kernelVersion=None):
         return files[0]
     return os.popen("uname -r").read()
 
+
 # Returns the kernel specified by the buffer
 def getKernel(buffer1):
     buffer = buffer1.lower()
@@ -135,6 +147,7 @@ def getKernel(buffer1):
     if buffer == "oldest":
         return _getKernel(2)
     return _getKernel(0, buffer)
+
 
 # Returns a human-readable version of a compressed buffer (if it isn't compressed, it will look weird)
 def beautify(buffer):
@@ -154,7 +167,8 @@ def beautify(buffer):
         returnme.append("")
         returnme.append("")
     return returnme
-        
+
+
 # Returns a buffer from a configuration file
 def getBuffer(file):
     returnme = []

@@ -11,9 +11,11 @@ IBuffer = ""
 VBuffer = ""
 VVBuffer = ""
 
+
 # Generates a thread name string
 def genTN(tn):
     return "[" + tn + "] "
+
 
 # Log to essential stream
 def logE(tn, text):
@@ -23,6 +25,7 @@ def logE(tn, text):
         EBuffer = EBuffer + text
         RLock.release()
 
+
 # Log to info stream
 def logI(tn, text):
     if config.IStatus is True:
@@ -31,6 +34,7 @@ def logI(tn, text):
         IBuffer = IBuffer + text
         RLock.release()
 
+
 # Log to verbose stream
 def logV(tn, text):
     if config.VStatus is True:
@@ -38,6 +42,7 @@ def logV(tn, text):
         text = tn + text
         VBuffer = VBuffer + text
         RLock.release()
+
 
 # Log to very-verbose stream
 def logVV(tn, text):
