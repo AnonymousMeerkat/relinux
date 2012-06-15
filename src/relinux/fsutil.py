@@ -7,6 +7,7 @@ import os
 import stat
 import shutil
 import fnmatch
+import sys
 from relinux import configutils, pwdmanip
 
 
@@ -124,6 +125,9 @@ def _chmod(c, mi):
 def chmod(file, mod):
     val = 0x00
     c = 0
+    # In case the user of this function used UGO instead of SUGO, we'll cover up for that
+    if len(mod) < 4:
+        c = 1
     # OR all of the chmod options
     for i in mod:
         # OR this option to val
@@ -238,3 +242,12 @@ def ife(buffers, func):
             buffers[2].write(r[1])
     copystat(buffers[0], buffers[1])
     buffers[2].close()
+
+
+# Finds the system architecture
+def getArch():
+    bits_64 = sys.maxsize > 2 ** 32
+    if bits_64 == True:
+        return "amd64"
+    else:
+        return "i386"

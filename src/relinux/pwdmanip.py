@@ -79,6 +79,7 @@ def _join(arr, char):
         else:
             returnme = returnme + i
         c = c + 1
+    returnme = returnme + "\n"
     return returnme
 
 

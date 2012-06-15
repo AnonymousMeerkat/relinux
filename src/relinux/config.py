@@ -3,6 +3,9 @@ Basic configuration
 @author: Anonymous Meerkat
 '''
 
+import os
+from relinux import fsutil
+
 product = "Relinux"
 version = 0.4
 version_string = product + " version " + str(version)
@@ -17,6 +20,8 @@ VVStatus = True
 GUIStatus = True
 background = "lightgrey"
 
-# Configuration File Section
+# Generated section
 ISOTree = ""
 TempSys = ""
+SysVersion = os.popen("/usr/bin/lsb_release -rs").readlines()[0].strip()
+Arch = fsutil.getArch()

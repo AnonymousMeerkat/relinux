@@ -8,6 +8,25 @@ from relinux import versionsort, config
 import os
 import glob
 
+# Codes
+excludes = "EXCLUDES"
+preseed = "PRESEED"
+memtest = "MEMTEST"
+isolinuxfile = "ISOLINUX"
+label = "LIVECDLABEL"
+splash = "SPLASHIMAGE"
+timeout = "TIMEOUT"
+remafterinst = "REMOVEAFTERINSTALL"
+username = "USERNAME"
+userfullname = "USERFULLNAME"
+host = "HOST"
+casperquiet = "CASPERQUIET"
+flavour = "FLAVOUR"
+sysname = "SYSNAME"
+version = "VERSION"
+codename = "CODENAME"
+description = "DESCRIPTION"
+
 
 # Checks if something matched
 def checkMatched(m):
@@ -178,3 +197,15 @@ def getBuffer(file):
         returnme.append(line.rstrip())
     print(len(returnme))
     return returnme
+
+# Option parsing
+#################
+
+
+# Returns a boolean (None if not a boolean)
+def parseBoolean(option):
+    loption = option.lower()[0]
+    if loption == "t" or loption == "y":
+        return True
+    else:
+        return False

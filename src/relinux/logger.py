@@ -11,6 +11,10 @@ IBuffer = ""
 VBuffer = ""
 VVBuffer = ""
 
+# Logging presets
+Error = "Error! "
+Tab = "    "
+
 
 # Generates a thread name string
 def genTN(tn):
