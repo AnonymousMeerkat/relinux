@@ -26,6 +26,11 @@ sysname = "SYSNAME"
 version = "VERSION"
 codename = "CODENAME"
 description = "DESCRIPTION"
+aptlistchange = "ALLOWAPTLISTCHANGE"
+kernel = "KERNELVERSION"
+sfscomp = "SQUASHFSCOMPRESSION"
+sfsopts = "SQUASHFSOPTS"
+isolevel = "ISOLEVEL"
 
 
 # Checks if something matched
@@ -153,7 +158,7 @@ def _getKernel(t, kernelVersion=None):
         files.reverse()
     if t == 1 or t == 2:
         return files[0]
-    return os.popen("uname -r").read()
+    return os.popen("uname -r").read().strip()
 
 
 # Returns the kernel specified by the buffer

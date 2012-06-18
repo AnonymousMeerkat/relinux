@@ -23,5 +23,5 @@ background = "lightgrey"
 # Generated section
 ISOTree = ""
 TempSys = ""
-SysVersion = os.popen("/usr/bin/lsb_release -rs").readlines()[0].strip()
+SysVersion = os.popen("/usr/bin/lsb_release -rs").read().strip()
 Arch = fsutil.getArch()

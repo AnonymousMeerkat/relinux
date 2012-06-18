@@ -26,6 +26,63 @@ def exclude(names, files):
     return excludes
 
 
+# Returns the size of the file or directory
+def getSize(path):
+    dlink = delink(path)
+    addme = 0
+    if dlink != None:
+        return getSize(dlink)
+    elif os.path.isfile(path):
+        return os.path.getsize(path)
+    elif os.path.isdir(path):
+        addme = os.path.getsize(path)
+        for i in os.listdir(path):
+            addme = addme + getSize(i)
+        return addme
+    return None
+
+
+# Size translator
+# size = Dictionary:
+#         T = Terabytes
+#         G = Gigabytes
+#         M = Megabytes
+#         K = Kilobytes
+#         B = Bytes
+# htom = Human to Machine (i.e. 4KB to 4096B). If not true, it accepts these values:
+#         T = Bytes-to-Terabytes
+#         etc...
+def sizeTrans(size, htom=True):
+    KB = 1024
+    MB = 1048576
+    GB = 1073741824
+    TB = 1099511627776
+    addme = 0
+    if size["T"] > 0:
+        addme = addme + size["T"]*TB
+    if size["G"] > 0:
+        addme = addme + size["G"]*GB
+    if size["M"] > 0:
+        addme = addme + size["M"]*MB
+    if size["K"] > 0:
+        addme = addme + size["K"]*KB
+    if size["B"] > 0:
+        addme = addme + size["B"]
+    if htom == True:
+        return addme
+    else:
+        if htom == "T":
+            return addme/TB
+        if htom == "G":
+            return addme/GB
+        if htom == "M":
+            return addme/MB
+        if htom == "K":
+            return addme/KB
+        if htom == "B":
+            return addme
+
+
 # Makes a directory
 def makedir(dirs):
     if not os.path.exists(dirs):
@@ -251,3 +308,20 @@ def getArch():
         return "amd64"
     else:
         return "i386"
+
+
+# Returns the installed size of a compressed filesystem (SquashFS)
+def getSFSInstSize(file):
+    # Not optimal, but it works
+    # Sample line:
+    #     drwxr-xr-x root/root               377 2012-04-25 10:04 squashfs-root
+    #                                        ^^^
+    #                                        That part is the size
+    patt = "^ *[dlspcb-][rwx-][rwx-][rwx-][rwx-][rwx-][rwx-][rwx-][rwx-][rwx-] *[A-Za-z0-9]*/[A-Za-z0-9]* *([0-9]*).*"
+    output = os.popen("unsquashfs -lls " + file)
+    totsize = 0
+    for line in output:
+        m = patt.match(line)
+        if configutils.checkMatched(m):
+            totsize = totsize + int(m.group(1))
+    return totsize

@@ -107,7 +107,7 @@ def genTempSys(configs):
         fsutil.touch(tmpsys + "var/log/" + i)
     # Setup the password and group stuff
     passwdf = tmpsys + "/etc/passwd"
-    #passwdfile = open(psswdf, "r")
+    #passwdfile = open(passwdf, "r")
     #passwdstat = fsutil.getStat(passwdf)
     #passwdbuffer = configutils.getBuffer(passwdfile)
     #passwdfile.close()
@@ -168,4 +168,15 @@ def genTempSys(configs):
     if os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply.orig") and not os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply"):
         shutil.copy2("/usr/lib/ubiquity/user-setup/user-setup-apply.orig", 
                      "/usr/lib/ubiquity/user-setup/user-setup-apply")
-    
+    if configutils.parseBoolean(configs[configutils.aptlistchange]) == True:
+        fsutil.makedir(tmpsys + "usr/share/ubiquity/")
+        aptsetup = open(tmpsys + "usr/share/ubiquity/apt-setup", "w")
+        aptsetup.write("#!/bin/sh\n")
+        aptsetup.write("exit\n")
+        aptsetup.close()
+    else:
+        fsutil.makedir(tmpsys + "usr/lib/ubiquity/apt-setup/generators/")
+        cdrom = open(tmpsys + "usr/lib/ubiquity/apt-setup/generators/40cdrom", "w")
+        cdrom.write("#!/bin/sh\n")
+        cdrom.write("exit\n")
+        cdrom.close()

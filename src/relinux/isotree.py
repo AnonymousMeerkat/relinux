@@ -3,7 +3,7 @@ ISO Tree Generator
 @author: Anonymous Meerkat
 '''
 
-from relinux import logger, config, fsutil, configutils
+from relinux import logger, config, fsutil, configutils, tempsys
 import shutil
 import os
 import re
@@ -39,6 +39,15 @@ def defineWriter(file, lists):
     for i in lists.keys():
         d.write("#define " + i + " " + lists[i] + "\n")
     d.close()
+
+
+# Display a iso9660 error
+def dispiso9660(level, maxs, size):
+    logger.logE(tn, logger.Error + "Compressed filesystem is higher than the iso9660 level " + level + 
+                    " spec allows (" + fsutil.sizeTrans({"B": maxs}, "M") + "MB, size is " + 
+                    fsutil.sizeTrans({"B": size}, "M") + "MB).")
+    logger.logE(tn, logger.Tab + "Please try to either reduce the amount of data you are generating, or " + 
+                "increase the ISO level")
 
 
 # Generate the ISO tree and contents
@@ -87,3 +96,35 @@ def getISOTree(configs):
     writer.close()
     # We don't want any differences, so we'll just copy filesystem.manifest to filesystem.manifest-desktop
     copyFile(isotree + "casper/filesystem.manifest", isotree + "casper/filesystem.manifest-desktop")
+    # Generate the ramdisk
+    os.system("mkinitramfs -o " + isotree + "casper/initrd.gz " + configutils.getKernel(configs[configutils.kernel]))
+    copyFile("/boot/vmlinuz-" + configutils.getKernel(configs[configutils.kernel]), isotree + "casper/vmlinuz")
+    # Generate the SquashFS file
+    # Options:
+    # -b 1M                    Use a 1M blocksize (maximum)
+    # -no-recovery             No recovery files
+    # -always-use-fragments    Fragment blocks for files larger than the blocksize (1M)
+    # -comp                    Compression type
+    opts = "-b 1M -no-recovery -no-duplicates -always-use-fragments"
+    opts = opts + " -comp " + configs[configutils.sfscomp]
+    opts = opts + " " + configs[configutils.sfsopts]
+    sfsex = "dev etc home media mnt proc sys var usr/lib/ubiquity/apt-setup/generators/40cdrom"
+    sfspath = isotree + "casper/filesystem.squashfs"
+    os.system("mksquashfs " + tempsys.tmpsys + " " + sfspath + " " + opts)
+    os.system("mksquashfs / " + sfspath + " " + opts + " -e " + sfsex)
+    # Find the size
+    size = fsutil.getSize(sfspath)
+    isolvl = int(configs[configutils.isolevel])
+    lvl2 = fsutil.sizeTrans({"G": 4})
+    lvl3 = fsutil.sizeTrans({"T": 8})
+    if size > lvl2 and isolvl < 3:
+        dispiso9660(isolvl, lvl2, size)
+    elif size > lvl3 and isolvl >= 3:
+        # 8TB OS? That's a bit much xD
+        dispiso9660(isolvl, lvl3, size)
+    # Find the size after it is uncompressed
+    file = open(isotree + "casper/filesystem.size", "w")
+    file.write(fsutil.getSFSInstSize(sfspath) + "\n")
+    file.close()
+    # TODO: Discuss on whether to add MD5 sum or not
+    # Could prevent problems, but might also prevent the user from editing
