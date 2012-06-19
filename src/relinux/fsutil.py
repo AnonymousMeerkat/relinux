@@ -8,6 +8,7 @@ import stat
 import shutil
 import fnmatch
 import sys
+import hashlib
 from relinux import configutils, pwdmanip
 
 
@@ -194,6 +195,28 @@ def chmod(file, mod):
     os.chmod(file, val)
 
 
+# List the files in a directory
+# Current options:
+#    recurse (True or False): If True, recurse into the directory
+#    dirs (True or False): If True, show directories too
+#    symlinks (True or False): If True, show symlinks too
+def listdir(dirs, options):
+    listed = os.listdir(dirs)
+    returnme = []
+    returnme.append(dirs)
+    for i in listed:
+        if options.symlinks == True and os.path.islink(i):
+            returnme.append(i)
+        if options.dirs == True and os.path.isdir(i):
+            if options.recurse == True:
+                returnme.extend(listdir(i, options))
+            else:
+                returnme.append(i)
+        if os.path.isfile(i):
+            returnme.append(i)
+    return returnme
+
+
 # Filesystem copier (like rsync --exclude... -a SRC DST)
 def fscopy(src, dst, excludes1):
     # Get a list of all files
@@ -325,3 +348,19 @@ def getSFSInstSize(file):
         if configutils.checkMatched(m):
             totsize = totsize + int(m.group(1))
     return totsize
+
+
+# Generate an MD5 checksum from a file
+def genMD5(file, blocksize=65536):
+    buffer = file.read(blocksize)
+    m = hashlib.md5()
+    while len(buffer) > 0:
+        m.update(buffer)
+        buffer = file.read(blocksize)
+    return m.digest()
+
+
+# Generate an MD5 checksum that can be read by the md5sum command from a file
+def genFinalMD5(file):
+    string = genMD5(file) + "  " + file + "\n"
+    return string

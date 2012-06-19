@@ -14,6 +14,7 @@ preseed = "PRESEED"
 memtest = "MEMTEST"
 isolinuxfile = "ISOLINUX"
 label = "LIVECDLABEL"
+url = "LIVECDURL"
 splash = "SPLASHIMAGE"
 timeout = "TIMEOUT"
 remafterinst = "REMOVEAFTERINSTALL"
@@ -31,6 +32,9 @@ kernel = "KERNELVERSION"
 sfscomp = "SQUASHFSCOMPRESSION"
 sfsopts = "SQUASHFSOPTS"
 isolevel = "ISOLEVEL"
+enablewubi = "ENABLEWUBI"
+isogenerator = "ISOGENERATOR"
+isolocation = "ISOLOCATION"
 
 
 # Checks if something matched

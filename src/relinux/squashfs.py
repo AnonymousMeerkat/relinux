@@ -34,7 +34,7 @@ def doSFSChecks(file, isolvl):
         dispiso9660(isolvl, lvl3, size)
 
 
-# Generate the SquashFS file
+# Generate the SquashFS file (has to run after isotree.genISOTree and tempsys.genTempSys)
 def genSFS(configs):
     # Generate the SquashFS file
     # Options:
