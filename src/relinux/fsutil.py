@@ -9,7 +9,7 @@ import shutil
 import fnmatch
 import sys
 import hashlib
-from relinux import configutils, pwdmanip
+from relinux import configutils
 
 
 # Reads the link location of a file or returns None

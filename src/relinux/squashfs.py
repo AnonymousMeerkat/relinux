@@ -3,12 +3,10 @@ SquashFS Generation
 @author: Anonymous Meerkat
 '''
 
-from relinux import logger, config, fsutil, configutils, tempsys, isotree
-import shutil
+from relinux import logger, fsutil, configutils, tempsys, isoutil
 import os
-import re
 
-isotreel = isotree.isotreel
+isotreel = isoutil.isotreel
 threadname = "SquashFS"
 tn = logger.genTN(threadname)
 
@@ -34,7 +32,7 @@ def doSFSChecks(file, isolvl):
         dispiso9660(isolvl, lvl3, size)
 
 
-# Generate the SquashFS file (has to run after isotree.genISOTree and tempsys.genTempSys)
+# Generate the SquashFS file (has to run after isoutil.genISOTree and tempsys.genTempSys)
 def genSFS(configs):
     # Generate the SquashFS file
     # Options:

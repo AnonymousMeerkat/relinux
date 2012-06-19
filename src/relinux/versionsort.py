@@ -2,7 +2,8 @@
 sort -V for python (translated from sort.c)
 @author: Anonymous Meerkat
 '''
-from re import *
+
+import re
 
 
 def order(c):
@@ -81,5 +82,5 @@ def VersionSortKey():
 
 def sort_nicely(l):
     convert = lambda text: int(text) if text.isdigit() else text
-    alphanum_key = lambda key: [convert(c) for c in split('([0-9]+)', key)]
+    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
     l.sort(key=alphanum_key)
