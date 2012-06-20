@@ -93,6 +93,17 @@ def getSections(buffer):
     return returnme
 
 
+# Returns the different options of the buffer
+def getOptions(buffer):
+    patt = re.compile("^ *Option *.*")
+    returnme = []
+    for i in buffer:
+        m = patt.match(i)
+        if checkMatched(m):
+            returnme.append(i.split()[1].strip())
+    return returnme
+
+
 # Returns all lines within a section of the buffer (it will not parse them though)
 def getLinesWithinSection(buffer, section):
     patt = re.compile("^ *Section *" + section + ".*")
@@ -112,9 +123,28 @@ def getLinesWithinSection(buffer, section):
     return returnme
 
 
-# Returns the parsed options in a dictionary (the buffer has to be compressed though)
-def getOptions(buffer):
-    patt = re.compile(r"^(.*?):(.*)")
+# Returns all lines within an option of the buffer (it will not parse them though)
+def getLinesWithinOption(buffer, option):
+    patt = re.compile("^ *Option *" + option + ".*")
+    patte = re.compile("^ *EndOption *.*")
+    returnme = []
+    x = 0
+    for i in buffer:
+        m = patt.match(i)
+        if checkMatched(m):
+            if x == 1:
+                break
+            x = 1
+            patt = patte
+        else:
+            if x == 1:
+                returnme.append(i)
+    return returnme
+
+
+# Returns the parsed properties in a dictionary (the buffer has to be compressed though)
+def getProperties(buffer):
+    patt = re.compile(r"^ *(.*?):(.*)")
     returnme = {}
     for i in buffer:
         m = patt.match(i)
@@ -123,13 +153,13 @@ def getOptions(buffer):
     return returnme
 
 
-# Returns the value for an option (it will only show the first result, so you have to run getLinesWithinSection)
-def getOption(buffer, option):
-    patt = re.compile("^ *" + option + " *:.*")
+# Returns the value for an property (it will only show the first result, so you have to run getLinesWithinOption)
+def getProperty(buffer, option):
+    patt = re.compile("^ *" + option + " *:(.*)")
     for i in buffer:
         m = patt.match(i)
         if checkMatched(m):
-            return i.split(":")[1].strip()
+            return m.group(1).strip()
     return ""
 
 
@@ -186,11 +216,18 @@ def beautify(buffer):
     for i in getSections(buffer):
         returnme.append("Section " + i)
         returnme.append("")
-        buffer1 = getLinesWithinSection(buffer, i)
-        opts = getOptions(buffer1)
-        for i in opts.keys():
-            returnme.append("  " + i + ": " + opts[i])
         returnme.append("")
+        buffer1 = getLinesWithinSection(buffer, i)
+        for x in getOptions(buffer1):
+            returnme.append("  Option " + x)
+            returnme.append("")
+            opts = getProperties(getLinesWithinOption(buffer1, x))
+            for y in opts.keys():
+                returnme.append("    " + y + ": " + opts[y])
+            returnme.append("")
+            returnme.append("  EndOption")
+            returnme.append("")
+            returnme.append("")
         returnme.append("EndSection")
         returnme.append("")
         returnme.append("")

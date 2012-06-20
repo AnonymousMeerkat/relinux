@@ -4,7 +4,7 @@ Basic configuration
 '''
 
 import os
-from relinux import fsutil
+#from relinux import fsutil
 
 product = "Relinux"
 version = 0.4
@@ -23,5 +23,5 @@ background = "lightgrey"
 # Generated section
 ISOTree = ""
 TempSys = ""
-SysVersion = os.popen("/usr/bin/lsb_release -rs").read().strip()
-Arch = fsutil.getArch()
+SysVersion = ""  # Should be filled in by: os.popen("/usr/bin/lsb_release -rs").read().strip()
+Arch = ""  # Should be filled in by: fsutil.getArch()
