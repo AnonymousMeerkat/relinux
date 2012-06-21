@@ -154,7 +154,7 @@ def genTempSys(configs):
     buildsys = "Ubuntu"
     if configutils.parseBoolean(configs[configutils.casperquiet]) == False:
         buildsys = ""
-    varEditor(tmpsys + "etc/casper.conf", {"USERNAME": configs[configutils.username], 
+    varEditor(tmpsys + "etc/casper.conf", {"USERNAME": configs[configutils.username],
                                            "USERFULLNAME": configs[configutils.userfullname],
                                            "HOST": configs[configutils.host],
                                            "BUILD_SYSTEM": buildsys,
@@ -166,7 +166,7 @@ def genTempSys(configs):
     # If, by chance, the user-setup-apply file does not exist, and there is an alternative,
     # we'll copy it over
     if os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply.orig") and not os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply"):
-        shutil.copy2("/usr/lib/ubiquity/user-setup/user-setup-apply.orig", 
+        shutil.copy2("/usr/lib/ubiquity/user-setup/user-setup-apply.orig",
                      "/usr/lib/ubiquity/user-setup/user-setup-apply")
     if configutils.parseBoolean(configs[configutils.aptlistchange]) == True:
         fsutil.makedir(tmpsys + "usr/share/ubiquity/")

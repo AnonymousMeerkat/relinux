@@ -60,26 +60,26 @@ def sizeTrans(size, htom=True):
     TB = 1099511627776
     addme = 0
     if size["T"] > 0:
-        addme = addme + size["T"]*TB
+        addme = addme + size["T"] * TB
     if size["G"] > 0:
-        addme = addme + size["G"]*GB
+        addme = addme + size["G"] * GB
     if size["M"] > 0:
-        addme = addme + size["M"]*MB
+        addme = addme + size["M"] * MB
     if size["K"] > 0:
-        addme = addme + size["K"]*KB
+        addme = addme + size["K"] * KB
     if size["B"] > 0:
         addme = addme + size["B"]
     if htom == True:
         return addme
     else:
         if htom == "T":
-            return addme/TB
+            return addme / TB
         if htom == "G":
-            return addme/GB
+            return addme / GB
         if htom == "M":
-            return addme/MB
+            return addme / MB
         if htom == "K":
-            return addme/KB
+            return addme / KB
         if htom == "B":
             return addme
 

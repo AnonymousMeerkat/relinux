@@ -51,6 +51,7 @@ def genISOTree():
     fsutil.maketree([isotreel + "casper", isotreel + "preseed",
                       isotreel + "isolinux", isotreel + ".disk"])
 
+
 # Generate the ISO contents (has to run after genISOTree)
 def getISOContents(configs):
     logger.logI("Generating ISO Contents")

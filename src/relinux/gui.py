@@ -11,7 +11,7 @@ from relinux import config, configutils
 
 class VerticalScrolledFrame(tkinter.Frame):
     def __init__(self, parent, *args, **kw):
-        tkinter.Frame.__init__(self, parent, *args, **kw)            
+        tkinter.Frame.__init__(self, parent, *args, **kw)
         vscrollbar = tkinter.Scrollbar(self, orient=tkinter.VERTICAL)
         vscrollbar.pack(fill=tkinter.Y, side=tkinter.RIGHT, expand=tkinter.FALSE)
         canvas = tkinter.Canvas(self, bd=0, highlightthickness=0,
@@ -139,7 +139,7 @@ class GUI:
         wizard.add_page_body(1, "Configure", self.page1)
         wizard.add_page_body(2, "Page 3", self.page2)
         wizard.pack(fill='both', expand=True)
-    
+
     def fillConfiguration(self, configs):
         c = 0
         for i in configs.keys():
