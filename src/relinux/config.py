@@ -3,7 +3,7 @@ Basic configuration
 @author: Anonymous Meerkat
 '''
 
-import os
+#import os
 #from relinux import fsutil
 
 product = "Relinux"

@@ -119,7 +119,7 @@ def genTempSys(configs):
     usrs = pwdmanip.getPPByUID("[5-9][0-9][0-9]", pe)
     usrs.extend(pwdmanip.getPPByUID("[1-9][0-9][0-9][0-9]", pe))
     usrs.extend(pwdmanip.getPPByUID("999", pe))
-    fsutil.ife(buffers, lambda(line): [True, pwdmanip.PPtoEntry(line)] if not line in usrs else [False, ""])
+    fsutil.ife(buffers, lambda line: [True, pwdmanip.PPtoEntry(line)] if not line in usrs else [False, ""])
     # Rewrite the password file
     #for i in ppe:
     #    if not i in usrs:
@@ -142,8 +142,8 @@ def genTempSys(configs):
     # are very similar to group files, so we can just parse them as if they were group files
     pe = pwdmanip.parseGroupEntries(gbuffers[3])
     gbuffers[3] = pe
-    fsutil.ife(buffers, lambda(line): _parseShadow(line, usrs))
-    fsutil.ife(gbuffers, lambda(line): _parseGroup(line, usrs))
+    fsutil.ife(buffers, lambda line: _parseShadow(line, usrs))
+    fsutil.ife(gbuffers, lambda line: _parseGroup(line, usrs))
     cbs = "/usr/share/initramfs-tools/scripts/casper-bottom/"
     # This pattern should do the trick
     execme = glob.glob(os.path.join(cbs, "[0-9][0-9]*"))

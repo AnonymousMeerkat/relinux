@@ -35,6 +35,18 @@ isolevel = "ISOLEVEL"
 enablewubi = "ENABLEWUBI"
 isogenerator = "ISOGENERATOR"
 isolocation = "ISOLOCATION"
+# Property codes
+name = "Name"
+desc = "Description"
+category = "Category"
+types = "Type"
+value = "Value"
+
+filename = "Filename"
+yesno = "Yes/No"
+multiple = "Multiple Values"
+text = "Text"
+choice = "Choice"
 
 
 # Checks if something matched
@@ -244,8 +256,49 @@ def getBuffer(file):
     print(len(returnme))
     return returnme
 
+
+# Parses a complete compressed configuration file
+# Returns a dictionary of dictionaries of dictionaries
+# Dict1 = Sections
+# Dict2 = Options
+# Dict3 = Properties
+# Notes: This will take a lot of RAM, and it will take a relatively long time (around 3 secs)
+#        Only use this function once, and distribute the result to the functions who need this
+def parseCompressedBuffer(buffer):
+    returnme = {}
+    for i in getSections(buffer):
+        returnme[i] = {}
+        liness = getLinesWithinSection(buffer, i)
+        for x in getOptions(liness):
+            returnme[i][x] = getProperties(getLinesWithinOption(liness, x))
+    return returnme
+
+
+# Returns a compressed buffer from a parsed buffer
+# This is the opposite of parseCompressedBuffer
+def compressParsedBuffer(buffer):
+    returnme = []
+    for i in buffer.keys():
+        returnme.append("Section " + i)
+        for x in buffer[i].keys():
+            returnme.append("Option " + x)
+            for y in buffer[i][x].keys():
+                returnme.append(y + ": " + buffer[i][x][y])
+            returnme.append("EndOption")
+        returnme.append("EndSection")
+    return returnme
+
+
 # Option parsing
 #################
+
+
+# Finds the value of a property (buffer is the parsed getProperties buffer)
+def getValue(buffer, propertys):
+    for i in buffer.keys():
+        if i.lower() == propertys.lower():
+            return buffer[i]
+    return None
 
 
 # Returns a boolean (None if not a boolean)
@@ -253,5 +306,21 @@ def parseBoolean(option):
     loption = option.lower()[0]
     if loption == "t" or loption == "y":
         return True
-    else:
+    elif loption == "f" or loption == "n":
         return False
+    else:
+        return None
+
+
+# Returns a parsed choice list (None if not a choice list, buffer must be the value of the Type option)
+def getChoices(buffers):
+    returnme = []
+    patt = re.compile("^ *" + choice + " *: *(.*)")
+    m = patt.match(buffers.strip())
+    if checkMatched(m):
+        for i in m.group(1).split(","):
+            si = i.strip()
+            returnme.append(si)
+    else:
+        return None
+    return returnme
