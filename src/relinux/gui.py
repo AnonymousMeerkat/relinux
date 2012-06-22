@@ -4,6 +4,7 @@ Anything GUI-related goes here
 '''
 
 from tkinter import ttk
+from tkinter import filedialog
 import tkinter
 from relinux import config, configutils
 
@@ -124,6 +125,62 @@ class Wizard(ttk.Notebook):
     current = property(_get_current, _set_current)
 
 
+class FileSelector(tkinter.Frame):
+    def __init__(self, *args, **kwargs):
+        tkinter.Frame.__init__(self, *args, **kwargs)
+        self.entry = ttk.Entry(self)
+        self.button = ttk.Button(self, text="...",  command=self._on_button)
+        self.button.grid(row=0, column=1)
+        self.entry.grid(row=0, column=0)
+
+    def _on_button(self):
+        s = filedialog.askopenfilename()
+        if s != "":
+            self.entry.delete(0, "end")
+            self.entry.insert(0, s)
+
+
+class YesNo(tkinter.Frame):
+    def __init__(self, *args, **kwargs):
+        tkinter.Frame.__init__(self, *args, **kwargs)
+        self.v = tkinter.IntVar()
+        self.y = ttk.Radiobutton(self, text="Yes", variable=self.v, value=1)
+        self.y.grid(row=0, column=0)
+        self.n = ttk.Radiobutton(self, text="No", variable=self.v, value=2)
+        self.n.grid(row=0, column=1)
+
+    def set(self, bools):
+        if bools == True:
+            self.v.set(1)
+        elif bools == False:
+            self.v.set(2)
+        else:
+            self.v.set(0)
+
+    def get(self):
+        if self.v.get() == 1:
+            return True
+        elif self.v.get() == 2:
+            return False
+        else:
+            return None
+
+
+class Choice(tkinter.Frame):
+    def __init__(self, *args, **kwargs):
+        tkinter.Frame.__init__(self, *args, **kwargs)
+        self.cb = ttk.Combobox(self)
+        self.entry = ttk.Entry(self)
+        self.cb.grid(row=0, column=0)
+        self.cb.bind("<<ComboboxSelected>>", self._on_changed)
+        
+    def _on_changed(self, event):
+        if self.cb.get() == configutils.custom:
+            self.entry.grid(row=1, column=0)
+        else:
+            self.entry.grid_remove()
+
+
 class GUI:
     def __init__(self, master):
         self.root = master
@@ -155,29 +212,28 @@ class GUI:
                 value = configutils.getValue(configs[i][x], configutils.value)
                 choices = configutils.getChoices(types)
                 if types == configutils.yesno:
-                    v = tkinter.IntVar()
-                    if configutils.parseBoolean(value) == True:
-                        v.set(1)
-                    elif configutils.parseBoolean(value) == False:
-                        v.set(2)
-                    r = ttk.Radiobutton(curr, text="Yes", variable=v, value=1)
+                    #v = tkinter.IntVar()
+                    #r = ttk.Radiobutton(curr, text="Yes", variable=v, value=1)
+                    #r.grid(row=c1, column=1)
+                    #r2 = ttk.Radiobutton(curr, text="No", variable=v, value=2)
+                    #r2.grid(row=c1, column=2)
+                    r = YesNo(curr)
                     r.grid(row=c1, column=1)
-                    r2 = ttk.Radiobutton(curr, text="No", variable=v, value=2)
-                    r2.grid(row=c1, column=2)
+                    r.set(configutils.parseBoolean(value))
                 elif choices != None and len(choices) > 0:
-                    cb = ttk.Combobox(curr)
+                    cb = Choice(curr)
                     cb.grid(row=c1, column=1)
-                    cb.config(values=choices, state="readonly")
-                    cb.set(value)
+                    cb.cb.config(values=choices, state="readonly")
+                    cb.cb.set(value)
                 elif types == configutils.filename:
-                    e = ttk.Entry(curr)
+                    e = FileSelector(curr)
                     e.grid(row=c1, column=1)
-                    e.insert(0, value)
-                    #b = ttk.Button(curr, text="...")
-                    #b.grid(row=c1, column=2, sticky=tkinter.E)
+                    e.entry.delete(0, "end")
+                    e.entry.insert(0, value)
                 else:
                     e = ttk.Entry(curr)
                     e.grid(row=c1, column=1)
+                    e.delete(0, "end")
                     e.insert(0, value)
                 c1 = c1 + 1
             c = c + 1

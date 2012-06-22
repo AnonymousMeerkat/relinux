@@ -48,6 +48,8 @@ multiple = "Multiple Values"
 text = "Text"
 choice = "Choice"
 
+custom = "Custom"
+
 
 # Checks if something matched
 def checkMatched(m):
