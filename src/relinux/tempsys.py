@@ -82,7 +82,7 @@ def genTempSys(configs):
     excludes = configs[configutils.excludes]
     fsutil.fscopy("etc", tmpsys + "etc", excludes)
     fsutil.fscopy("var", tmpsys + "var", excludes)
-    logger.logI(tn, "Editing files")
+    logger.logI(tn, "Removing unneeded files")
     # Remove these files as they can conflict inside the installed system
     fsutil.rmfiles([tmpsys + "etc/X11/xorg.conf*", tmpsys + "etc/resolv.conf",
                     tmpsys + "etc/hosts", tmpsys + "etc/hostname", tmpsys + "etc/timezone",

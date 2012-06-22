@@ -174,11 +174,11 @@ class GUI:
                     e = ttk.Entry(curr)
                     e.grid(row=c1, column=1)
                     e.insert(0, value)
-                    b = ttk.Button(curr, text="...")
-                    b.grid(row=c1, column=2)
+                    #b = ttk.Button(curr, text="...")
+                    #b.grid(row=c1, column=2, sticky=tkinter.E)
                 else:
                     e = ttk.Entry(curr)
                     e.grid(row=c1, column=1)
-                    e.insert(0, value)
+                    e.insert(0, value) 
                 c1 = c1 + 1
             c = c + 1

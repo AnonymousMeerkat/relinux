@@ -262,7 +262,7 @@ def getBuffer(file):
 # Dict1 = Sections
 # Dict2 = Options
 # Dict3 = Properties
-# Notes: This will take a lot of RAM, and it will take a relatively long time (around 3 secs)
+# Notes: This will take a lot of RAM, and it will take a relatively long time (around 1-3 secs)
 #        Only use this function once, and distribute the result to the functions who need this
 def parseCompressedBuffer(buffer):
     returnme = {}

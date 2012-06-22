@@ -30,11 +30,11 @@ def main():
                   action="store_true", dest="verbose", default=False,
                   help="print verbose")
     args = parser.parse_args()
-    if args.__dict__["showversion"] == True:
+    if args.showversion == True:
         version()
-    if args.__dict__["quiet"] == True:
+    if args.quiet == True:
         config.IStatus = False
-    if args.__dict__["verbose"] == True:
+    if args.verbose == True:
         config.VStatus = True
     buffer1 = configutils.getBuffer(open("../../relinux.conf"))
     buffer2 = configutils.compress(buffer1)
