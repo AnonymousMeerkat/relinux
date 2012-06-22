@@ -5,7 +5,6 @@ Anything GUI-related goes here
 
 from tkinter import ttk
 import tkinter
-import re
 from relinux import config, configutils
 
 
@@ -179,6 +178,6 @@ class GUI:
                 else:
                     e = ttk.Entry(curr)
                     e.grid(row=c1, column=1)
-                    e.insert(0, value) 
+                    e.insert(0, value)
                 c1 = c1 + 1
             c = c + 1

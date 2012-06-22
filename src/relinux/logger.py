@@ -6,6 +6,39 @@ Contains streams for logging information
 from relinux import config
 from threading import RLock
 
+
+# Set as quiet (nothing but the essential stream)
+def quiet():
+    config.EStatus = True
+    config.IStatus = False
+    config.VStatus = False
+    config.VVStatus = False
+
+
+# Set as normal (essential and info streams)
+def normal():
+    config.EStatus = True
+    config.IStatus = True
+    config.VStatus = False
+    config.VVStatus = False
+
+
+# Set as verbose (essential, info, and verbose streams)
+def verbose():
+    config.EStatus = True
+    config.IStatus = True
+    config.VStatus = True
+    config.VVStatus = False
+
+
+# Set as very-verbose (all streams)
+def veryverbose():
+    config.EStatus = True
+    config.IStatus = True
+    config.VStatus = True
+    config.VVStatus = True
+
+
 EBuffer = ""
 IBuffer = ""
 VBuffer = ""

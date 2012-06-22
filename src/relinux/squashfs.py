@@ -22,6 +22,7 @@ def dispiso9660(level, maxs, size):
 
 # Make the SquashFS checks
 def doSFSChecks(file, isolvl):
+    logger.logI(tn, "Checking the compressed filesystem")
     size = fsutil.getSize(file)
     lvl2 = fsutil.sizeTrans({"G": 4})
     lvl3 = fsutil.sizeTrans({"T": 8})
@@ -34,22 +35,27 @@ def doSFSChecks(file, isolvl):
 
 # Generate the SquashFS file (has to run after isoutil.genISOTree and tempsys.genTempSys)
 def genSFS(configs):
+    logger.logI(tn, "Generating compressed filesystem")
     # Generate the SquashFS file
     # Options:
     # -b 1M                    Use a 1M blocksize (maximum)
     # -no-recovery             No recovery files
     # -always-use-fragments    Fragment blocks for files larger than the blocksize (1M)
     # -comp                    Compression type
+    logger.logVV(tn, "Generating options")
     opts = "-b 1M -no-recovery -no-duplicates -always-use-fragments"
     opts = opts + " -comp " + configs[configutils.sfscomp]
     opts = opts + " " + configs[configutils.sfsopts]
     sfsex = "dev etc home media mnt proc sys var usr/lib/ubiquity/apt-setup/generators/40cdrom"
     sfspath = isotreel + "casper/filesystem.squashfs"
+    logger.logI(tn, "Adding the edited /etc and /var to the filesystem")
     os.system("mksquashfs " + tempsys.tmpsys + " " + sfspath + " " + opts)
+    logger.logI(tn, "Adding the rest of the system")
     os.system("mksquashfs / " + sfspath + " " + opts + " -e " + sfsex)
     # Make sure the SquashFS file is OK
     doSFSChecks(sfspath, int(configs[configutils.isolevel]))
     # Find the size after it is uncompressed
+    logger.logV(tn, "Writing the size")
     file = open(isotreel + "casper/filesystem.size", "w")
     file.write(fsutil.getSFSInstSize(sfspath) + "\n")
     file.close()
