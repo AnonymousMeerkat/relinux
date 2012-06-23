@@ -173,7 +173,7 @@ class Choice(tkinter.Frame):
         self.entry = tkinter.Entry(self)
         self.cb.grid(row=0, column=0)
         self.cb.bind("<<ComboboxSelected>>", self._on_changed)
-        
+
     def _on_changed(self, event):
         if self.cb.get() == configutils.custom:
             self.entry.grid(row=1, column=0)
@@ -219,7 +219,7 @@ class Multiple(tkinter.Frame):
             self.addEntry(0)
 
     def _plus(self, row):
-        self.addEntry(row+1)
+        self.addEntry(row + 1)
 
     def _minus(self, row):
         self.remEntry(row)
