@@ -43,9 +43,9 @@ class About:
     def __init__(self, master):
         top = self.top = tkinter.Toplevel(master, background=config.background)
         top.title(config.product + " - About")
-        w = ttk.Label(top, text=config.about_string)
+        w = tkinter.Label(top, text=config.about_string)
         w.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)
-        b = ttk.Button(top, text="Close", command=top.destroy)
+        b = tkinter.Button(top, text="Close", command=top.destroy)
         b.pack(side=tkinter.BOTTOM)
 
 
@@ -72,19 +72,19 @@ class Wizard(ttk.Notebook):
     def _wizard_buttons(self):
         """Place wizard buttons in the pages."""
         for indx, child in self._children.items():
-            btnframe = ttk.Frame(child)
+            btnframe = tkinter.Frame(child)
             btnframe.pack(side='bottom', fill='x', padx=6, pady=12)
-            nextbtn = ttk.Button(btnframe, text="Next", command=self.next_page)
+            nextbtn = tkinter.Button(btnframe, text="Next", command=self.next_page)
             nextbtn.pack(side='right', anchor='e', padx=6)
-            quitbtn = ttk.Button(btnframe, text="Quit", command=self.close)
+            quitbtn = tkinter.Button(btnframe, text="Quit", command=self.close)
             quitbtn.pack(side="left", anchor="w", padx=6)
             if indx > 0:
-                prevbtn = ttk.Button(btnframe, text="Previous",
+                prevbtn = tkinter.Button(btnframe, text="Previous",
                     command=self.prev_page)
                 prevbtn.pack(side='right', anchor='e', padx=6)
                 if indx == len(self._children) - 1:
                     nextbtn.configure(text="Finish", command=self.close)
-            progressframe = ttk.Frame(child)
+            progressframe = tkinter.Frame(child)
             progressframe.pack(side="bottom", fill="x", padx=6)
             ttk.Progressbar(progressframe).pack(fill="x")
 
@@ -128,8 +128,8 @@ class Wizard(ttk.Notebook):
 class FileSelector(tkinter.Frame):
     def __init__(self, *args, **kwargs):
         tkinter.Frame.__init__(self, *args, **kwargs)
-        self.entry = ttk.Entry(self)
-        self.button = ttk.Button(self, text="...",  command=self._on_button)
+        self.entry = tkinter.Entry(self)
+        self.button = tkinter.Button(self, text="...",  command=self._on_button)
         self.button.grid(row=0, column=1)
         self.entry.grid(row=0, column=0)
 
@@ -144,9 +144,9 @@ class YesNo(tkinter.Frame):
     def __init__(self, *args, **kwargs):
         tkinter.Frame.__init__(self, *args, **kwargs)
         self.v = tkinter.IntVar()
-        self.y = ttk.Radiobutton(self, text="Yes", variable=self.v, value=1)
+        self.y = tkinter.Radiobutton(self, text="Yes", variable=self.v, value=1)
         self.y.grid(row=0, column=0)
-        self.n = ttk.Radiobutton(self, text="No", variable=self.v, value=2)
+        self.n = tkinter.Radiobutton(self, text="No", variable=self.v, value=2)
         self.n.grid(row=0, column=1)
 
     def set(self, bools):
@@ -170,7 +170,7 @@ class Choice(tkinter.Frame):
     def __init__(self, *args, **kwargs):
         tkinter.Frame.__init__(self, *args, **kwargs)
         self.cb = ttk.Combobox(self)
-        self.entry = ttk.Entry(self)
+        self.entry = tkinter.Entry(self)
         self.cb.grid(row=0, column=0)
         self.cb.bind("<<ComboboxSelected>>", self._on_changed)
         
@@ -181,6 +181,61 @@ class Choice(tkinter.Frame):
             self.entry.grid_remove()
 
 
+class Multiple(tkinter.Frame):
+    def __init__(self, *args, **kwargs):
+        tkinter.Frame.__init__(self, *args, **kwargs)
+        self.entries = []
+        self.pluses = []
+        self.minuses = []
+        self.addEntry(0)
+
+    def addEntry(self, row):
+        self.entries.insert(row, tkinter.Entry(self))
+        self.pluses.insert(row, tkinter.Button(self, text="+", foreground="darkgreen", command=lambda: self._plus(row)))
+        self.minuses.insert(row, tkinter.Button(self, text="-", foreground="darkred", command=lambda: self._minus(row)))
+        self.entries[row].grid(row=row, column=0)
+        self.minuses[row].grid(row=row, column=1)
+        self.pluses[row].grid(row=row, column=2)
+        self._rePack()
+
+    def remEntry(self, row):
+        self.entries[row].grid_remove()
+        self.minuses[row].grid_remove()
+        self.pluses[row].grid_remove()
+        del(self.entries[row])
+        del(self.minuses[row])
+        del(self.pluses[row])
+        self._rePack()
+
+    def set(self, arr):
+        for i in list(range(len(self.entries))):
+            self.remEntry(i)
+        if len(arr) > 0:
+            for i in list(range(len(arr))):
+                self.addEntry(i)
+                self.entries[i].delete(0, "end")
+                self.entries[i].insert(0, arr[i])
+        else:
+            self.addEntry(0)
+
+    def _plus(self, row):
+        self.addEntry(row+1)
+
+    def _minus(self, row):
+        self.remEntry(row)
+
+    def __rePack(self, c):
+        self.pluses[c].config(command=lambda: self._plus(c))
+        self.minuses[c].config(command=lambda: self._minus(c))
+        self.entries[c].grid(row=c, column=0)
+        self.minuses[c].grid(row=c, column=1)
+        self.pluses[c].grid(row=c, column=2)
+
+    def _rePack(self):
+        for c in list(range(len(self.entries))):
+            self.__rePack(c)
+
+
 class GUI:
     def __init__(self, master):
         self.root = master
@@ -189,8 +244,8 @@ class GUI:
         wizard.master.minsize(400, 350)
         wizard.master.maxsize(800, 700)
         self.page1 = ttk.Notebook(wizard.page_container(1))
-        self.page0 = ttk.Label(wizard.page_container(0), text='Welcome to relinux 0.4!\nClick on next to get started')
-        self.page2 = ttk.Label(wizard.page_container(2), text='Page 3')
+        self.page0 = tkinter.Label(wizard.page_container(0), text='Welcome to relinux 0.4!\nClick on next to get started')
+        self.page2 = tkinter.Label(wizard.page_container(2), text='Page 3')
         wizard.add_page_body(0, "Welcome", self.page0)
         wizard.add_page_body(1, "Configure", self.page1)
         wizard.add_page_body(2, "Page 3", self.page2)
@@ -206,11 +261,12 @@ class GUI:
             curr.pack(side="top", fill="both", expand=1)
             c1 = 0
             for x in configs[i]:
-                l = ttk.Label(curr, text=configutils.getValue(configs[i][x], configutils.name))
+                l = tkinter.Label(curr, text=configutils.getValue(configs[i][x], configutils.name))
                 l.grid(row=c1, sticky=tkinter.W)
                 types = configutils.getValue(configs[i][x], configutils.types)
                 value = configutils.getValue(configs[i][x], configutils.value)
                 choices = configutils.getChoices(types)
+                multiple = configutils.getMultipleValues(value)
                 if types == configutils.yesno:
                     #v = tkinter.IntVar()
                     #r = ttk.Radiobutton(curr, text="Yes", variable=v, value=1)
@@ -230,8 +286,12 @@ class GUI:
                     e.grid(row=c1, column=1)
                     e.entry.delete(0, "end")
                     e.entry.insert(0, value)
+                elif types == configutils.multiple:
+                    e = Multiple(curr)
+                    e.grid(row=c1, column=1)
+                    e.set(multiple)
                 else:
-                    e = ttk.Entry(curr)
+                    e = tkinter.Entry(curr)
                     e.grid(row=c1, column=1)
                     e.delete(0, "end")
                     e.insert(0, value)

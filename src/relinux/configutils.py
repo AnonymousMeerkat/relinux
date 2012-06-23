@@ -326,3 +326,15 @@ def getChoices(buffers):
     else:
         return None
     return returnme
+
+
+# Returns a parsed multiple values list (buffer must be the value)
+def getMultipleValues(buffers):
+    returnme = []
+    patt = re.compile("^ *(.*)")
+    m = patt.match(buffers.strip())
+    if checkMatched(m):
+        for i in m.group(1).split():
+            si = i.strip()
+            returnme.append(si)
+    return returnme
