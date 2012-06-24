@@ -31,7 +31,7 @@ def exclude(names, files):
 def getSize(path):
     dlink = delink(path)
     addme = 0
-    if dlink != None:
+    if dlink is not None:
         return getSize(dlink)
     elif os.path.isfile(path):
         return os.path.getsize(path)
@@ -69,7 +69,7 @@ def sizeTrans(size, htom=True):
         addme = addme + size["K"] * KB
     if size["B"] > 0:
         addme = addme + size["B"]
-    if htom == True:
+    if htom is True:
         return addme
     else:
         if htom == "T":
@@ -115,15 +115,15 @@ def makefiles(arr):
 def rm(file, followlink=False):
     rfile = file
     dfile = delink(file)
-    if dfile != None:
+    if dfile is not None:
         file = dfile
     if os.path.isfile(file):
         os.remove(rfile)
-        if followlink == True and dfile != None:
+        if followlink is True and dfile is not None:
             os.remove(file)
     elif os.path.isdir(file):
         shutil.rmtree(rfile)
-        if followlink == True and dfile != None:
+        if followlink is True and dfile is not None:
             os.remove(file)
 
 
@@ -205,10 +205,10 @@ def listdir(dirs, options):
     returnme = []
     returnme.append(dirs)
     for i in listed:
-        if options.symlinks == True and os.path.islink(i):
+        if options.symlinks is True and os.path.islink(i):
             returnme.append(i)
-        if options.dirs == True and os.path.isdir(i):
-            if options.recurse == True:
+        if options.dirs is True and os.path.isdir(i):
+            if options.recurse is True:
                 returnme.extend(listdir(i, options))
             else:
                 returnme.append(i)
@@ -234,7 +234,7 @@ def fscopy(src, dst, excludes1):
         fullpath = os.path.join(src, file)
         newpath = os.path.join(dst, file)
         dfile = delink(fullpath)
-        if dfile != None:
+        if dfile is not None:
             os.symlink(dfile, newpath)
         elif os.path.isdir(fullpath):
             fscopy(fullpath, newpath, excludes)
@@ -252,7 +252,7 @@ def adrm(dirs, options, excludes1):
     files = os.listdir(dirs)
     excludes = []
     # Exclude the files listed to exclude
-    if options.excludes == True:
+    if options.excludes is True:
         excludes = shutil.ignore_patterns(files, excludes1)
     # Remove the wanted files
     for file in files:
@@ -261,7 +261,7 @@ def adrm(dirs, options, excludes1):
             continue
         fullpath = os.path.join(dirs, file)
         dfile = delink(fullpath)
-        if dfile != None:
+        if dfile is not None:
             if os.path.isfile(dfile):
                 rm(fullpath)
                 continue
@@ -269,7 +269,7 @@ def adrm(dirs, options, excludes1):
             adrm(fullpath, options, excludes1)
         else:
             rm(fullpath)
-    if options.remdirs == True:
+    if options.remdirs is True:
         rm(dirs)
 
 
@@ -318,7 +318,7 @@ def ife_getbuffers(file):
 def ife(buffers, func):
     for i in buffers[3]:
         r = func(i)
-        if r[0] == True:
+        if r[0] is True:
             buffers[2].write(r[1])
     copystat(buffers[0], buffers[1])
     buffers[2].close()
@@ -327,7 +327,7 @@ def ife(buffers, func):
 # Finds the system architecture
 def getArch():
     bits_64 = sys.maxsize > 2 ** 32
-    if bits_64 == True:
+    if bits_64 is True:
         return "amd64"
     else:
         return "i386"

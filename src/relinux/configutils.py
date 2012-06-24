@@ -53,7 +53,7 @@ custom = "Custom"
 
 # Checks if something matched
 def checkMatched(m):
-    if m != None and m.group(0) != None:
+    if m is not None and m.group(0) is not None:
         return True
     else:
         return False
@@ -252,7 +252,7 @@ def beautify(buffer):
 def getBuffer(file):
     returnme = []
     for line in file:
-        if not line or line == None:
+        if not line or line is None:
             break
         returnme.append(line.rstrip())
     print(len(returnme))

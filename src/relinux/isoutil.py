@@ -30,7 +30,7 @@ def showFileNotFound(file, dirs):
 def copyFile(src, dst, critical=False):
     if os.path.isfile(src):
         shutil.copy2(src, dst)
-    elif critical == True:
+    elif critical is True:
         splitted = os.path.split(src)
         showFileNotFound(splitted[1], splitted[0])
 
@@ -114,7 +114,7 @@ def getISOContents(configs):
     os.system("mkinitramfs -o " + isotreel + "casper/initrd.gz " + configutils.getKernel(configs[configutils.kernel]))
     logger.logI(tn, "Copying the kernel to the ISO tree")
     copyFile("/boot/vmlinuz-" + configutils.getKernel(configs[configutils.kernel]), isotreel + "casper/vmlinuz")
-    if configutils.parseBoolean(configs[configutils.enablewubi]) == True:
+    if configutils.parseBoolean(configs[configutils.enablewubi]) is True:
         logger.logV(tn, "Generating the windows autorun.inf")
         file = open(isotreel + "autorun.inf", "w")
         file.write("[autorun]\n")

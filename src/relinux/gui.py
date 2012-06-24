@@ -150,9 +150,9 @@ class YesNo(tkinter.Frame):
         self.n.grid(row=0, column=1)
 
     def set(self, bools):
-        if bools == True:
+        if bools is True:
             self.v.set(1)
-        elif bools == False:
+        elif bools is False:
             self.v.set(2)
         else:
             self.v.set(0)
@@ -276,7 +276,7 @@ class GUI:
                     r = YesNo(curr)
                     r.grid(row=c1, column=1)
                     r.set(configutils.parseBoolean(value))
-                elif choices != None and len(choices) > 0:
+                elif choices is not None and len(choices) > 0:
                     cb = Choice(curr)
                     cb.grid(row=c1, column=1)
                     cb.cb.config(values=choices, state="readonly")

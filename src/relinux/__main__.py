@@ -34,13 +34,13 @@ def main():
                   action="store_true", dest="veryverbose", default=False,
                   help="log even more to stdout")
     args = parser.parse_args()
-    if args.showversion == True:
+    if args.showversion is True:
         version()
-    if args.quiet == True:
+    if args.quiet is True:
         logger.quiet()
-    if args.verbose == True:
+    if args.verbose is True:
         logger.verbose()
-    if args.veryverbose == True:
+    if args.veryverbose is True:
         logger.veryverbose()
     buffer1 = configutils.getBuffer(open("../../relinux.conf"))
     buffer2 = configutils.compress(buffer1)
