@@ -3,6 +3,7 @@ Basic configuration
 @author: Anonymous Meerkat
 '''
 
+# We should not use any imports in this file
 #import os
 #from relinux import fsutil
 
