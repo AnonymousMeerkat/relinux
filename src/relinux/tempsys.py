@@ -11,10 +11,67 @@ import re
 import threading
 
 tmpsys = config.TempSys + "/"
+tmpsystree = "TempSysTree"
+cpetcvar = "EtcVar"
+remconfig = "RemConfig"
+
+
+# Generate the tree for the tempsys
+class genTempSysTree(threading.Thread):
+    def __init__(self):
+        self.deps = []
+        self.threadname = tmpsystree
+        self.tn = logger.genTN(self.threadname)
+
+    def run(self):
+        logger.logI(self.tn, "Generating the tree for the temporary filesystem")
+        fsutil.maketree([tmpsys + "etc", tmpsys + "dev",
+                          tmpsys + "proc", tmpsys + "tmp",
+                          tmpsys + "sys", tmpsys + "mnt",
+                          tmpsys + "media/cdrom", tmpsys + "var", tmpsys + "home"])
+        fsutil.chmod(tmpsys + "tmp", "1777")
+
+
+# Copy the contents of /etc/ and /var/ to the tempsys
+class copyEtcVar(threading.Thread):
+    def __init__(self):
+        self.deps = [tmpsystree]
+        self.threadname = cpetcvar
+        self.tn = logger.genTN(self.threadname)
+
+    def run(self, configs):
+        logger.logI(self.tn, "Copying files to the temporary filesystem")
+        excludes = configs[configutils.excludes]
+        fsutil.fscopy("etc", tmpsys + "etc", excludes)
+        fsutil.fscopy("var", tmpsys + "var", excludes)
+
+
+# Remove configuration files that can break the installed/live system
+class remConfig(threading.Thread):
+    def __init__(self):
+        self.deps = [cpetcvar]
+        self.threadname = remconfig
+        self.tn = logger.genTN(self.threadname)
+    
+    def run(self):
+        # Remove these files as they can conflict inside the installed system
+        logger.logV(self.tn, "Removing personal configurations")
+        fsutil.rmfiles([tmpsys + "etc/X11/xorg.conf*", tmpsys + "etc/resolv.conf",
+                        tmpsys + "etc/hosts", tmpsys + "etc/hostname", tmpsys + "etc/timezone",
+                        tmpsys + "etc/mtab", tmpsys + "etc/fstab",
+                        tmpsys + "etc/udev/rules.d/70-persistent*",
+                        tmpsys + "etc/cups/ssl/server.crt", tmpsys + "etc/cups/ssl/server.key",
+                        tmpsys + "etc/ssh/ssh_host_rsa_key", tmpsys + "etc/ssh/ssh_host_dsa_key.pub",
+                        tmpsys + "etc/ssh/ssh_host_dsa_key", tmpsys + "etc/ssh/ssh_host_rsa_key.pub",
+                        tmpsys + "etc/group", tmpsys + "etc/passwd", tmpsys + "etc/shadow",
+                        tmpsys + "etc/shadow-", tmpsys + "etc/gshadow", tmpsys + "etc/gshadow-",
+                        tmpsys + "etc/wicd/wired-settings.conf", tmpsys + "etc/wicd/wireless-settings.conf",
+                        tmpsys + "etc/printcap", tmpsys + "etc/cups/printers.conf"])
 
 
 class TempSys(threading.Thread):
     def __init__(self):
+        self.deps = [tmpsystree]
         self.threadname = "TempSys"
         self.tn = logger.genTN(self.threadname)
 
@@ -72,30 +129,7 @@ class TempSys(threading.Thread):
         buffers.close()
 
     def run(self, configs):
-        logger.logI(self.tn, "Generating the tree for the temporary filesystem")
-        fsutil.maketree([tmpsys + "etc", tmpsys + "dev",
-                          tmpsys + "proc", tmpsys + "tmp",
-                          tmpsys + "sys", tmpsys + "mnt",
-                          tmpsys + "media/cdrom", tmpsys + "var", tmpsys + "home"])
-        fsutil.chmod(tmpsys + "tmp", "1777")
-        logger.logI(self.tn, "Copying files to the temporary filesystem")
-        excludes = configs[configutils.excludes]
-        fsutil.fscopy("etc", tmpsys + "etc", excludes)
-        fsutil.fscopy("var", tmpsys + "var", excludes)
         logger.logI(self.tn, "Removing unneeded files")
-        # Remove these files as they can conflict inside the installed system
-        logger.logV(self.tn, "Removing personal configurations")
-        fsutil.rmfiles([tmpsys + "etc/X11/xorg.conf*", tmpsys + "etc/resolv.conf",
-                        tmpsys + "etc/hosts", tmpsys + "etc/hostname", tmpsys + "etc/timezone",
-                        tmpsys + "etc/mtab", tmpsys + "etc/fstab",
-                        tmpsys + "etc/udev/rules.d/70-persistent*",
-                        tmpsys + "etc/cups/ssl/server.crt", tmpsys + "etc/cups/ssl/server.key",
-                        tmpsys + "etc/ssh/ssh_host_rsa_key", tmpsys + "etc/ssh/ssh_host_dsa_key.pub",
-                        tmpsys + "etc/ssh/ssh_host_dsa_key", tmpsys + "etc/ssh/ssh_host_rsa_key.pub",
-                        tmpsys + "etc/group", tmpsys + "etc/passwd", tmpsys + "etc/shadow",
-                        tmpsys + "etc/shadow-", tmpsys + "etc/gshadow", tmpsys + "etc/gshadow-",
-                        tmpsys + "etc/wicd/wired-settings.conf", tmpsys + "etc/wicd/wireless-settings.conf",
-                        tmpsys + "etc/printcap", tmpsys + "etc/cups/printers.conf"])
         logger.logV(self.tn, "Removing cached lists")
         fsutil.adrm(tmpsys + "var/lib/apt/lists/", {"excludes": True, "remdirs": False}, ["*.gpg", "*lock*", "*partial*"])
         logger.logV(self.tn, "Removing temporary files in /var")
