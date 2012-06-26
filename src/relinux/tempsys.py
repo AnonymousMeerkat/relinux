@@ -204,7 +204,7 @@ class TempSys(threading.Thread):
         #fsutil.copystat(passwdstat, passwdf)
         #passwdfile.close()
         # Now for the group file
-        logger.logVV(_("Removing users in /etc/group"))
+        logger.logVV(self.tn, _("Removing users in /etc/group"))
         groupf = tmpsys + "etc/group"
         buffers = fsutil.ife_getbuffers(groupf)
         pe = pwdmanip.parseGroupEntries(buffers[3])
@@ -220,11 +220,11 @@ class TempSys(threading.Thread):
         # are very similar to group files, so we can just parse them as if they were group files
         pe = pwdmanip.parseGroupEntries(gbuffers[3])
         gbuffers[3] = pe
-        logger.logVV(_("Removing users in /etc/shadow"))
+        logger.logVV(self.tn, _("Removing users in /etc/shadow"))
         fsutil.ife(buffers, lambda line: self._parseShadow(line, usrs))
-        logger.logVV("Removing users in /etc/gshadow")
+        logger.logVV(self.tn, _("Removing users in /etc/gshadow"))
         fsutil.ife(gbuffers, lambda line: self._parseGroup(line, usrs))
-        logger.logI(self.tn, "Applying permissions to casper scripts")
+        logger.logI(self.tn, _("Applying permissions to casper scripts"))
         cbs = "/usr/share/initramfs-tools/scripts/casper-bottom/"
         # This pattern should do the trick
         execme = glob.glob(os.path.join(cbs, "[0-9][0-9]*"))
@@ -234,8 +234,8 @@ class TempSys(threading.Thread):
         # Edit the casper.conf
         # Strangely enough, casper uses its "quiet" flag if the build system is either Debian or Ubuntu
         if config.VStatus is False:
-            logger.logI(self.tn, "Editing casper and LSB configuration files")
-        logger.logV(self.tn, "Editing casper.conf")
+            logger.logI(self.tn, _("Editing casper and LSB configuration files"))
+        logger.logV(self.tn, _("Editing casper.conf"))
         buildsys = "Ubuntu"
         if configutils.parseBoolean(configs[configutils.casperquiet]) is False:
             buildsys = ""
@@ -244,13 +244,13 @@ class TempSys(threading.Thread):
                                                "HOST": configs[configutils.host],
                                                "BUILD_SYSTEM": buildsys,
                                                "FLAVOUR": configs[configutils.flavour]})
-        logger.logV(self.tn, "Editing lsb-release")
+        logger.logV(self.tn, _("Editing lsb-release"))
         self.varEditor(tmpsys + "etc/lsb-release", {"DISTRIB_ID": configs[configutils.sysname],
                                                "DISTRIB_RELEASE": configs[configutils.version],
                                                "DISTRIB_CODENAME": configs[configutils.codename],
                                                "DISTRIB_DESCRIPTION": configs[configutils.description]})
         # If the user-setup-apply file does not exist, and there is an alternative, we'll copy it over
-        logger.logI(self.tn, "Setting up the installer")
+        logger.logI(self.tn, _("Setting up the installer"))
         if os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply.orig") and not os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply"):
             shutil.copy2("/usr/lib/ubiquity/user-setup/user-setup-apply.orig",
                          "/usr/lib/ubiquity/user-setup/user-setup-apply")

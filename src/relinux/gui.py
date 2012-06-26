@@ -42,10 +42,10 @@ class VerticalScrolledFrame(tkinter.Frame):
 class About:
     def __init__(self, master):
         top = self.top = tkinter.Toplevel(master, background=config.background)
-        top.title(config.product + " - About")
+        top.title(config.product + _(" - About"))
         w = tkinter.Label(top, text=config.about_string)
         w.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)
-        b = tkinter.Button(top, text="Close", command=top.destroy)
+        b = tkinter.Button(top, text=_("Close"), command=top.destroy)
         b.pack(side=tkinter.BOTTOM)
 
 
@@ -74,16 +74,16 @@ class Wizard(ttk.Notebook):
         for indx, child in self._children.items():
             btnframe = tkinter.Frame(child)
             btnframe.pack(side='bottom', fill='x', padx=6, pady=12)
-            nextbtn = tkinter.Button(btnframe, text="Next", command=self.next_page)
+            nextbtn = tkinter.Button(btnframe, text=_("Next"), command=self.next_page)
             nextbtn.pack(side='right', anchor='e', padx=6)
-            quitbtn = tkinter.Button(btnframe, text="Quit", command=self.close)
+            quitbtn = tkinter.Button(btnframe, text=_("Quit"), command=self.close)
             quitbtn.pack(side="left", anchor="w", padx=6)
             if indx > 0:
-                prevbtn = tkinter.Button(btnframe, text="Previous",
+                prevbtn = tkinter.Button(btnframe, text=_("Previous"),
                     command=self.prev_page)
                 prevbtn.pack(side='right', anchor='e', padx=6)
                 if indx == len(self._children) - 1:
-                    nextbtn.configure(text="Finish", command=self.close)
+                    nextbtn.configure(text=_("Finish"), command=self.close)
             progressframe = tkinter.Frame(child)
             progressframe.pack(side="bottom", fill="x", padx=6)
             ttk.Progressbar(progressframe).pack(fill="x")
@@ -144,9 +144,9 @@ class YesNo(tkinter.Frame):
     def __init__(self, *args, **kwargs):
         tkinter.Frame.__init__(self, *args, **kwargs)
         self.v = tkinter.IntVar()
-        self.y = tkinter.Radiobutton(self, text="Yes", variable=self.v, value=1)
+        self.y = tkinter.Radiobutton(self, text=_("Yes"), variable=self.v, value=1)
         self.y.grid(row=0, column=0)
-        self.n = tkinter.Radiobutton(self, text="No", variable=self.v, value=2)
+        self.n = tkinter.Radiobutton(self, text=_("No"), variable=self.v, value=2)
         self.n.grid(row=0, column=1)
 
     def set(self, bools):
@@ -244,11 +244,11 @@ class GUI:
         wizard.master.minsize(400, 350)
         wizard.master.maxsize(800, 700)
         self.page1 = ttk.Notebook(wizard.page_container(1))
-        self.page0 = tkinter.Label(wizard.page_container(0), text='Welcome to relinux 0.4!\nClick on next to get started')
-        self.page2 = tkinter.Label(wizard.page_container(2), text='Page 3')
-        wizard.add_page_body(0, "Welcome", self.page0)
-        wizard.add_page_body(1, "Configure", self.page1)
-        wizard.add_page_body(2, "Page 3", self.page2)
+        self.page0 = tkinter.Label(wizard.page_container(0), text=_('Welcome to relinux 0.4!\nClick on next to get started'))
+        self.page2 = tkinter.Label(wizard.page_container(2), text=_('Page 3'))
+        wizard.add_page_body(0, _("Welcome"), self.page0)
+        wizard.add_page_body(1, _("Configure"), self.page1)
+        wizard.add_page_body(2, _("Page 3"), self.page2)
         wizard.pack(fill='both', expand=True)
 
     def fillConfiguration(self, configs):

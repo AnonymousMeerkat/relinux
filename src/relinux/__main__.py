@@ -7,9 +7,10 @@ import sys
 # Just in case, we will append both this directory and the directory higher than us
 sys.path.append("..")
 sys.path.append(".")
-from relinux import config, gui, configutils, logger
+from relinux import config
 import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
+from relinux import gui, configutils, logger
 #from .lib import *
 from argparse import ArgumentParser
 import tkinter
