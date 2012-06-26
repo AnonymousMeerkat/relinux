@@ -11,7 +11,7 @@ product = "Relinux"
 productunix = "relinux"
 version = 0.4
 version_string = product + " version " + str(version)
-about_string = product + " is a free software designed to help you make a professional-looking OS easily"
+about_string = product + _(" is a free software designed to help you make a professional-looking OS easily")
 
 EStatus = True
 IStatus = True
@@ -29,6 +29,6 @@ SysVersion = ""  # Should be filled in by: os.popen("/usr/bin/lsb_release -rs").
 Arch = ""  # Should be filled in by: fsutil.getArch()
 
 # Gettext
-Localization = "../../localize/"
-Unicode = True
-Language = "en"
+localedir = "../../localize/"
+unicode = True
+language = "en"

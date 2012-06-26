@@ -27,7 +27,7 @@ class genTempSysTree(threading.Thread):
         self.tn = logger.genTN(self.threadname)
 
     def run(self):
-        logger.logI(self.tn, "Generating the tree for the temporary filesystem")
+        logger.logI(self.tn, _("Generating the tree for the temporary filesystem"))
         fsutil.maketree([tmpsys + "etc", tmpsys + "dev",
                           tmpsys + "proc", tmpsys + "tmp",
                           tmpsys + "sys", tmpsys + "mnt",
@@ -43,7 +43,7 @@ class copyEtcVar(threading.Thread):
         self.tn = logger.genTN(self.threadname)
 
     def run(self, configs):
-        logger.logI(self.tn, "Copying files to the temporary filesystem")
+        logger.logI(self.tn, _("Copying files to the temporary filesystem"))
         excludes = configs[configutils.excludes]
         fsutil.fscopy("etc", tmpsys + "etc", excludes)
         fsutil.fscopy("var", tmpsys + "var", excludes)
@@ -58,7 +58,7 @@ class remConfig(threading.Thread):
     
     def run(self):
         # Remove these files as they can conflict inside the installed system
-        logger.logV(self.tn, "Removing personal configurations that can break the installed system")
+        logger.logV(self.tn, _("Removing personal configurations that can break the installed system"))
         fsutil.rmfiles([tmpsys + "etc/X11/xorg.conf*", tmpsys + "etc/resolv.conf",
                         tmpsys + "etc/hosts", tmpsys + "etc/hostname", tmpsys + "etc/timezone",
                         tmpsys + "etc/mtab", tmpsys + "etc/fstab",
@@ -80,7 +80,7 @@ class remCachedLists(threading.Thread):
         self.tn = logger.genTN(self.threadname)
 
     def run(self):
-        logger.logV(self.tn, "Removing cached lists")
+        logger.logV(self.tn, _("Removing cached lists"))
         fsutil.adrm(tmpsys + "var/lib/apt/lists/", {"excludes": True, "remdirs": False}, ["*.gpg", "*lock*", "*partial*"])
 
 
@@ -92,7 +92,7 @@ class remTempVar(threading.Thread):
         self.tn = logger.genTN(self.threadname)
 
     def run(self):
-        logger.logV(self.tn, "Removing temporary files in /var")
+        logger.logV(self.tn, _("Removing temporary files in /var"))
         # Remove all files in these directories (but not directories inside them)
         for i in ["etc/NetworkManager/system-connections/", "var/run", "var/log", "var/mail", "var/spool",
                   "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]:
@@ -108,7 +108,7 @@ class genVarLogs(threading.Thread):
     
     def run(self):
         # Create the logs
-        logger.logV(self.tn, "Creating empty logs")
+        logger.logV(self.tn, _("Creating empty logs"))
         for i in ["dpkg.log", "lastlog", "mail.log", "syslog", "auth.log", "daemon.log", "faillog",
                           "lpr.log", "mail.warn", "user.log", "boot", "debug", "mail.err", "messages", "wtmp",
                           "bootstrap.log", "dmesg", "kern.log", "mail.info"]:
@@ -176,9 +176,9 @@ class TempSys(threading.Thread):
         buffers.close()
 
     def run(self, configs):
-        logger.logI(self.tn, "Removing unneeded files")
+        logger.logI(self.tn, _("Removing unneeded files"))
         # Setup the password and group stuff
-        logger.logI(self.tn, "Removing conflicting users")
+        logger.logI(self.tn, _("Removing conflicting users"))
         passwdf = tmpsys + "/etc/passwd"
         #passwdfile = open(passwdf, "r")
         #passwdstat = fsutil.getStat(passwdf)
@@ -194,8 +194,8 @@ class TempSys(threading.Thread):
         usrs.extend(pwdmanip.getPPByUID("[1-9][0-9][0-9][0-9]", pe))
         usrs.extend(pwdmanip.getPPByUID("999", pe))
         if config.VVStatus is False:
-            logger.logV("Removing them")
-        logger.logVV("Removing users in /etc/passwd")
+            logger.logV(_("Removing them"))
+        logger.logVV(_("Removing users in /etc/passwd"))
         fsutil.ife(buffers, lambda line: [True, pwdmanip.PPtoEntry(line)] if not line in usrs else [False, ""])
         # Rewrite the password file
         #for i in ppe:
@@ -204,7 +204,7 @@ class TempSys(threading.Thread):
         #fsutil.copystat(passwdstat, passwdf)
         #passwdfile.close()
         # Now for the group file
-        logger.logVV("Removing users in /etc/group")
+        logger.logVV(_("Removing users in /etc/group"))
         groupf = tmpsys + "etc/group"
         buffers = fsutil.ife_getbuffers(groupf)
         pe = pwdmanip.parseGroupEntries(buffers[3])
@@ -220,7 +220,7 @@ class TempSys(threading.Thread):
         # are very similar to group files, so we can just parse them as if they were group files
         pe = pwdmanip.parseGroupEntries(gbuffers[3])
         gbuffers[3] = pe
-        logger.logVV("Removing users in /etc/shadow")
+        logger.logVV(_("Removing users in /etc/shadow"))
         fsutil.ife(buffers, lambda line: self._parseShadow(line, usrs))
         logger.logVV("Removing users in /etc/gshadow")
         fsutil.ife(gbuffers, lambda line: self._parseGroup(line, usrs))
