@@ -8,6 +8,8 @@ import sys
 sys.path.append("..")
 sys.path.append(".")
 from relinux import config, gui, configutils, logger
+import gettext
+gettext.install(config.productunix, config.localedir, config.unicode)
 #from .lib import *
 from argparse import ArgumentParser
 import tkinter
@@ -42,6 +44,7 @@ def main():
         logger.verbose()
     if args.veryverbose is True:
         logger.veryverbose()
+    print(_("HELLO"))
     buffer1 = configutils.getBuffer(open("../../relinux.conf"))
     buffer2 = configutils.compress(buffer1)
     buffer = configutils.parseCompressedBuffer(buffer2)

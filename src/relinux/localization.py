@@ -11,7 +11,6 @@ from relinux import config, configutils
 
 class Localize():
     def __init__(self):
-        gettext.install(config.productunix, config.localedir, config.unicode)
         self.languages = {}
         patt = re.compile(config.productunix + "_(.*?)")
         for i in os.listdir(config.localedir):
@@ -22,3 +21,4 @@ class Localize():
     
     def useLanguage(self, language):
         self.languages[language].install()
+        config._ = self.languages[language].ugettext
