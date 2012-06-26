@@ -14,6 +14,9 @@ tmpsys = config.TempSys + "/"
 tmpsystree = "TempSysTree"
 cpetcvar = "EtcVar"
 remconfig = "RemConfig"
+remcachedlists = "RemCachedLists"
+remtempvar = "RemTempVar"
+genvarlogs = "GenVarLogs"
 
 
 # Generate the tree for the tempsys
@@ -55,7 +58,7 @@ class remConfig(threading.Thread):
     
     def run(self):
         # Remove these files as they can conflict inside the installed system
-        logger.logV(self.tn, "Removing personal configurations")
+        logger.logV(self.tn, "Removing personal configurations that can break the installed system")
         fsutil.rmfiles([tmpsys + "etc/X11/xorg.conf*", tmpsys + "etc/resolv.conf",
                         tmpsys + "etc/hosts", tmpsys + "etc/hostname", tmpsys + "etc/timezone",
                         tmpsys + "etc/mtab", tmpsys + "etc/fstab",
@@ -67,6 +70,50 @@ class remConfig(threading.Thread):
                         tmpsys + "etc/shadow-", tmpsys + "etc/gshadow", tmpsys + "etc/gshadow-",
                         tmpsys + "etc/wicd/wired-settings.conf", tmpsys + "etc/wicd/wireless-settings.conf",
                         tmpsys + "etc/printcap", tmpsys + "etc/cups/printers.conf"])
+
+
+# Remove cached lists
+class remCachedLists(threading.Thread):
+    def __init__(self):
+        self.deps = [cpetcvar]
+        self.threadname = remcachedlists
+        self.tn = logger.genTN(self.threadname)
+
+    def run(self):
+        logger.logV(self.tn, "Removing cached lists")
+        fsutil.adrm(tmpsys + "var/lib/apt/lists/", {"excludes": True, "remdirs": False}, ["*.gpg", "*lock*", "*partial*"])
+
+
+# Remove temporary files in /var
+class remTempVar(threading.Thread):
+    def __init__(self):
+        self.deps = [cpetcvar]
+        self.threadname = remtempvar
+        self.tn = logger.genTN(self.threadname)
+
+    def run(self):
+        logger.logV(self.tn, "Removing temporary files in /var")
+        # Remove all files in these directories (but not directories inside them)
+        for i in ["etc/NetworkManager/system-connections/", "var/run", "var/log", "var/mail", "var/spool",
+                  "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]:
+            fsutil.adrm(tmpsys + i, {"excludes": False, "remdirs": False}, None)
+
+
+# Generate logs in /var/log
+class genVarLogs(threading.Thread):
+    def __init__(self):
+        self.deps = [cpetcvar]
+        self.threadname = genvarlogs
+        self.tn = logger.genTN(self.threadname)
+    
+    def run(self):
+        # Create the logs
+        logger.logV(self.tn, "Creating empty logs")
+        for i in ["dpkg.log", "lastlog", "mail.log", "syslog", "auth.log", "daemon.log", "faillog",
+                          "lpr.log", "mail.warn", "user.log", "boot", "debug", "mail.err", "messages", "wtmp",
+                          "bootstrap.log", "dmesg", "kern.log", "mail.info"]:
+            logger.logVV(logger.Tab + "Creating " + i)
+            fsutil.touch(tmpsys + "var/log/" + i)
 
 
 class TempSys(threading.Thread):
@@ -130,20 +177,6 @@ class TempSys(threading.Thread):
 
     def run(self, configs):
         logger.logI(self.tn, "Removing unneeded files")
-        logger.logV(self.tn, "Removing cached lists")
-        fsutil.adrm(tmpsys + "var/lib/apt/lists/", {"excludes": True, "remdirs": False}, ["*.gpg", "*lock*", "*partial*"])
-        logger.logV(self.tn, "Removing temporary files in /var")
-        # Remove all files in these directories (but not directories inside them)
-        for i in ["etc/NetworkManager/system-connections/", "var/run", "var/log", "var/mail", "var/spool",
-                  "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]:
-            fsutil.adrm(tmpsys + i, {"excludes": False, "remdirs": False}, None)
-        # Create the logs
-        logger.logV(self.tn, "Creating empty logs")
-        for i in ["dpkg.log", "lastlog", "mail.log", "syslog", "auth.log", "daemon.log", "faillog",
-                          "lpr.log", "mail.warn", "user.log", "boot", "debug", "mail.err", "messages", "wtmp",
-                          "bootstrap.log", "dmesg", "kern.log", "mail.info"]:
-            logger.logVV(logger.Tab + "Creating " + i)
-            fsutil.touch(tmpsys + "var/log/" + i)
         # Setup the password and group stuff
         logger.logI(self.tn, "Removing conflicting users")
         passwdf = tmpsys + "/etc/passwd"
