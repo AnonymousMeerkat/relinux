@@ -11,20 +11,20 @@ import re
 import threading
 
 tmpsys = config.TempSys + "/"
-tmpsystree = "TempSysTree"
-cpetcvar = "EtcVar"
-remconfig = "RemConfig"
-remcachedlists = "RemCachedLists"
-remtempvar = "RemTempVar"
-genvarlogs = "GenVarLogs"
+#tmpsystree = "TempSysTree"
+#cpetcvar = "EtcVar"
+#remconfig = "RemConfig"
+#remcachedlists = "RemCachedLists"
+#remtempvar = "RemTempVar"
+#genvarlogs = "GenVarLogs"
+#remusers = "RemUsers"
 
 
 # Generate the tree for the tempsys
+tmpsystree = {"deps": [], "tn": "TempSysTree"}
 class genTempSysTree(threading.Thread):
     def __init__(self):
-        self.deps = []
-        self.threadname = tmpsystree
-        self.tn = logger.genTN(self.threadname)
+        self.tn = logger.genTN(tmpsystree["tn"])
 
     def run(self):
         logger.logI(self.tn, _("Generating the tree for the temporary filesystem"))
@@ -33,28 +33,28 @@ class genTempSysTree(threading.Thread):
                           tmpsys + "sys", tmpsys + "mnt",
                           tmpsys + "media/cdrom", tmpsys + "var", tmpsys + "home"])
         fsutil.chmod(tmpsys + "tmp", "1777")
+tmpsystree["thread"] = genTempSysTree
 
 
 # Copy the contents of /etc/ and /var/ to the tempsys
+cpetcvar = {"deps": [tmpsystree], "tn": "TempSysTree"}
 class copyEtcVar(threading.Thread):
     def __init__(self):
-        self.deps = [tmpsystree]
-        self.threadname = cpetcvar
-        self.tn = logger.genTN(self.threadname)
+        self.tn = logger.genTN(cpetcvar["tn"])
 
     def run(self, configs):
         logger.logI(self.tn, _("Copying files to the temporary filesystem"))
         excludes = configs[configutils.excludes]
         fsutil.fscopy("etc", tmpsys + "etc", excludes)
         fsutil.fscopy("var", tmpsys + "var", excludes)
+cpetcvar["thread"] = copyEtcVar
 
 
 # Remove configuration files that can break the installed/live system
+remconfig = {"deps": [cpetcvar], "tn": "RemConfig"}
 class remConfig(threading.Thread):
     def __init__(self):
-        self.deps = [cpetcvar]
-        self.threadname = remconfig
-        self.tn = logger.genTN(self.threadname)
+        self.tn = logger.genTN(remconfig["tn"])
     
     def run(self):
         # Remove these files as they can conflict inside the installed system
@@ -70,26 +70,26 @@ class remConfig(threading.Thread):
                         tmpsys + "etc/shadow-", tmpsys + "etc/gshadow", tmpsys + "etc/gshadow-",
                         tmpsys + "etc/wicd/wired-settings.conf", tmpsys + "etc/wicd/wireless-settings.conf",
                         tmpsys + "etc/printcap", tmpsys + "etc/cups/printers.conf"])
+remconfig["thread"] = remConfig
 
 
 # Remove cached lists
+remcachedlists = {"deps": [cpetcvar], "tn": "RemCachedLists"}
 class remCachedLists(threading.Thread):
     def __init__(self):
-        self.deps = [cpetcvar]
-        self.threadname = remcachedlists
-        self.tn = logger.genTN(self.threadname)
+        self.tn = logger.genTN(remcachedlists["tn"])
 
     def run(self):
         logger.logV(self.tn, _("Removing cached lists"))
         fsutil.adrm(tmpsys + "var/lib/apt/lists/", {"excludes": True, "remdirs": False}, ["*.gpg", "*lock*", "*partial*"])
+remcachedlists["thread"] = remCachedLists
 
 
 # Remove temporary files in /var
+remtempvar = {"deps": [cpetcvar], "tn": "RemTempVar"}
 class remTempVar(threading.Thread):
     def __init__(self):
-        self.deps = [cpetcvar]
-        self.threadname = remtempvar
-        self.tn = logger.genTN(self.threadname)
+        self.tn = logger.genTN(remtempvar["tn"])
 
     def run(self):
         logger.logV(self.tn, _("Removing temporary files in /var"))
@@ -97,14 +97,14 @@ class remTempVar(threading.Thread):
         for i in ["etc/NetworkManager/system-connections/", "var/run", "var/log", "var/mail", "var/spool",
                   "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]:
             fsutil.adrm(tmpsys + i, {"excludes": False, "remdirs": False}, None)
+remtempvar["thread"] = remTempVar
 
 
 # Generate logs in /var/log
+genvarlogs = {"deps": [cpetcvar], "tn": "GenVarLogs"}
 class genVarLogs(threading.Thread):
     def __init__(self):
-        self.deps = [cpetcvar]
-        self.threadname = genvarlogs
-        self.tn = logger.genTN(self.threadname)
+        self.tn = logger.genTN(genvarlogs["tn"])
     
     def run(self):
         # Create the logs
@@ -114,12 +114,15 @@ class genVarLogs(threading.Thread):
                           "bootstrap.log", "dmesg", "kern.log", "mail.info"]:
             logger.logVV(logger.Tab + "Creating " + i)
             fsutil.touch(tmpsys + "var/log/" + i)
+genvarlogs["thread"] = genVarLogs
 
 
-class TempSys(threading.Thread):
+# Edit passwd and shadow files to remove users
+remusers = {"deps": [cpetcvar], "tn": "RemUsers"}
+class remUsers(threading.Thread):
     def __init__(self):
-        self.deps = [tmpsystree]
-        self.threadname = "TempSys"
+        self.deps = [cpetcvar]
+        self.threadname = remusers
         self.tn = logger.genTN(self.threadname)
 
     # Helper function for changing the /etc/group file
@@ -151,32 +154,7 @@ class TempSys(threading.Thread):
         else:
             return [False, ""]
 
-    # Helper function
-    def __varEditor(self, line, lists):
-        patt = re.compile("^.*? *([A-Za-z_-]*?)=.*$")
-        m = patt.match(line)
-        #if configutils.checkMatched(m):
-        if m.group(0) is not None:
-            for i in lists.keys():
-                if m.group(1) == i:
-                    lists[i] = None
-                    return [True, i + "=" + lists[i]]
-        return [False, ""]
-
-    # Casper Variable Editor
-    # lists - Dictionary containing all options needed
-    def _varEditor(self, file, lists):
-        buffers = fsutil.ife_getbuffers(file)
-        fsutil.ife(buffers, lambda(line): self.__varEditor(line, lists))
-        # In case the file is broken, we'll add the lines needed
-        buffers = open(file, "a")
-        for i in lists:
-            if lists[i] is not None:
-                buffers.write("export " + i + "=" + lists[i] + "\n")
-        buffers.close()
-
-    def run(self, configs):
-        logger.logI(self.tn, _("Removing unneeded files"))
+    def run(self):
         # Setup the password and group stuff
         logger.logI(self.tn, _("Removing conflicting users"))
         passwdf = tmpsys + "/etc/passwd"
@@ -225,6 +203,41 @@ class TempSys(threading.Thread):
         logger.logVV(self.tn, _("Removing users in /etc/gshadow"))
         fsutil.ife(gbuffers, lambda line: self._parseGroup(line, usrs))
         logger.logI(self.tn, _("Applying permissions to casper scripts"))
+remusers["thread"] = remUsers
+
+
+class TempSys(threading.Thread):
+    def __init__(self):
+        self.deps = [tmpsystree]
+        self.threadname = "TempSys"
+        self.tn = logger.genTN(self.threadname)
+
+    # Helper function
+    def __varEditor(self, line, lists):
+        patt = re.compile("^.*? *([A-Za-z_-]*?)=.*$")
+        m = patt.match(line)
+        #if configutils.checkMatched(m):
+        if m.group(0) is not None:
+            for i in lists.keys():
+                if m.group(1) == i:
+                    lists[i] = None
+                    return [True, i + "=" + lists[i]]
+        return [False, ""]
+
+    # Casper Variable Editor
+    # lists - Dictionary containing all options needed
+    def _varEditor(self, file, lists):
+        buffers = fsutil.ife_getbuffers(file)
+        fsutil.ife(buffers, lambda(line): self.__varEditor(line, lists))
+        # In case the file is broken, we'll add the lines needed
+        buffers = open(file, "a")
+        for i in lists:
+            if lists[i] is not None:
+                buffers.write("export " + i + "=" + lists[i] + "\n")
+        buffers.close()
+
+    def run(self, configs):
+        logger.logI(self.tn, _("Removing unneeded files"))
         cbs = "/usr/share/initramfs-tools/scripts/casper-bottom/"
         # This pattern should do the trick
         execme = glob.glob(os.path.join(cbs, "[0-9][0-9]*"))
@@ -266,3 +279,7 @@ class TempSys(threading.Thread):
             cdrom.write("#!/bin/sh\n")
             cdrom.write("exit\n")
             cdrom.close()
+
+
+# Thread list
+threads = [tmpsystree, cpetcvar, remconfig, remcachedlists, remtempvar, genvarlogs, remusers]

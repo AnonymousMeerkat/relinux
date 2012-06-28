@@ -22,7 +22,7 @@ VVStatus = True
 GUIStatus = True
 background = "lightgrey"
 
-# Generated section
+# Generated
 ISOTree = ""
 TempSys = ""
 SysVersion = ""  # Should be filled in by: os.popen("/usr/bin/lsb_release -rs").read().strip()
@@ -32,3 +32,7 @@ Arch = ""  # Should be filled in by: fsutil.getArch()
 localedir = "../../localize/"
 unicode = True
 language = "en"
+
+# Threading
+ThreadRPS = 10
+ThreadStop = False
