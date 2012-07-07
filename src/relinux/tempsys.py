@@ -121,9 +121,7 @@ genvarlogs["thread"] = genVarLogs
 remusers = {"deps": [cpetcvar], "tn": "RemUsers"}
 class remUsers(threading.Thread):
     def __init__(self):
-        self.deps = [cpetcvar]
-        self.threadname = remusers
-        self.tn = logger.genTN(self.threadname)
+        self.tn = logger.genTN(remusers["tn"])
 
     # Helper function for changing the /etc/group file
     def _parseGroup(self, i, usrs):
@@ -206,11 +204,11 @@ class remUsers(threading.Thread):
 remusers["thread"] = remUsers
 
 
-class TempSys(threading.Thread):
+# Edits casper.conf
+casperconf = {"deps": [cpetcvar], "tn": "casper.conf"}
+class CasperConfEditor(threading.Thread):
     def __init__(self):
-        self.deps = [tmpsystree]
-        self.threadname = "TempSys"
-        self.tn = logger.genTN(self.threadname)
+        self.tn = logger.genTN(casperconf["tn"])
 
     # Helper function
     def __varEditor(self, line, lists):
@@ -237,13 +235,6 @@ class TempSys(threading.Thread):
         buffers.close()
 
     def run(self, configs):
-        logger.logI(self.tn, _("Removing unneeded files"))
-        cbs = "/usr/share/initramfs-tools/scripts/casper-bottom/"
-        # This pattern should do the trick
-        execme = glob.glob(os.path.join(cbs, "[0-9][0-9]*"))
-        for i in execme:
-            logger.logVV(self.tn, "chmod 755 " + i)
-            fsutil.chmod(i, "755")
         # Edit the casper.conf
         # Strangely enough, casper uses its "quiet" flag if the build system is either Debian or Ubuntu
         if config.VStatus is False:
@@ -262,6 +253,16 @@ class TempSys(threading.Thread):
                                                "DISTRIB_RELEASE": configs[configutils.version],
                                                "DISTRIB_CODENAME": configs[configutils.codename],
                                                "DISTRIB_DESCRIPTION": configs[configutils.description]})
+casperconf["thread"] = CasperConfEditor
+
+
+# Sets up Ubiquity
+ubiquitysetup = {"deps": [cpetcvar], "tn": "Ubiquity"}
+class UbiquitySetup(threading.Thread):
+    def __init__(self):
+        self.tn = logger.genTN(ubiquitysetup["tn"])
+
+    def run(self, configs):
         # If the user-setup-apply file does not exist, and there is an alternative, we'll copy it over
         logger.logI(self.tn, _("Setting up the installer"))
         if os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply.orig") and not os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply"):
@@ -281,5 +282,22 @@ class TempSys(threading.Thread):
             cdrom.close()
 
 
+class TempSys(threading.Thread):
+    def __init__(self):
+        self.deps = [tmpsystree]
+        self.threadname = "TempSys"
+        self.tn = logger.genTN(self.threadname)
+
+    def run(self, configs):
+        logger.logI(self.tn, _("Removing unneeded files"))
+        '''cbs = "/usr/share/initramfs-tools/scripts/casper-bottom/"
+        # This pattern should do the trick
+        execme = glob.glob(os.path.join(cbs, "[0-9][0-9]*"))
+        for i in execme:
+            logger.logVV(self.tn, "chmod 755 " + i)
+            fsutil.chmod(i, "755")'''
+
+
 # Thread list
-threads = [tmpsystree, cpetcvar, remconfig, remcachedlists, remtempvar, genvarlogs, remusers]
+threads = [tmpsystree, cpetcvar, remconfig, remcachedlists, remtempvar, genvarlogs, remusers, 
+           casperconf, ubiquitysetup]

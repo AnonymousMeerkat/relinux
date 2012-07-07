@@ -9,7 +9,7 @@ import shutil
 import fnmatch
 import sys
 import hashlib
-from relinux import configutils
+from relinux import configutils, logger
 
 
 # Reads the link location of a file or returns None
@@ -85,52 +85,63 @@ def sizeTrans(size, htom=True):
 
 
 # Makes a directory
-def makedir(dirs):
+def makedir(dirs, tn=""):
     if not os.path.exists(dirs):
+        logger.logVV(tn, _("Creating directory " + dir))
         os.makedirs(dirs)
 
 
 # Makes a directory tree
-def maketree(arr):
+def maketree(arr, tn=""):
     for i in arr:
-        makedir(i)
+        makedir(i, tn)
 
 
 # Simple implementation of the touch utility
-def touch(file):
+def touch(file, tn=""):
     if os.path.exists(file):
+        logger.logVV(tn, _("Touching file " + file))
         os.utime(file, None)
     else:
+        logger.logVV(tn, _("Creating file " + file))
         open(file, "w").close()
 
 
 # Same as maketree, but for files instead
-def makefiles(arr):
+def makefiles(arr, tn=""):
     for i in arr:
-        touch(i)
+        touch(i, tn)
 
 
 # Removes a file
 # If followlink is True, then it will remove both the link and the origin
-def rm(file, followlink=False):
+def rm(file, followlink=False, tn=""):
     rfile = file
     dfile = delink(file)
+    rmstring = "Removing "
+    if os.path.isdir(file):
+        rmstring += "directory "
     if dfile is not None:
         file = dfile
+        rmstring += "symlink "
     if os.path.isfile(file):
+        logger.logVV(tn, _(rmstring + file))
         os.remove(rfile)
         if followlink is True and dfile is not None:
+            logger.logVV(tn, _("Removing " + file))
             os.remove(file)
     elif os.path.isdir(file):
+        logger.logVV(tn, _(rmstring + file))
         shutil.rmtree(rfile)
         if followlink is True and dfile is not None:
+            logger.logVV(tn, _("Removing directory " + file))
             os.remove(file)
 
 
 # Removes a list of files
-def rmfiles(arr):
+def rmfiles(arr, tn=""):
     for i in arr:
-        rm(i)
+        rm(i, tn)
 
 
 # Helper function for chmod
@@ -180,9 +191,10 @@ def _chmod(c, mi):
 
 
 # Simple implementation of the chmod utility
-def chmod(file, mod):
+def chmod(file, mod, tn=""):
     val = 0x00
     c = 0
+    logger.logVV(tn, _("Calculating permissions of " + file))
     # In case the user of this function used UGO instead of SUGO, we'll cover up for that
     if len(mod) < 4:
         c = 1
@@ -192,6 +204,7 @@ def chmod(file, mod):
         val = val | _chmod(c, int(i))
         c = c + 1
     # Chmod it
+    logger.logVV(tn, _("Setting permissions of " + file + " to " + mod))
     os.chmod(file, val)
 
 
