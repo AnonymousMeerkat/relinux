@@ -6,7 +6,8 @@ ISO Utilities
 @author: Anonymous Meerkat
 '''
 
-from relinux import logger, config, fsutil, configutils, squashfs
+from relinux import logger, config, fsutil, configutils
+from relinux.modules.osweaver import squashfs
 import shutil
 import os
 import re

@@ -3,7 +3,8 @@ SquashFS Generation
 @author: Anonymous Meerkat
 '''
 
-from relinux import logger, fsutil, configutils, tempsys, isoutil
+from relinux import logger, fsutil, configutils
+from relinux.modules.osweaver import isoutil
 import os
 import threading
 

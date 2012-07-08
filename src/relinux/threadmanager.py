@@ -3,7 +3,8 @@ Thread Managing Class
 @author: Anonymous Meerkat
 '''
 
-from relinux import tempsys, squashfs, isoutil, config
+from relinux import config
+from relinux.modules.osweaver import isoutil, squashfs, tempsys
 import time
 
 threads = tempsys.threads

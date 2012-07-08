@@ -1,0 +1,32 @@
+Guide for developers
+
+How relinux is setup
+====================
+Relinux is split up into utilities and modules. Utilities are libraries that the modules use, and modules are
+the parts that make up the relinux toolkit (OSWeaver being the main one).
+
+Tree and basic function of each file
+====================================
+src
+├── __init__.py
+└── relinux
+    ├── config.py             Application configuration
+    ├── configutils.py        Utilities for parsing relinux.conf
+    ├── fsutil.py             Utilities to manage the system
+    ├── gui.py                Everything GUI-related
+    ├── __init__.py
+    ├── localization.py       Designed to ease usage of gettext, but might be deprecated soon
+    ├── logger.py             Logging utilities
+    ├── __main__.py           Runs relinux
+    ├── modules
+    │   ├── __init__.py
+    │   └── osweaver          OSWeaver Module
+    │       ├── __init__.py   Module information
+    │       ├── isoutil.py    Generates the ISO structure
+    │       ├── squashfs.py   Generates the SquashFS
+    │       └── tempsys.py    Generates the temporary system (that SquashFS will use)
+    ├── pwdmanip.py           Utilities for parsing /etc/passwd, /etc/g{roup|shadow}, and /etc/shadow
+    ├── test                  Temporary file to use awk/sed with :P
+    ├── threadmanager.py      Manages threads
+    └── versionsort.py        Contains a version sorting class (but will be moved to configutils)
+
