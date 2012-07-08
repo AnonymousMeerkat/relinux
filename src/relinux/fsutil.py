@@ -25,7 +25,7 @@ def exclude(names, files, tn=""):
     excludes = []
     for i in files:
         excludes.extend(fnmatch.filter(names, i))
-    logger.logV(tn, _("Created exclude list") + " (" + len(excludes) + " " + 
+    logger.logV(tn, _("Created exclude list") + " (" + len(excludes) + " " +
                 gettext.ngettext("entry", "entries", len(excludes)) + _(" allocated") + ")")
     return excludes
 
@@ -253,7 +253,7 @@ def fscopy(src, dst, excludes1, tn=""):
         newpath = os.path.join(dst, file)
         dfile = delink(fullpath)
         if dfile is not None:
-            logger.logVV(tn, file + " " + _("is a symlink. Creating an identical symlink at") + " " + 
+            logger.logVV(tn, file + " " + _("is a symlink. Creating an identical symlink at") + " " +
                          newpath)
             os.symlink(dfile, newpath)
         elif os.path.isdir(fullpath):

@@ -87,7 +87,8 @@ def _join(arr, char):
 def PPtoEntry(buffer):
     returnme = []
     for i in buffer:
-        returnme.append(_join([i["user"], i["passwd"], i["uid"], i["gid"], i["name"], i["home"], i["shell"]], ":"))
+        returnme.append(_join([i["user"], i["passwd"], i["uid"], i["gid"], i["name"], i["home"],
+                               i["shell"]], ":"))
     return returnme
 
 
@@ -113,8 +114,9 @@ def PGtoEntry(buffer):
 def PStoEntry(buffer):
     returnme = []
     for i in buffer:
-        returnme.append(_join([i["user"], i["passwd"], i["lastpwdchange"], i["minpwdchange"], i["maxpwdchange"],
-                               i["warnperiod"], i["inactive"], i["expire"], i["reserved"]], ":"))
+        returnme.append(_join([i["user"], i["passwd"], i["lastpwdchange"], i["minpwdchange"],
+                               i["maxpwdchange"], i["warnperiod"], i["inactive"], i["expire"],
+                               i["reserved"]], ":"))
     return returnme
 
 

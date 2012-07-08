@@ -6,9 +6,14 @@ Anything GUI-related goes here
 from tkinter import ttk
 from tkinter import filedialog
 import tkinter
-from relinux import config, configutils
+from relinux import config, configutils, logger
 
 
+threadname = "GUI"
+tn = logger.genTN(threadname)
+
+
+# Scrolling frame, source: http://tkinter.unpy.net/wiki/VerticalScrolledFrame
 class VerticalScrolledFrame(tkinter.Frame):
     def __init__(self, parent, *args, **kw):
         tkinter.Frame.__init__(self, parent, *args, **kw)
@@ -42,7 +47,7 @@ class VerticalScrolledFrame(tkinter.Frame):
 class About:
     def __init__(self, master):
         top = self.top = tkinter.Toplevel(master, background=config.background)
-        top.title(config.product + _(" - About"))
+        top.title(config.product + " - " + _("About"))
         w = tkinter.Label(top, text=config.about_string)
         w.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)
         b = tkinter.Button(top, text=_("Close"), command=top.destroy)
@@ -63,6 +68,7 @@ class Wizard(ttk.Notebook):
         self._children = {}
 
         for page in range(npages):
+            logger.logVV(tn, _("Creating page") + " " + str(page))
             self.add_empty_page()
 
         self.current = 0
@@ -110,15 +116,14 @@ class Wizard(ttk.Notebook):
         if page_num in self._children:
             return self._children[page_num]
         else:
-            raise KeyError("Invalid page: %s" % page_num)
+            logger.logE(tn, _("Page") + " " + page_num + " " + _("does not exist"))
 
     def _get_current(self):
         return self._current
 
     def _set_current(self, curr):
         if curr not in self._children:
-            raise KeyError("Invalid page: %s" % curr)
-
+            logger.logE(tn, _("Page") + " " + curr + " " + _("does not exist"))
         self._current = curr
         self.select(self._children[self._current])
 

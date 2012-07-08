@@ -48,4 +48,4 @@ def threadLoop():
         # Run runnable threads
         for x in findRunnableThreads():
             runThread(x)
-        time.sleep(1/config.ThreadRPS)
+        time.sleep(1 / config.ThreadRPS)

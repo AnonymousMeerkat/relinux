@@ -24,7 +24,8 @@ cf = "0"
 
 # Shows a file not found error
 def showFileNotFound(file, dirs):
-    logger.logE(tn, logger.Error + file + " not found. Copy " + file + " to " + dirs)
+    logger.logE(tn, logger.Error + file + " " + _("not found") + "." + _("Copy") + " " + file +
+                " " + _("to") + " " + dirs)
 
 
 # Copy a file
@@ -62,7 +63,7 @@ class genISOContents(threading.Thread):
         logger.logI(tn, _("Copying over files we need"))
         logger.logV(tn, _("Copying preseed files to the ISO tree"))
         for i in configs[configutils.preseed]:
-            logger.logVV(tn, _("Copying ") + i + _(" to the ISO tree"))
+            logger.logVV(tn, _("Copying") + " " + i + " " + _("to the ISO tree"))
             copyFile(i, isotreel + "preseed")
         if configutils.parseBoolean(configs[configutils.memtest]):
             logger.logV(tn, _("Copying memtest to the ISO tree"))
@@ -162,7 +163,7 @@ class genISO(threading.Thread):
         for x in fsutil.listdir(isotreel, {"recurse": True}):
             i = re.sub(r"^ *" + isotreel + ".*", ".", x)
             if i.find("isotree") == -1 and i.find("md5sum") == -1:
-                logger.logVV(tn, _("Writing MD5 sum of ") + i)
+                logger.logVV(tn, _("Writing MD5 sum of") + " " + i)
                 file.write(fsutil.genFinalMD5(i))
         file.close()
         # Generate the ISO

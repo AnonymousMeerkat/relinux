@@ -83,7 +83,7 @@ def logV(tn, text):
 
 # Log to very-verbose stream
 def logVV(tn, text):
-    if config.VVStatus is True and not tn = "":
+    if config.VVStatus is True and not tn == "":
         RLock.acquire()
         text = tn + text
         VVBuffer = VVBuffer + text

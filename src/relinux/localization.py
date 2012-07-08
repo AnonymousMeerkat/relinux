@@ -18,7 +18,7 @@ class Localize():
             if configutils.checkMatched(m):
                 lang = m.group(1)
                 self.languages[lang] = gettext.translation(config.productunix, config.localedir, languages=[lang])
-    
+
     def useLanguage(self, language):
         self.languages[language].install()
         config._ = self.languages[language].ugettext

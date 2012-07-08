@@ -5,7 +5,6 @@ Generates a temporary filesystem to hack on
 
 from relinux import logger, config, configutils, fsutil, pwdmanip
 import os
-import glob
 import shutil
 import re
 import threading
@@ -55,7 +54,7 @@ remconfig = {"deps": [cpetcvar], "tn": "RemConfig"}
 class remConfig(threading.Thread):
     def __init__(self):
         self.tn = logger.genTN(remconfig["tn"])
-    
+
     def run(self):
         # Remove these files as they can conflict inside the installed system
         logger.logV(self.tn, _("Removing personal configurations that can break the installed system"))
@@ -83,7 +82,7 @@ class remCachedLists(threading.Thread):
         logger.logV(self.tn, _("Removing cached lists"))
         fsutil.adrm(tmpsys + "var/lib/apt/lists/",
                     {"excludes": True, "remdirs": False, "remsymlink": True, "remfullpath": False},
-                    ["*.gpg", "*lock*", "*partial*"])
+                    ["*.gpg", "*lock*", "*partial*"], self.tn)
 remcachedlists["thread"] = remCachedLists
 
 
@@ -100,7 +99,7 @@ class remTempVar(threading.Thread):
                   "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]:
             fsutil.adrm(tmpsys + i,
                         {"excludes": False, "remdirs": False, "remsymlink": True, "remfullpath": False},
-                        None)
+                        None, self.tn)
 remtempvar["thread"] = remTempVar
 
 
@@ -109,14 +108,14 @@ genvarlogs = {"deps": [cpetcvar], "tn": "GenVarLogs"}
 class genVarLogs(threading.Thread):
     def __init__(self):
         self.tn = logger.genTN(genvarlogs["tn"])
-    
+
     def run(self):
         # Create the logs
         logger.logV(self.tn, _("Creating empty logs"))
         for i in ["dpkg.log", "lastlog", "mail.log", "syslog", "auth.log", "daemon.log", "faillog",
                           "lpr.log", "mail.warn", "user.log", "boot", "debug", "mail.err", "messages", "wtmp",
                           "bootstrap.log", "dmesg", "kern.log", "mail.info"]:
-            logger.logVV(logger.Tab + "Creating " + i)
+            logger.logVV(logger.Tab + _("Creating") + " " + i)
             fsutil.touch(tmpsys + "var/log/" + i)
 genvarlogs["thread"] = genVarLogs
 
@@ -303,5 +302,5 @@ class TempSys(threading.Thread):
 
 
 # Thread list
-threads = [tmpsystree, cpetcvar, remconfig, remcachedlists, remtempvar, genvarlogs, remusers, 
+threads = [tmpsystree, cpetcvar, remconfig, remcachedlists, remtempvar, genvarlogs, remusers,
            casperconf, ubiquitysetup]
