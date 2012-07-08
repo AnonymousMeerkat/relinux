@@ -9,6 +9,7 @@ import shutil
 import fnmatch
 import sys
 import hashlib
+import gettext
 from relinux import configutils, logger
 
 
@@ -20,10 +21,12 @@ def delink(file):
 
 
 # Lengthener for files to exclude
-def exclude(names, files):
+def exclude(names, files, tn=""):
     excludes = []
     for i in files:
         excludes.extend(fnmatch.filter(names, i))
+    logger.logV(tn, _("Created exclude list") + " (" + len(excludes) + " " + 
+                gettext.ngettext("entry", "entries", len(excludes)) + _(" allocated") + ")")
     return excludes
 
 
@@ -87,7 +90,7 @@ def sizeTrans(size, htom=True):
 # Makes a directory
 def makedir(dirs, tn=""):
     if not os.path.exists(dirs):
-        logger.logVV(tn, _("Creating directory " + dir))
+        logger.logVV(tn, _("Creating directory") + " " + dir)
         os.makedirs(dirs)
 
 
@@ -100,10 +103,10 @@ def maketree(arr, tn=""):
 # Simple implementation of the touch utility
 def touch(file, tn=""):
     if os.path.exists(file):
-        logger.logVV(tn, _("Touching file " + file))
+        logger.logVV(tn, _("Touching file") + " " + file)
         os.utime(file, None)
     else:
-        logger.logVV(tn, _("Creating file " + file))
+        logger.logVV(tn, _("Creating file") + " " + file)
         open(file, "w").close()
 
 
@@ -125,16 +128,16 @@ def rm(file, followlink=False, tn=""):
         file = dfile
         rmstring += "symlink "
     if os.path.isfile(file):
-        logger.logVV(tn, _(rmstring + file))
+        logger.logVV(tn, _(rmstring) + file)
         os.remove(rfile)
         if followlink is True and dfile is not None:
-            logger.logVV(tn, _("Removing " + file))
+            logger.logVV(tn, _("Removing") + " " + file)
             os.remove(file)
     elif os.path.isdir(file):
         logger.logVV(tn, _(rmstring + file))
         shutil.rmtree(rfile)
         if followlink is True and dfile is not None:
-            logger.logVV(tn, _("Removing directory " + file))
+            logger.logVV(tn, _("Removing directory") + " " + file)
             os.remove(file)
 
 
@@ -194,7 +197,7 @@ def _chmod(c, mi):
 def chmod(file, mod, tn=""):
     val = 0x00
     c = 0
-    logger.logVV(tn, _("Calculating permissions of " + file))
+    logger.logVV(tn, _("Calculating permissions of") + " " + file)
     # In case the user of this function used UGO instead of SUGO, we'll cover up for that
     if len(mod) < 4:
         c = 1
@@ -204,7 +207,7 @@ def chmod(file, mod, tn=""):
         val = val | _chmod(c, int(i))
         c = c + 1
     # Chmod it
-    logger.logVV(tn, _("Setting permissions of " + file + " to " + mod))
+    logger.logVV(tn, _("Setting permissions of") + " " + file + " " + _("to") + " " + mod)
     os.chmod(file, val)
 
 
@@ -213,7 +216,8 @@ def chmod(file, mod, tn=""):
 #    recurse (True or False): If True, recurse into the directory
 #    dirs (True or False): If True, show directories too
 #    symlinks (True or False): If True, show symlinks too
-def listdir(dirs, options):
+def listdir(dirs, options, tn=""):
+    logger.logV(tn, _("Gathering a list of files in") + " " + dirs)
     listed = os.listdir(dirs)
     returnme = []
     returnme.append(dirs)
@@ -231,28 +235,34 @@ def listdir(dirs, options):
 
 
 # Filesystem copier (like rsync --exclude... -a SRC DST)
-def fscopy(src, dst, excludes1):
+def fscopy(src, dst, excludes1, tn=""):
     # Get a list of all files
-    files = os.listdir(src)
+    files = listdir(src, {"recurse": True, "dirs": True, "symlinks": True}, tn)
     # Exclude the files that are not wanted
     excludes = []
-    if len(excludes) > 0:
-        excludes = shutil.ignore_patterns(files, excludes1)
+    if len(excludes1) > 0:
+        excludes = exclude(files, excludes1)
     makedir(dst)
     # Copy the files
     for file in files:
         # Make sure we don't copy files that are supposed to be excluded
         if file in excludes:
+            logger.logVV(tn, file + " " + _("is to be excluded. Skipping a CPU cycle"))
             continue
         fullpath = os.path.join(src, file)
         newpath = os.path.join(dst, file)
         dfile = delink(fullpath)
         if dfile is not None:
+            logger.logVV(tn, file + " " + _("is a symlink. Creating an identical symlink at") + " " + 
+                         newpath)
             os.symlink(dfile, newpath)
         elif os.path.isdir(fullpath):
-            fscopy(fullpath, newpath, excludes)
+            logger.logVV(tn, _("Recursing into") + " " + file)
+            fscopy(fullpath, newpath, excludes, tn)
         else:
+            logger.logVV(tn, _("Copying") + " " + fullpath + " " + _("to") + " " + newpath)
             shutil.copy2(fullpath, newpath)
+    logger.logV(tn, _("Setting permissions"))
     shutil.copystat(src, dst)
 
 
@@ -260,17 +270,21 @@ def fscopy(src, dst, excludes1):
 # Current options:
 #     excludes (True or False): If True, exclude the files listed in excludes
 #     remdirs (True or False): If True, remove directories too
-def adrm(dirs, options, excludes1):
+#     remsymlink (True or False): If True, remove symlinks too
+#     remfullpath (True or False): If True, symlinks will have both their symlink and the file
+#                                  referenced removed
+def adrm(dirs, options, excludes1=[], tn=""):
     # Get a list of all files inside the directory
-    files = os.listdir(dirs)
+    files = listdir(dirs, {"recurse": True, "dirs": True, "symlinks": True}, tn)
     excludes = []
     # Exclude the files listed to exclude
-    if options.excludes is True:
-        excludes = shutil.ignore_patterns(files, excludes1)
+    if options.excludes is True and len(excludes1) > 0:
+        excludes = exclude(files, excludes1)
     # Remove the wanted files
     for file in files:
         # Make sure we don't remove files that are listed to exclude from removal
         if file in excludes:
+            logger.logVV(tn, file + " " + _("is to be excluded. Skipping a CPU cycle"))
             continue
         fullpath = os.path.join(dirs, file)
         dfile = delink(fullpath)
@@ -278,15 +292,21 @@ def adrm(dirs, options, excludes1):
             if os.path.isfile(dfile):
                 rm(fullpath)
                 continue
-        elif os.path.isdir(fullpath):
-            adrm(fullpath, options, excludes1)
+            elif os.path.isdir(fullpath):
+                adrm(fullpath, options, excludes1, tn)
         else:
-            rm(fullpath)
+            if options.remsymlink is True:
+                logger.logVV(tn, _("Removing symlink") + " " + fullpath)
+                rm(fullpath)
+            if options.remfullpath is True:
+                logger.logVV(tn, _("Removing") + " " + dfile + " (" + _("directed by symlink")
+                              + fullpath + ")")
     if options.remdirs is True:
+        logger.logVV(tn, _("Removing source directory") + " " + dirs)
         rm(dirs)
 
 
-# Returns the stat of a file
+# Returns the unix stat of a file
 def getStat(file):
     return os.stat(file)
 
@@ -339,6 +359,7 @@ def ife(buffers, func):
 
 # Finds the system architecture
 def getArch():
+    # TODO: Improve this
     bits_64 = sys.maxsize > 2 ** 32
     if bits_64 is True:
         return "amd64"
@@ -352,7 +373,7 @@ def getSFSInstSize(file):
     # Sample line:
     #     drwxr-xr-x root/root               377 2012-04-25 10:04 squashfs-root
     #                                        ^^^
-    #                                        That part is the size
+    #                                        Size in bytes
     patt = "^ *[dlspcb-][rwx-][rwx-][rwx-][rwx-][rwx-][rwx-][rwx-][rwx-][rwx-] *[A-Za-z0-9]*/[A-Za-z0-9]* *([0-9]*).*"
     output = os.popen("unsquashfs -lls " + file)
     totsize = 0

@@ -56,7 +56,7 @@ def genTN(tn):
 
 # Log to essential stream
 def logE(tn, text):
-    if config.EStatus is True:
+    if config.EStatus is True and not tn == "":
         RLock.acquire()
         text = tn + text
         EBuffer = EBuffer + text
@@ -65,7 +65,7 @@ def logE(tn, text):
 
 # Log to info stream
 def logI(tn, text):
-    if config.IStatus is True:
+    if config.IStatus is True and not tn == "":
         RLock.acquire()
         text = tn + text
         IBuffer = IBuffer + text
@@ -74,7 +74,7 @@ def logI(tn, text):
 
 # Log to verbose stream
 def logV(tn, text):
-    if config.VStatus is True:
+    if config.VStatus is True and not tn == "":
         RLock.acquire()
         text = tn + text
         VBuffer = VBuffer + text
@@ -83,7 +83,7 @@ def logV(tn, text):
 
 # Log to very-verbose stream
 def logVV(tn, text):
-    if config.VVStatus is True:
+    if config.VVStatus is True and not tn = "":
         RLock.acquire()
         text = tn + text
         VVBuffer = VVBuffer + text

@@ -31,8 +31,8 @@ class genTempSysTree(threading.Thread):
         fsutil.maketree([tmpsys + "etc", tmpsys + "dev",
                           tmpsys + "proc", tmpsys + "tmp",
                           tmpsys + "sys", tmpsys + "mnt",
-                          tmpsys + "media/cdrom", tmpsys + "var", tmpsys + "home"])
-        fsutil.chmod(tmpsys + "tmp", "1777")
+                          tmpsys + "media/cdrom", tmpsys + "var", tmpsys + "home"], self.tn)
+        fsutil.chmod(tmpsys + "tmp", "1777", self.tn)
 tmpsystree["thread"] = genTempSysTree
 
 
@@ -45,8 +45,8 @@ class copyEtcVar(threading.Thread):
     def run(self, configs):
         logger.logI(self.tn, _("Copying files to the temporary filesystem"))
         excludes = configs[configutils.excludes]
-        fsutil.fscopy("etc", tmpsys + "etc", excludes)
-        fsutil.fscopy("var", tmpsys + "var", excludes)
+        fsutil.fscopy("etc", tmpsys + "etc", excludes, self.tn)
+        fsutil.fscopy("var", tmpsys + "var", excludes, self.tn)
 cpetcvar["thread"] = copyEtcVar
 
 
@@ -81,7 +81,9 @@ class remCachedLists(threading.Thread):
 
     def run(self):
         logger.logV(self.tn, _("Removing cached lists"))
-        fsutil.adrm(tmpsys + "var/lib/apt/lists/", {"excludes": True, "remdirs": False}, ["*.gpg", "*lock*", "*partial*"])
+        fsutil.adrm(tmpsys + "var/lib/apt/lists/",
+                    {"excludes": True, "remdirs": False, "remsymlink": True, "remfullpath": False},
+                    ["*.gpg", "*lock*", "*partial*"])
 remcachedlists["thread"] = remCachedLists
 
 
@@ -96,7 +98,9 @@ class remTempVar(threading.Thread):
         # Remove all files in these directories (but not directories inside them)
         for i in ["etc/NetworkManager/system-connections/", "var/run", "var/log", "var/mail", "var/spool",
                   "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]:
-            fsutil.adrm(tmpsys + i, {"excludes": False, "remdirs": False}, None)
+            fsutil.adrm(tmpsys + i,
+                        {"excludes": False, "remdirs": False, "remsymlink": True, "remfullpath": False},
+                        None)
 remtempvar["thread"] = remTempVar
 
 
