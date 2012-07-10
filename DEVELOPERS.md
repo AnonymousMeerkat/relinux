@@ -1,12 +1,11 @@
-Guide for developers
+Tutorial for module developers
+==============================
 
-How relinux is setup
-====================
+## How relinux is setup ##
 Relinux is split up into utilities and modules. Utilities are libraries that the modules use, and modules are
 the parts that make up the relinux toolkit (OSWeaver being the main one).
 
-Tree and basic function of each file
-====================================
+## Tree and basic function of each file ##
 
 	src
 	├── __init__.py
@@ -31,8 +30,7 @@ Tree and basic function of each file
 	    ├── threadmanager.py      Manages threads
 	    └── versionsort.py        Contains a version sorting class (but will be moved to configutils)
 
-Creating a module
-=================
+## Creating a module ##
 Modules are relatively easy to make. A basic module structure looks like this:
 
 	modulename
@@ -54,8 +52,7 @@ Note the relinuxmodule variable. Without that variable set to true, relinux will
 The run function is called with a dictionary as soon as the module is loaded. The dictionary contains
 pointers to objects that relinux uses (see next section for an example of one). 
 
-Making a GUI
-============
+## Making a GUI ##
 As mentioned previously, the run function contains a dictionary that contains pointers to objects.
 One of these is the GUI object, which allows you to change the GUI in any way you like, for example:
 
