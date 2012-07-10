@@ -4,12 +4,13 @@ Generates a temporary filesystem to hack on
 '''
 
 from relinux import logger, config, configutils, fsutil, pwdmanip
+from relinux.modules.osweaver import tmpsys
 import os
 import shutil
 import re
 import threading
 
-tmpsys = config.TempSys + "/"
+#tmpsys = config.TempSys + "/"
 #tmpsystree = "TempSysTree"
 #cpetcvar = "EtcVar"
 #remconfig = "RemConfig"
@@ -187,7 +188,7 @@ class remUsers(threading.Thread):
         groupf = tmpsys + "etc/group"
         buffers = fsutil.ife_getbuffers(groupf)
         pe = pwdmanip.parseGroupEntries(buffers[3])
-        fsutil.ife(buffers, lambda(line): self._parseGroup(line, usrs))
+        fsutil.ife(buffers, lambda line: self._parseGroup(line, usrs))
         # Work on both shadow files
         shadowf = tmpsys + "etc/shadow"
         gshadowf = tmpsys + "etc/gshadow"
@@ -229,7 +230,7 @@ class CasperConfEditor(threading.Thread):
     # lists - Dictionary containing all options needed
     def _varEditor(self, file, lists):
         buffers = fsutil.ife_getbuffers(file)
-        fsutil.ife(buffers, lambda(line): self.__varEditor(line, lists))
+        fsutil.ife(buffers, lambda line: self.__varEditor(line, lists))
         # In case the file is broken, we'll add the lines needed
         buffers = open(file, "a")
         for i in lists:

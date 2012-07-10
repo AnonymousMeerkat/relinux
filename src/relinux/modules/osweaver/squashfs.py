@@ -4,11 +4,10 @@ SquashFS Generation
 '''
 
 from relinux import logger, fsutil, configutils
-from relinux.modules.osweaver import isoutil
+from relinux.modules.osweaver import isotreel
 import os
 import threading
 
-isotreel = isoutil.isotreel
 threadname = "SquashFS"
 tn = logger.genTN(threadname)
 

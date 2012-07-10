@@ -6,21 +6,25 @@ ISO Utilities
 @author: Anonymous Meerkat
 '''
 
-from relinux import logger, config, fsutil, configutils
+from relinux.modules.osweaver import isotreel
 from relinux.modules.osweaver import squashfs
+from relinux import logger, config, fsutil, configutils
 import shutil
 import os
 import re
 import threading
 
-# Just in case config.ISOTree doesn't include a /
-isotreel = config.ISOTree + "/"
+
 threadname = "ISOTree"
 tn = logger.genTN(threadname)
 # C True
 ct = "1"
 # C False
 cf = "0"
+# Options
+isogenopts = ("-r -cache-inodes -J -l -b " + isotreel + "isolinux/isolinux.bin -c " + isotreel + 
+              "isolinux/boot.cat -no-emul-boot " +
+              "-boot-load-size 4 -boot-info-table")
 
 
 # Shows a file not found error
@@ -79,7 +83,7 @@ class genISOContents(threading.Thread):
         for i in [["LABEL", configs[configutils.label]], ["SPLASH", configs[configutils.splash]],
                   ["TIMEOUT", configs[configutils.timeout]]]:
             fsutil.ife(fsutil.ife_getbuffers(isotreel + "isolinux/isolinux.cfg"),
-                       lambda(line): re.sub("\$" + i[0], i[1], line))
+                       lambda line: re.sub("\$" + i[0], i[1], line))
         # Write disk definitions
         logger.logI(tn, _("Generating files"))
         logger.logV(tn, _("Writing disk definitions"))
@@ -182,9 +186,8 @@ class genISO(threading.Thread):
         # -boot-info-table     Add a boot information table at offset 8 in the boot image
         # -o file              Output image
         logger.logI(tn, _("Generating the ISO"))
-        os.system(configs[configutils.isogenerator] + " -r -V " + configs[configutils.label] + " -cache-inodes " +
-                  "-J -l -b " + isotreel + "isolinux/isolinux.bin -c " + isotreel + "isolinux/boot.cat -no-emul-boot " +
-                  "-boot-load-size 4 -boot-info-table -o " + configs[configutils.isolocation])
+        os.system(configs[configutils.isogenerator] + " " + isogenopts + " -V " + 
+                  configs[configutils.label] + " -o " + configs[configutils.isolocation])
         # Generate the MD5 sum
         logger.logV(tn, _("Generating MD5 sum for the ISO"))
         file = open(configs[configutils.isolocation] + ".md5", "w")

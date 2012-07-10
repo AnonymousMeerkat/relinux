@@ -10,7 +10,8 @@ sys.path.append(".")
 from relinux import config
 import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
-from relinux import gui, configutils, logger
+from relinux import gui, configutils, logger, modloader
+modules = modloader.getModules()
 #from .lib import *
 from argparse import ArgumentParser
 import tkinter
@@ -53,6 +54,8 @@ def main():
     root = tkinter.Tk()
     App = gui.GUI(root)
     App.fillConfiguration(buffer)
+    for i in modules:
+        modloader.runModule(modloader.loadModule(i), {"gui": App})
     root.mainloop()
 
 if __name__ == '__main__':

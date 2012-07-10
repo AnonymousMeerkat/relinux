@@ -253,17 +253,17 @@ class GUI:
     def __init__(self, master):
         self.root = master
         self.root.title(config.product)
-        wizard = Wizard(npages=2)
-        wizard.master.minsize(400, 350)
-        wizard.master.maxsize(800, 700)
-        self.page1 = ttk.Notebook(wizard.page_container(1))
-        self.page0 = tkinter.Label(wizard.page_container(0), text=_("Welcome to relinux 0.4!\nClick on next to get started"))
-        wizard.add_page_body(0, _("Welcome"), self.page0)
-        wizard.add_page_body(1, _("Configure"), self.page1)
-        wizard.add_tab()
-        self.page2 = tkinter.Label(wizard.page_container(2), text=_("Page 3"))
-        wizard.add_page_body(2, _("Page 3"), self.page2)
-        wizard.pack(fill="both", expand=True)
+        self.wizard = Wizard(npages=2)
+        self.wizard.master.minsize(400, 350)
+        self.wizard.master.maxsize(800, 700)
+        self.page1 = ttk.Notebook(self.wizard.page_container(1))
+        self.page0 = tkinter.Label(self.wizard.page_container(0), text=_("Welcome to relinux 0.4!\nClick on next to get started"))
+        self.wizard.add_page_body(0, _("Welcome"), self.page0)
+        self.wizard.add_page_body(1, _("Configure"), self.page1)
+        self.wizard.add_tab()
+        self.page2 = tkinter.Label(self.wizard.page_container(2), text=_("Page 3"))
+        self.wizard.add_page_body(2, _("Page 3"), self.page2)
+        self.wizard.pack(fill="both", expand=True)
 
     def fillConfiguration(self, configs):
         c = 0
