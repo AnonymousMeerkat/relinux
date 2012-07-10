@@ -76,23 +76,26 @@ class Wizard(ttk.Notebook):
         self.bind("<<NotebookTabChanged>>", self.on_change_tab)
 
     def _wizard_buttons(self):
-        """Place wizard buttons in the pages."""
+        # Place wizard buttons on the pages
         for indx, child in self._children.items():
-            btnframe = tkinter.Frame(child)
-            btnframe.pack(side='bottom', fill='x', padx=6, pady=12)
-            nextbtn = tkinter.Button(btnframe, text=_("Next"), command=self.next_page)
-            nextbtn.pack(side='right', anchor='e', padx=6)
-            quitbtn = tkinter.Button(btnframe, text=_("Quit"), command=self.close)
+            if hasattr(child, "btnframe"):
+                child.btnframe.pack_forget()
+            child.btnframe = tkinter.Frame(child)
+            child.btnframe.pack(side="bottom", fill="x", padx=6, pady=12)
+            nextbtn = tkinter.Button(child.btnframe, text=_("Next"), command=self.next_page)
+            nextbtn.pack(side="right", anchor="e", padx=6)
+            quitbtn = tkinter.Button(child.btnframe, text=_("Quit"), command=self.close)
             quitbtn.pack(side="left", anchor="w", padx=6)
             if indx > 0:
-                prevbtn = tkinter.Button(btnframe, text=_("Previous"),
+                prevbtn = tkinter.Button(child.btnframe, text=_("Previous"),
                     command=self.prev_page)
-                prevbtn.pack(side='right', anchor='e', padx=6)
+                prevbtn.pack(side="right", anchor="e", padx=6)
                 if indx == len(self._children) - 1:
                     nextbtn.configure(text=_("Finish"), command=self.close)
-            progressframe = tkinter.Frame(child)
+            '''progressframe = tkinter.Frame(child)
             progressframe.pack(side="bottom", fill="x", padx=6)
-            ttk.Progressbar(progressframe).pack(fill="x")
+            progress = ttk.Progressbar(progressframe)
+            progress.pack(fill="x")'''
 
     def next_page(self):
         self.current += 1
@@ -108,6 +111,11 @@ class Wizard(ttk.Notebook):
         self._children[len(self._children)] = child
         self.add(child)
 
+    def add_tab(self):
+        self.add_empty_page()
+        self._wizard_buttons()
+        return (len(self._children) - 1)
+
     def add_page_body(self, tab_id, title, body):
         self.tab(tab_id, text=title)
         body.pack(side='top', fill='both', padx=6, pady=12, expand=1)
@@ -116,7 +124,7 @@ class Wizard(ttk.Notebook):
         if page_num in self._children:
             return self._children[page_num]
         else:
-            logger.logE(tn, _("Page") + " " + page_num + " " + _("does not exist"))
+            logger.logE(tn, _("Page") + " " + str(page_num) + " " + _("does not exist"))
 
     def _get_current(self):
         return self._current
@@ -245,16 +253,17 @@ class GUI:
     def __init__(self, master):
         self.root = master
         self.root.title(config.product)
-        wizard = Wizard(npages=3)
+        wizard = Wizard(npages=2)
         wizard.master.minsize(400, 350)
         wizard.master.maxsize(800, 700)
         self.page1 = ttk.Notebook(wizard.page_container(1))
-        self.page0 = tkinter.Label(wizard.page_container(0), text=_('Welcome to relinux 0.4!\nClick on next to get started'))
-        self.page2 = tkinter.Label(wizard.page_container(2), text=_('Page 3'))
+        self.page0 = tkinter.Label(wizard.page_container(0), text=_("Welcome to relinux 0.4!\nClick on next to get started"))
         wizard.add_page_body(0, _("Welcome"), self.page0)
         wizard.add_page_body(1, _("Configure"), self.page1)
+        wizard.add_tab()
+        self.page2 = tkinter.Label(wizard.page_container(2), text=_("Page 3"))
         wizard.add_page_body(2, _("Page 3"), self.page2)
-        wizard.pack(fill='both', expand=True)
+        wizard.pack(fill="both", expand=True)
 
     def fillConfiguration(self, configs):
         c = 0

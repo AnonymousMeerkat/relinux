@@ -4,16 +4,15 @@ Thread Managing Class
 '''
 
 from relinux import config
-from relinux.modules.osweaver import isoutil, squashfs, tempsys
 import time
 
-threads = tempsys.threads
+#threads = []
 threadsdone = []
 threadsrunning = []
 
 
 # Finds threads that can currently run (and have not already run)
-def findRunnableThreads():
+def findRunnableThreads(threads):
     returnme = []
     for i in threads:
         if not i in threadsdone:
@@ -41,12 +40,12 @@ def checkThread(thread):
 
 
 # Thread loop
-def threadLoop():
+def threadLoop(threads):
     while config.ThreadStop is False:
         # Clear old threads
         for x in threadsrunning:
             checkThread(x)
         # Run runnable threads
-        for x in findRunnableThreads():
+        for x in findRunnableThreads(threads):
             runThread(x)
         time.sleep(1 / config.ThreadRPS)
