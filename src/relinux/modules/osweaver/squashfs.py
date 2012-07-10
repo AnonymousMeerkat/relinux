@@ -64,3 +64,5 @@ class genSFS(threading.Thread):
         file.close()
         # TODO: Discuss on whether to add MD5 sum or not
         # Could prevent problems, but might also prevent the user from editing
+
+threads = []

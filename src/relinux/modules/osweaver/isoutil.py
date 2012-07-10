@@ -190,3 +190,5 @@ class genISO(threading.Thread):
         file = open(configs[configutils.isolocation] + ".md5", "w")
         file.write(fsutil.genFinalMD5(i))
         file.close()
+
+threads = []

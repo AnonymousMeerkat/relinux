@@ -30,3 +30,6 @@ src
     ├── threadmanager.py      Manages threads
     └── versionsort.py        Contains a version sorting class (but will be moved to configutils)
 
+Creating a module
+=================
+Modules are relatively easy to make.

@@ -36,3 +36,6 @@ language = "en"
 # Threading
 ThreadRPS = 10
 ThreadStop = False
+
+# Modules
+ModFolder = "./modules"
