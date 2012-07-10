@@ -61,8 +61,8 @@ One of these is the GUI object, which allows you to change the GUI in any way yo
 
 	def run(adict):
 		gui = adict["gui"]
-    	pagenum = gui.wizard.add_tab()
-    	gui.mypage = tkinter.Label(gui.wizard.page_container(pagenum), text=_("My Page"))
-    	gui.wizard.add_page_body(pagenum, _("Page"), gui.mypage)
+		pagenum = gui.wizard.add_tab()
+		gui.mypage = tkinter.Label(gui.wizard.page_container(pagenum), text=_("My Page"))
+		gui.wizard.add_page_body(pagenum, _("Page"), gui.mypage)
 
 This would create a page with the title of "Page", and the text inside would be "My Page"
