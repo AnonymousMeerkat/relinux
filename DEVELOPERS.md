@@ -121,7 +121,7 @@ Sample usage;
 	logger.logI(tn, "Message from " + threadname)
 
 ### pwdmanip ###
-Various utilities for /etc/password, /etc/g{shadow|group}, and /etc/shadow
+Various utilities for `/etc/passwd`, `/etc/group`, `/etc/gshadow` and `/etc/shadow`
 
 ### threadmanager ###
 Manages threads. Example of usage:
