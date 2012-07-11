@@ -4,7 +4,7 @@ Generates a temporary filesystem to hack on
 '''
 
 from relinux import logger, config, configutils, fsutil, pwdmanip
-from relinux.modules.osweaver import tmpsys
+from relinux.modules.osweaver import tmpsys, configs
 import os
 import shutil
 import re
@@ -42,7 +42,7 @@ class copyEtcVar(threading.Thread):
     def __init__(self):
         self.tn = logger.genTN(cpetcvar["tn"])
 
-    def run(self, configs):
+    def run(self):
         logger.logI(self.tn, _("Copying files to the temporary filesystem"))
         excludes = configs[configutils.excludes]
         fsutil.fscopy("etc", tmpsys + "etc", excludes, self.tn)
@@ -238,7 +238,7 @@ class CasperConfEditor(threading.Thread):
                 buffers.write("export " + i + "=" + lists[i] + "\n")
         buffers.close()
 
-    def run(self, configs):
+    def run(self):
         # Edit the casper.conf
         # Strangely enough, casper uses its "quiet" flag if the build system is either Debian or Ubuntu
         if config.VStatus is False:
@@ -266,7 +266,7 @@ class UbiquitySetup(threading.Thread):
     def __init__(self):
         self.tn = logger.genTN(ubiquitysetup["tn"])
 
-    def run(self, configs):
+    def run(self):
         # If the user-setup-apply file does not exist, and there is an alternative, we'll copy it over
         logger.logI(self.tn, _("Setting up the installer"))
         if os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply.orig") and not os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply"):
@@ -292,7 +292,7 @@ class TempSys(threading.Thread):
         self.threadname = "TempSys"
         self.tn = logger.genTN(self.threadname)
 
-    def run(self, configs):
+    def run(self):
         logger.logI(self.tn, _("Removing unneeded files"))
         '''cbs = "/usr/share/initramfs-tools/scripts/casper-bottom/"
         # This pattern should do the trick
