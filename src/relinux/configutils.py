@@ -13,8 +13,8 @@ excludes = "EXCLUDES"
 preseed = "PRESEED"
 memtest = "MEMTEST"
 isolinuxfile = "ISOLINUX"
-label = "LIVECDLABEL"
-url = "LIVECDURL"
+label = "CDLABEL"
+url = "CDURL"
 splash = "SPLASHIMAGE"
 timeout = "TIMEOUT"
 remafterinst = "REMOVEAFTERINSTALL"
@@ -298,11 +298,16 @@ def compressParsedBuffer(buffer):
 
 
 # Finds the value of a property (buffer is the parsed getProperties buffer)
-def getValue(buffer, propertys):
+def getValueP(buffer, propertys):
     for i in buffer.keys():
         if i.lower() == propertys.lower():
             return buffer[i]
     return None
+
+
+# Returns the value of an option
+def getValue(buffer):
+    return getValueP(buffer, value)
 
 
 # Returns a boolean (None if not a boolean)

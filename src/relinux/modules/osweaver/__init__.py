@@ -25,7 +25,7 @@ def runThreads():
 
 def run(adict):
     global configs
-    configs = adict["config"]
+    configs = adict["config"]["OSWeaver"]
     gui = adict["gui"]
     pagenum = gui.wizard.add_tab()
     gui.mypage = tkinter.Label(gui.wizard.page_container(pagenum), text=_("My Page"))

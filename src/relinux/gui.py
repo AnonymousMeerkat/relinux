@@ -275,10 +275,10 @@ class GUI:
             curr.pack(side="top", fill="both", expand=1)
             c1 = 0
             for x in configs[i]:
-                l = tkinter.Label(curr, text=configutils.getValue(configs[i][x], configutils.name))
+                l = tkinter.Label(curr, text=configutils.getValueP(configs[i][x], configutils.name))
                 l.grid(row=c1, sticky=tkinter.W)
-                types = configutils.getValue(configs[i][x], configutils.types)
-                value = configutils.getValue(configs[i][x], configutils.value)
+                types = configutils.getValueP(configs[i][x], configutils.types)
+                value = configutils.getValueP(configs[i][x], configutils.value)
                 choices = configutils.getChoices(types)
                 multiple = configutils.getMultipleValues(value)
                 if types == configutils.yesno:

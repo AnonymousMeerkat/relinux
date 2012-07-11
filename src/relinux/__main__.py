@@ -12,7 +12,6 @@ import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
 from relinux import gui, configutils, logger, modloader
 modules = modloader.getModules()
-#from .lib import *
 from argparse import ArgumentParser
 import tkinter
 

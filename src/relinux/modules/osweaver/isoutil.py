@@ -24,7 +24,11 @@ cf = "0"
 isogenopts = ("-r -cache-inodes -J -l -b " + isotreel + "isolinux/isolinux.bin -c " + isotreel +
               "isolinux/boot.cat -no-emul-boot " +
               "-boot-load-size 4 -boot-info-table")
-diskname = configs[configutils.label] + " - Release " + config.Arch
+
+
+# Returns the disk name of the ISO
+def getDiskName():
+    return configutils.getValue(configs[configutils.label]) + " - Release " + config.Arch
 
 
 # Shows a file not found error
@@ -73,7 +77,7 @@ class copyPreseed(threading.Thread):
 
     def run(self):
         logger.logV(self.tn, _("Copying preseed files to the ISO tree"))
-        for i in configs[configutils.preseed]:
+        for i in configutils.getValue(configs[configutils.preseed]):
             logger.logVV(self.tn, _("Copying") + " " + i + " " + _("to the ISO tree"))
             copyFile(i, isotreel + "preseed/")
 copypreseed["thread"] = copyPreseed
@@ -86,7 +90,7 @@ class copyMemtest(threading.Thread):
         self.tn = logger.genTN(copymemtest["tn"])
 
     def run(self):
-        if configutils.parseBoolean(configs[configutils.memtest]):
+        if configutils.parseBoolean(configutils.getValue(configs[configutils.memtest])):
             logger.logV(self.tn, _("Copying memtest to the ISO tree"))
             copyFile("/boot/memtest86+.bin", isotreel + "isolinux/memtest")
 copymemtest["thread"] = copyMemtest
@@ -103,11 +107,13 @@ class copySysLinux(threading.Thread):
         copyFile("/usr/lib/syslinux/isolinux.bin", isotreel + "isolinux/", True)
         copyFile("/usr/lib/syslinux/vesamenu.c32", isotreel + "isolinux/", True)
         logger.logVV(self.tn, _("Copying isolinux.cfg to the ISO tree"))
-        copyFile(configs[configutils.isolinuxfile], isotreel + "isolinux/isolinux.cfg", True)
+        copyFile(configutils.getValue(configs[configutils.isolinuxfile], isotreel +
+                                      "isolinux/isolinux.cfg", True))
         # Edit the isolinux.cfg file to replace the variables
         logger.logV(_("Editing isolinux.cfg"))
-        for i in [["LABEL", configs[configutils.label]], ["SPLASH", configs[configutils.splash]],
-                  ["TIMEOUT", configs[configutils.timeout]]]:
+        for i in [["LABEL", configutils.getValue(configs[configutils.label])],
+                  ["SPLASH", configutils.getValue(configs[configutils.splash])],
+                  ["TIMEOUT", configutils.getValue(configs[configutils.timeout])]]:
             fsutil.ife(fsutil.ife_getbuffers(isotreel + "isolinux/isolinux.cfg"),
                        lambda line: re.sub("\$" + i[0], i[1], line))
 copysyslinux["thread"] = copySysLinux
@@ -121,7 +127,7 @@ class diskDefines(threading.Thread):
 
     def run(self):
         logger.logV(self.tn, _("Writing disk definitions"))
-        defineWriter(isotreel + "README.diskdefines", {"DISKNAME": diskname,
+        defineWriter(isotreel + "README.diskdefines", {"DISKNAME": getDiskName(),
                                                       "TYPE": "binary",
                                                       "TYPEbinary": ct,
                                                       "ARCH": config.Arch,
@@ -173,7 +179,7 @@ class genRAMDisk(threading.Thread):
     def run(self):
         logger.logV(self.tn, _("Generating ramdisk"))
         os.system("mkinitramfs -o " + isotreel + "casper/initrd.gz " +
-                  configutils.getKernel(configs[configutils.kernel]))
+                  configutils.getKernel(configutils.getValue(configs[configutils.kernel])))
 genramdisk["thread"] = genRAMDisk
 
 
@@ -185,7 +191,7 @@ class copyKernel(threading.Thread):
 
     def run(self, configs):
         logger.logI(self.tn, _("Copying the kernel to the ISO tree"))
-        copyFile("/boot/vmlinuz-" + configutils.getKernel(configs[configutils.kernel]),
+        copyFile("/boot/vmlinuz-" + configutils.getKernel(configutils.getValue(configs[configutils.kernel])),
                  isotreel + "casper/vmlinuz")
 copykernel["thread"] = copyKernel
 
@@ -197,13 +203,13 @@ class genWUBI(threading.Thread):
         self.tn = logger.genTN(genwubi["tn"])
 
     def run(self):
-        if configutils.parseBoolean(configs[configutils.enablewubi]) is True:
+        if configutils.parseBoolean(configutils.getValue(configs[configutils.enablewubi])) is True:
             logger.logV(self.tn, _("Generating the windows autorun.inf"))
             file = open(isotreel + "autorun.inf", "w")
             file.write("[autorun]\n")
             file.write("open=wubi.exe\n")
             file.write("icon=wubi.exe,0\n")
-            file.write("label=Install " + configs[configutils.sysname] + "\n")
+            file.write("label=Install " + configutils.getValue(configs[configutils.sysname]) + "\n")
             file.write("\n")
             file.write("[Content]\n")
             file.write("MusicFiles=false\n")
@@ -223,13 +229,13 @@ class USBComp(threading.Thread):
         logger.logI(self.tn, _("Making the ISO compatible with a USB burner"))
         logger.logVV(self.tn, _("Writing .disk/info"))
         file = open(isotreel + ".disk/info", "w")
-        file.write(diskname)
+        file.write(getDiskName())
         file.close()
         logger.logV(self.tn, _("Making symlink pointing to the ISO root dir"))
         os.symlink(isotreel + "ubuntu", isotreel)
         logger.logVV(self.tn, _("Writing release notes URL"))
         file = open(isotreel + ".disk/release_notes_url", "w")
-        file.write(configs[configutils.url] + "\n")
+        file.write(configutils.getValue(configs[configutils.url]) + "\n")
         file.close()
         logger.logVV(self.tn, _("Writing .disk/base_installable"))
         fsutil.touch(isotreel + ".disk/base_installable")
@@ -253,7 +259,8 @@ class genISO(threading.Thread):
     def run(self):
         logger.logI(self.tn, _("Starting generation of the ISO image"))
         # Make a last verification on the SquashFS
-        squashfs.doSFSChecks(isotreel + "casper/filesystem.squashfs", configs[configutils.isolevel])
+        squashfs.doSFSChecks(isotreel + "casper/filesystem.squashfs",
+                             configutils.getValue(configs[configutils.isolevel]))
         # Generate MD5 checksums
         logger.logV(self.tn, _("Generating MD5 sums"))
         file = open(isotreel + "md5sum.txt")
@@ -278,8 +285,9 @@ class genISO(threading.Thread):
         # -boot-info-table     Add a boot information table at offset 8 in the boot image
         # -o file              Output image
         logger.logI(self.tn, _("Generating the ISO"))
-        os.system(configs[configutils.isogenerator] + " " + isogenopts + " -V " +
-                  configs[configutils.label] + " -o " + configs[configutils.isolocation])
+        os.system(configutils.getValue(configs[configutils.isogenerator]) + " " + isogenopts + " -V " +
+                  configutils.getValue(configs[configutils.label]) + " -o " +
+                  configutils.getValue(configs[configutils.isolocation]))
         # Generate the MD5 sum
         logger.logV(self.tn, _("Generating MD5 sum for the ISO"))
         file = open(configs[configutils.isolocation] + ".md5", "w")
