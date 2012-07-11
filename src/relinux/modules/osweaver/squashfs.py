@@ -5,6 +5,7 @@ SquashFS Generation
 
 from relinux import logger, fsutil, configutils
 from relinux.modules.osweaver import isotreel, tmpsys, configs
+from relinux.modules.osweaver import tempsys
 import os
 import threading
 
@@ -35,7 +36,7 @@ def doSFSChecks(file, isolvl):
 
 
 # Generate the SquashFS file (has to run after isoutil.genISOTree and tempsys.genTempSys)
-gensfs = {"deps": [], "tn": threadname}
+gensfs = {"deps": tempsys.threads, "tn": threadname}
 class genSFS(threading.Thread):
     def run(self):
         logger.logI(tn, _("Generating compressed filesystem"))
