@@ -69,6 +69,9 @@ This would create a page with the title of "Page", and the text inside would be 
 This section will show a basic overview of the libraries given in relinux. To learn more information,
 open up the files yourself!
 
+### aptutil ###
+Various utilities for APT package management.
+
 ### configutils ###
 The configutils library contains various utilities to manage the configuration file.
 The main usage is to convert the human-readable configuration file to a dictionary of dictionaries of
@@ -119,7 +122,7 @@ Not exactly a library (more like a module), but very useful to check out the sou
 build a GUI component
 
 ### logger ###
-Logs information into four categores: Error, Information, Verbose, and Very-Verbose.
+Logs information into five categores: Error, Information, Warning, Verbose, and Very-Verbose.
 Sample usage;
 
 	threadname = "MyThread"

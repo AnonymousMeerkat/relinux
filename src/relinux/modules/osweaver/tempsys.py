@@ -3,8 +3,8 @@ Generates a temporary filesystem to hack on
 @author: Anonymous Meerkat
 '''
 
-from relinux import logger, config, configutils, fsutil, pwdmanip
-from relinux.modules.osweaver import tmpsys, configs
+from relinux import logger, config, configutils, fsutil, pwdmanip, aptutil
+from relinux.modules.osweaver import tmpsys, configs, aptcache
 import os
 import shutil
 import re
@@ -240,20 +240,25 @@ class CasperConfEditor(threading.Thread):
 
     def run(self):
         # Edit the casper.conf
-        # Strangely enough, casper uses its "quiet" flag if the build system is either Debian or Ubuntu
+        # Strangely enough, casper uses the "quiet" flag if the build system is either Debian or Ubuntu
         if config.VStatus is False:
             logger.logI(self.tn, _("Editing casper and LSB configuration files"))
         logger.logV(self.tn, _("Editing casper.conf"))
         buildsys = "Ubuntu"
         if configutils.parseBoolean(configutils.getValue(configs[configutils.casperquiet])) is False:
             buildsys = ""
+        unionfs = configutils.getValue(configs[configutils.unionfs])
+        if unionfs == "overlayfs" and aptutil.compVersions(aptutil.getPkgVersion(aptutil.getPkg("casper", aptcache)), 1.272, aptutil.lt):
+            logger.logW(self.tn, _("Using DEFAULT instead of overlayfs"))
+            unionfs = "DEFAULT"
         self.varEditor(tmpsys + "etc/casper.conf", {
                                             "USERNAME": configutils.getValue(configs[configutils.username]),
                                             "USERFULLNAME":
                                                 configutils.getValue(configs[configutils.userfullname]),
                                             "HOST": configutils.getValue(configs[configutils.host]),
                                             "BUILD_SYSTEM": buildsys,
-                                            "FLAVOUR": configutils.getValue(configs[configutils.flavour])})
+                                            "FLAVOUR": configutils.getValue(configs[configutils.flavour]),
+                                            "UNIONFS": unionfs})
         logger.logV(self.tn, _("Editing lsb-release"))
         self.varEditor(tmpsys + "etc/lsb-release", {
                                     "DISTRIB_ID": configutils.getValue(configs[configutils.sysname]),

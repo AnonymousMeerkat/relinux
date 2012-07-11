@@ -10,6 +10,7 @@ from threading import RLock
 # Set as quiet (nothing but the essential stream)
 def quiet():
     config.EStatus = True
+    config.WStatus = False
     config.IStatus = False
     config.VStatus = False
     config.VVStatus = False
@@ -18,14 +19,16 @@ def quiet():
 # Set as normal (essential and info streams)
 def normal():
     config.EStatus = True
+    config.WStatus = False
     config.IStatus = True
     config.VStatus = False
     config.VVStatus = False
 
 
-# Set as verbose (essential, info, and verbose streams)
+# Set as verbose (essential, info, warning, and verbose streams)
 def verbose():
     config.EStatus = True
+    config.WStatus = True
     config.IStatus = True
     config.VStatus = True
     config.VVStatus = False
@@ -34,6 +37,7 @@ def verbose():
 # Set as very-verbose (all streams)
 def veryverbose():
     config.EStatus = True
+    config.WStatus = True
     config.IStatus = True
     config.VStatus = True
     config.VVStatus = True
@@ -41,6 +45,7 @@ def veryverbose():
 
 EBuffer = ""
 IBuffer = ""
+WBuffer = ""
 VBuffer = ""
 VVBuffer = ""
 
@@ -69,6 +74,15 @@ def logI(tn, text):
         RLock.acquire()
         text = tn + text
         IBuffer = IBuffer + text
+        RLock.release()
+
+
+# Log to warning stream
+def logW(tn, text):
+    if config.IStatus is True and not tn == "":
+        RLock.acquire()
+        text = tn + text
+        WBuffer = WBuffer + text
         RLock.release()
 
 

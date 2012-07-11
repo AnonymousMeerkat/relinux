@@ -13,6 +13,7 @@ modulename = "OSWeaver"
 isotreel = config.ISOTree + "/"
 tmpsys = config.TempSys + "/"
 configs = {}
+aptcache = {}
 
 
 def runThreads():
@@ -24,8 +25,9 @@ def runThreads():
 
 
 def run(adict):
-    global configs
+    global configs, aptcache
     configs = adict["config"]["OSWeaver"]
+    aptcache = adict["aptcache"]
     gui = adict["gui"]
     pagenum = gui.wizard.add_tab()
     gui.mypage = tkinter.Label(gui.wizard.page_container(pagenum), text=_("My Page"))

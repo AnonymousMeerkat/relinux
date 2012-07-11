@@ -10,7 +10,7 @@ sys.path.append(".")
 from relinux import config
 import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
-from relinux import gui, configutils, logger, modloader
+from relinux import gui, configutils, logger, aptutil, modloader
 modules = modloader.getModules()
 from argparse import ArgumentParser
 import tkinter
@@ -53,8 +53,9 @@ def main():
     root = tkinter.Tk()
     App = gui.GUI(root)
     App.fillConfiguration(buffer)
+    aptcache = aptutil.getCache()
     for i in modules:
-        modloader.runModule(modloader.loadModule(i), {"gui": App, "config": buffer})
+        modloader.runModule(modloader.loadModule(i), {"gui": App, "config": buffer, "aptcache": aptcache})
     root.mainloop()
 
 if __name__ == '__main__':

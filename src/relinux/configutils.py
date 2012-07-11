@@ -35,6 +35,7 @@ isolevel = "ISOLEVEL"
 enablewubi = "ENABLEWUBI"
 isogenerator = "ISOGENERATOR"
 isolocation = "ISOLOCATION"
+unionfs = "UNIONFS"
 # Property codes
 name = "Name"
 desc = "Description"
