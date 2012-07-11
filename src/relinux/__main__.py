@@ -55,7 +55,7 @@ def main():
     App = gui.GUI(root)
     App.fillConfiguration(buffer)
     for i in modules:
-        modloader.runModule(modloader.loadModule(i), {"gui": App})
+        modloader.runModule(modloader.loadModule(i), {"gui": App, "config": buffer})
     root.mainloop()
 
 if __name__ == '__main__':

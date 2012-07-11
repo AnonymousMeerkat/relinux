@@ -92,6 +92,12 @@ Parsed:
 		}
 	}
 
+Code:
+
+	buffer = configutils.parseCompressedBuffer(configutils.compress(configutils.getBuffer(open(file))))
+
+Note that relinux already parses it, and it is passed to each module by the "config" item
+
 ### fsutil ###
 fsutil contains various utilities to manage the filesystem. Though there are many functions listed there,
 this document will only cover one, ife.
