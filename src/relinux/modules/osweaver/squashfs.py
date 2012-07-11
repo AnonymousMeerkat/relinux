@@ -4,7 +4,7 @@ SquashFS Generation
 '''
 
 from relinux import logger, fsutil, configutils
-from relinux.modules.osweaver import isotreel, tmpsys
+from relinux.modules.osweaver import isotreel, tmpsys, configs
 import os
 import threading
 
@@ -35,8 +35,9 @@ def doSFSChecks(file, isolvl):
 
 
 # Generate the SquashFS file (has to run after isoutil.genISOTree and tempsys.genTempSys)
+gensfs = {"deps": [], "tn": threadname}
 class genSFS(threading.Thread):
-    def run(self, configs):
+    def run(self):
         logger.logI(tn, _("Generating compressed filesystem"))
         # Generate the SquashFS file
         # Options:
@@ -46,8 +47,8 @@ class genSFS(threading.Thread):
         # -comp                    Compression type
         logger.logVV(tn, _("Generating options"))
         opts = "-b 1M -no-recovery -no-duplicates -always-use-fragments"
-        opts = opts + " -comp " + configs[configutils.sfscomp]
-        opts = opts + " " + configs[configutils.sfsopts]
+        opts = opts + " -comp " + configutils.getValue(configs[configutils.sfscomp])
+        opts = opts + " " + configutils.getValue(configs[configutils.sfsopts])
         sfsex = "dev etc home media mnt proc sys var usr/lib/ubiquity/apt-setup/generators/40cdrom"
         sfspath = isotreel + "casper/filesystem.squashfs"
         logger.logI(tn, _("Adding the edited /etc and /var to the filesystem"))
@@ -55,7 +56,7 @@ class genSFS(threading.Thread):
         logger.logI(tn, _("Adding the rest of the system"))
         os.system("mksquashfs / " + sfspath + " " + opts + " -e " + sfsex)
         # Make sure the SquashFS file is OK
-        doSFSChecks(sfspath, int(configs[configutils.isolevel]))
+        doSFSChecks(sfspath, int(configutils.getValue(configs[configutils.isolevel])))
         # Find the size after it is uncompressed
         logger.logV(tn, _("Writing the size"))
         file = open(isotreel + "casper/filesystem.size", "w")
@@ -63,5 +64,6 @@ class genSFS(threading.Thread):
         file.close()
         # TODO: Discuss on whether to add MD5 sum or not
         # Could prevent problems, but might also prevent the user from editing
+gensfs["thread"] = genSFS
 
-threads = []
+threads = [genSFS]

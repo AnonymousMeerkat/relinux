@@ -44,7 +44,7 @@ class copyEtcVar(threading.Thread):
 
     def run(self):
         logger.logI(self.tn, _("Copying files to the temporary filesystem"))
-        excludes = configs[configutils.excludes]
+        excludes = configutils.getValue(configs[configutils.excludes])
         fsutil.fscopy("etc", tmpsys + "etc", excludes, self.tn)
         fsutil.fscopy("var", tmpsys + "var", excludes, self.tn)
 cpetcvar["thread"] = copyEtcVar
@@ -245,18 +245,22 @@ class CasperConfEditor(threading.Thread):
             logger.logI(self.tn, _("Editing casper and LSB configuration files"))
         logger.logV(self.tn, _("Editing casper.conf"))
         buildsys = "Ubuntu"
-        if configutils.parseBoolean(configs[configutils.casperquiet]) is False:
+        if configutils.parseBoolean(configutils.getValue(configs[configutils.casperquiet])) is False:
             buildsys = ""
-        self.varEditor(tmpsys + "etc/casper.conf", {"USERNAME": configs[configutils.username],
-                                               "USERFULLNAME": configs[configutils.userfullname],
-                                               "HOST": configs[configutils.host],
-                                               "BUILD_SYSTEM": buildsys,
-                                               "FLAVOUR": configs[configutils.flavour]})
+        self.varEditor(tmpsys + "etc/casper.conf", {
+                                            "USERNAME": configutils.getValue(configs[configutils.username]),
+                                            "USERFULLNAME":
+                                                configutils.getValue(configs[configutils.userfullname]),
+                                            "HOST": configutils.getValue(configs[configutils.host]),
+                                            "BUILD_SYSTEM": buildsys,
+                                            "FLAVOUR": configutils.getValue(configs[configutils.flavour])})
         logger.logV(self.tn, _("Editing lsb-release"))
-        self.varEditor(tmpsys + "etc/lsb-release", {"DISTRIB_ID": configs[configutils.sysname],
-                                               "DISTRIB_RELEASE": configs[configutils.version],
-                                               "DISTRIB_CODENAME": configs[configutils.codename],
-                                               "DISTRIB_DESCRIPTION": configs[configutils.description]})
+        self.varEditor(tmpsys + "etc/lsb-release", {
+                                    "DISTRIB_ID": configutils.getValue(configs[configutils.sysname]),
+                                    "DISTRIB_RELEASE": configutils.getValue(configs[configutils.version]),
+                                    "DISTRIB_CODENAME": configutils.getValue(configs[configutils.codename]),
+                                    "DISTRIB_DESCRIPTION":
+        configutils.getValue(configs[configutils.description])})
 casperconf["thread"] = CasperConfEditor
 
 
@@ -272,7 +276,7 @@ class UbiquitySetup(threading.Thread):
         if os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply.orig") and not os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply"):
             shutil.copy2("/usr/lib/ubiquity/user-setup/user-setup-apply.orig",
                          "/usr/lib/ubiquity/user-setup/user-setup-apply")
-        if configutils.parseBoolean(configs[configutils.aptlistchange]) is True:
+        if configutils.parseBoolean(configutils.getValue(configs[configutils.aptlistchange])) is True:
             fsutil.makedir(tmpsys + "usr/share/ubiquity/")
             aptsetup = open(tmpsys + "usr/share/ubiquity/apt-setup", "w")
             aptsetup.write("#!/bin/sh\n")
@@ -284,6 +288,7 @@ class UbiquitySetup(threading.Thread):
             cdrom.write("#!/bin/sh\n")
             cdrom.write("exit\n")
             cdrom.close()
+ubiquitysetup["thread"] = UbiquitySetup
 
 
 class TempSys(threading.Thread):
