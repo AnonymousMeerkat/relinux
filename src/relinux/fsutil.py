@@ -25,12 +25,12 @@ def exclude(names, files, tn=""):
     excludes = []
     for i in files:
         excludes.extend(fnmatch.filter(names, i))
-    logger.logV(tn, _("Created exclude list") + " (" + len(excludes) + " " +
-                gettext.ngettext("entry", "entries", len(excludes)) + _(" allocated") + ")")
+    logger.logV(tn, _("Created exclude list") + + " " + "(" + len(excludes) + " " +
+                gettext.ngettext("entry", "entries", len(excludes)) + " " + _("allocated") + ")")
     return excludes
 
 
-# Returns the size of the file or directory
+# Returns the size of a file or directory
 def getSize(path):
     dlink = delink(path)
     addme = 0
@@ -312,8 +312,8 @@ def getStat(file):
 
 
 # Returns the mode of the stat of a file (can be used like this: getMode(getStat(file))
-def getMode(stat):
-    return stat.S_IMODE(stat.st_mode)
+def getMode(stats):
+    return stat.S_IMODE(stats.st_mode)
 
 
 # Specific implementation of shutil's copystat function
@@ -333,14 +333,14 @@ def copystat(stat, dst):
 # 3 = file contents
 def ife_getbuffers(file):
     returnme = []
-    returnme[0] = getStat(file)
-    returnme[1] = file
+    returnme.append(getStat(file))
+    returnme.append(file)
     fbuff = open(file, "r")
-    rbuff = configutils.getBuffer(fbuff)
+    rbuff = configutils.getBuffer(fbuff, False)
     fbuff.close()
     fbuff = open(file, "w")
-    returnme[2] = fbuff
-    returnme[3] = rbuff
+    returnme.append(fbuff)
+    returnme.append(rbuff)
     return returnme
 
 
@@ -355,6 +355,7 @@ def ife(buffers, func):
             buffers[2].write(r[1])
     copystat(buffers[0], buffers[1])
     buffers[2].close()
+    buffers[3].close()
 
 
 # Finds the system architecture

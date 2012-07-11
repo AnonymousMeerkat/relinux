@@ -4,7 +4,7 @@ SquashFS Generation
 '''
 
 from relinux import logger, fsutil, configutils
-from relinux.modules.osweaver import isotreel
+from relinux.modules.osweaver import isotreel, tmpsys
 import os
 import threading
 
@@ -51,7 +51,7 @@ class genSFS(threading.Thread):
         sfsex = "dev etc home media mnt proc sys var usr/lib/ubiquity/apt-setup/generators/40cdrom"
         sfspath = isotreel + "casper/filesystem.squashfs"
         logger.logI(tn, _("Adding the edited /etc and /var to the filesystem"))
-        os.system("mksquashfs " + tempsys.tmpsys + " " + sfspath + " " + opts)
+        os.system("mksquashfs " + tmpsys + " " + sfspath + " " + opts)
         logger.logI(tn, _("Adding the rest of the system"))
         os.system("mksquashfs / " + sfspath + " " + opts + " -e " + sfsex)
         # Make sure the SquashFS file is OK

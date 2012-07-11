@@ -21,7 +21,6 @@ def runThreads():
     threadmanager.threadLoop(threads)
 
 def run(adict):
-    print("YES")
     gui = adict["gui"]
     pagenum = gui.wizard.add_tab()
     gui.mypage = tkinter.Label(gui.wizard.page_container(pagenum), text=_("My Page"))

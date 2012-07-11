@@ -249,12 +249,14 @@ def beautify(buffer):
 
 
 # Returns a buffer from a configuration file
-def getBuffer(file):
+def getBuffer(file, strip=True):
     returnme = []
     for line in file:
         if not line or line is None:
             break
-        returnme.append(line.rstrip())
+        if strip is True:
+            line = line.rstrip()
+        returnme.append(line)
     print(len(returnme))
     return returnme
 
