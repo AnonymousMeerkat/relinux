@@ -248,7 +248,7 @@ class CasperConfEditor(threading.Thread):
         if configutils.parseBoolean(configutils.getValue(configs[configutils.casperquiet])) is False:
             buildsys = ""
         unionfs = configutils.getValue(configs[configutils.unionfs])
-        if unionfs == "overlayfs" and aptutil.compVersions(aptutil.getPkgVersion(aptutil.getPkg("casper", aptcache)), 1.272, aptutil.lt):
+        if unionfs == "overlayfs" and aptutil.compVersions(aptutil.getPkgVersion(aptutil.getPkg("casper", aptcache)), "1.272", aptutil.lt):
             logger.logW(self.tn, _("Using DEFAULT instead of overlayfs"))
             unionfs = "DEFAULT"
         self.varEditor(tmpsys + "etc/casper.conf", {
