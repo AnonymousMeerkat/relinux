@@ -45,6 +45,7 @@ def main():
         logger.verbose()
     if args.veryverbose is True:
         logger.veryverbose()
+    logger.logI("[TEST] ", "YES")
     buffer1 = configutils.getBuffer(open("../../relinux.conf"))
     buffer2 = configutils.compress(buffer1)
     buffer = configutils.parseCompressedBuffer(buffer2)

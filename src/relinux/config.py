@@ -6,6 +6,7 @@ Basic configuration
 # We should not use any imports in this file
 #import os
 #from relinux import fsutil
+import sys
 
 product = "Relinux"
 productunix = "relinux"
@@ -18,6 +19,12 @@ WStatus = True
 IStatus = True
 VStatus = True
 VVStatus = True
+
+EFiles = [sys.stderr]
+WFiles = [sys.stdout]
+IFiles = [sys.stdout]
+VFiles = [sys.stdout]
+VVFiles = [sys.stdout]
 
 # GUI Section
 GUIStatus = True
