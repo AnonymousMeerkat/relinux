@@ -160,7 +160,7 @@ threads require one thread to run. For example, here could be a tree of threads 
 	   \   |   /
 	    \  |  /
 	     \ | /
-	      \|/  
+	      \|/
 	       7
 
 Code:

@@ -36,6 +36,7 @@ enablewubi = "ENABLEWUBI"
 isogenerator = "ISOGENERATOR"
 isolocation = "ISOLOCATION"
 unionfs = "UNIONFS"
+popcon = "POPCON"
 # Property codes
 name = "Name"
 desc = "Description"
