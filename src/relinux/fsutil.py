@@ -1,6 +1,6 @@
 '''
 General filesystem utilities
-@author: Anonymous Meerkat
+@author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
 import os
@@ -10,6 +10,7 @@ import fnmatch
 import sys
 import hashlib
 import gettext
+import subprocess
 from relinux import configutils, logger
 
 
@@ -25,7 +26,7 @@ def exclude(names, files, tn=""):
     excludes = []
     for i in files:
         excludes.extend(fnmatch.filter(names, i))
-    logger.logV(tn, _("Created exclude list") + + " " + "(" + len(excludes) + " " +
+    logger.logV(tn, _("Created exclude list") + +" " + "(" + len(excludes) + " " + 
                 gettext.ngettext("entry", "entries", len(excludes)) + " " + _("allocated") + ")")
     return excludes
 
@@ -253,7 +254,7 @@ def fscopy(src, dst, excludes1, tn=""):
         newpath = os.path.join(dst, file)
         dfile = delink(fullpath)
         if dfile is not None:
-            logger.logVV(tn, file + " " + _("is a symlink. Creating an identical symlink at") + " " +
+            logger.logVV(tn, file + " " + _("is a symlink. Creating an identical symlink at") + " " + 
                          newpath)
             os.symlink(dfile, newpath)
         elif os.path.isdir(fullpath):
@@ -360,12 +361,18 @@ def ife(buffers, func):
 
 # Finds the system architecture
 def getArch():
-    # TODO: Improve this
-    bits_64 = sys.maxsize > 2 ** 32
-    if bits_64 is True:
-        return "amd64"
-    else:
-        return "i386"
+    archcmd = subprocess.Popen(["perl " + os.getcwd() + "/getarch.pl"], stdout=subprocess.PIPE,
+                            universal_newlines=True)
+    arch = archcmd.communicate()[0].strip()
+    arch.wait()
+    exitcode = arch.returncode
+    if exitcode > 0 or arch == "" or arch == None:
+        bits_64 = sys.maxsize > 2 ** 32
+        if bits_64 is True:
+            arch = "amd64"
+        else:
+            arch = "i386"
+    return arch
 
 
 # Returns the installed size of a compressed filesystem (SquashFS)
