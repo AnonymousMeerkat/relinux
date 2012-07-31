@@ -1,9 +1,9 @@
 '''
 Thread Managing Class
-@author: Anonymous Meerkat
+@author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
-from relinux import config
+from relinux import config, fsutil
 import time
 
 #threads = []
@@ -14,8 +14,10 @@ threadsrunning = []
 # Finds threads that can currently run (and have not already run)
 def findRunnableThreads(threads):
     returnme = []
+    cpumax = fsutil.getCPUCount()
+    current = 0
     for i in threads:
-        if not i in threadsdone:
+        if not i in threadsdone and current < cpumax:
             deps = 0
             depsl = len(i["deps"])
             for x in i["deps"]:
@@ -23,6 +25,9 @@ def findRunnableThreads(threads):
                     deps = deps + 1
             if deps >= depsl:
                 returnme.append(i)
+        current = current + 1
+        if current >= cpumax:
+            break
     return returnme
 
 

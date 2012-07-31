@@ -5,7 +5,6 @@
 #
 # Written by Anonymous Meerkat <meerkatanonymous@gmail.com>
 
-use Dpkg;
 use Dpkg::Arch get_raw_host_arch;
 
 my $str = get_raw_host_arch();

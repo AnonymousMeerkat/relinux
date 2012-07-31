@@ -1,6 +1,6 @@
 '''
 Main relinux script
-@author: Anonymous Meerkat
+@author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
 import sys

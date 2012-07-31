@@ -1,6 +1,6 @@
 '''
 OSWeaver Module for relinux
-@author: Anonymous Meerkat
+@author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
 from relinux import threadmanager, config

@@ -11,6 +11,7 @@ import sys
 import hashlib
 import gettext
 import subprocess
+import multiprocessing
 from relinux import configutils, logger
 
 
@@ -373,6 +374,11 @@ def getArch():
         else:
             arch = "i386"
     return arch
+
+
+# Finds the number of CPUs
+def getCPUCount():
+    return multiprocessing.cpu_count()
 
 
 # Returns the installed size of a compressed filesystem (SquashFS)

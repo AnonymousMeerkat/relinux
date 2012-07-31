@@ -1,6 +1,6 @@
 '''
 Setup Dependencies
-@author: Anonymous Meerkat
+@author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
 from relinux.modules.osweaver import aptcache, config
@@ -15,6 +15,8 @@ class setupInst(threading.Thread):
     def __init__(self):
         self.tn = logger.genTN(instdepends["tn"])
         self.depcache = aptutil.getDepCache(aptcache)
+        self.ap = aptutil.getAcquireProgress()
+        self.ip = aptutil.getInstallProgress()
 
     def run(self):
         logger.logV(self.tn, "Setting up Ubiquity")
@@ -29,6 +31,7 @@ class setupInst(threading.Thread):
             aptutil.instPkg(aptutil.getPkg("popularity-contest"), self.depcache)
         else:
             aptutil.remPkg(aptutil.getPkg("popularity-contest"), self.depcache, True)
+        aptutil.commitChanges(self.depcache, self.ap, self.ip)
 
 
 threads = [setupInst]
