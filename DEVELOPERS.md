@@ -45,11 +45,16 @@ The `__init__.py` file does all the work in the module. Here is an example of on
 	'''
 	
 	relinuxmodule = True
+	relinuxmoduleapi = "0.4a1"
+	modulename = "Random Module"
 	
 	def run(adict):
 		# Do something here
 
 Note the relinuxmodule variable. Without that variable set to true, relinux will not detect the module.
+For compatibility reasons, the relinuxmoduleapi variable sets the version of relinux that the module is
+written for.
+The modulename variable sets the name of the module.
 The run function is called with a dictionary as soon as the module is loaded. The dictionary contains
 pointers to objects that relinux uses (see next section for an example of one). 
 
@@ -119,18 +124,18 @@ Here is code that will add line numbers to a document:
 
 ### gui ###
 Not exactly a library (more like a module), but very useful to check out the source if you are going to
-build a GUI component
+build a GUI component.
 
 ### logger ###
 Logs information into five categores: Error, Information, Warning, Verbose, and Very-Verbose.
-Sample usage;
+Sample usage:
 
 	threadname = "MyThread"
 	tn = logger.genTN(threadname)
 	logger.logI(tn, "Message from " + threadname)
 
 ### pwdmanip ###
-Various utilities for `/etc/passwd`, `/etc/group`, `/etc/gshadow` and `/etc/shadow`
+Various utilities for `/etc/passwd`, `/etc/group`, `/etc/gshadow` and `/etc/shadow`.
 
 ### threadmanager ###
 Manages threads. Example of usage:

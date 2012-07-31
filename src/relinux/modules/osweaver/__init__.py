@@ -7,6 +7,7 @@ from relinux import threadmanager, config
 import tkinter
 
 relinuxmodule = True
+relinuxmoduleapi = "0.4a1"
 modulename = "OSWeaver"
 
 # Just in case config.ISOTree doesn't include a /

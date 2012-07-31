@@ -1,19 +1,31 @@
 '''
 Module Loader
-@author: Anonymous Meerkat
+@author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
 import imp
 import os
-from relinux import config
+from relinux import config, logger
+
+
+tn = logger.genTN("ModLoader")
 
 
 # Checks if a folder is a module
-def isModule(name, file, pathname, desc):
-    module = imp.load_module(name, file, pathname, desc)
-    if hasattr(module, "relinuxmodule") and module.relinuxmodule is True and hasattr(module, "run") and callable(getattr(module, "run")):
+def isModule(module):
+    if hasattr(module, "relinuxmodule") and hasattr(module, "relinuxmoduleapi") and module.relinuxmodule is True and hasattr(module, "run") and callable(getattr(module, "run")):
         return True
     return False
+
+
+# Checks if a module is compatible with this version of relinux
+def isCompatible(module):
+    if module.relinuxmoduleapi != config.version:
+        logger.logW(tn, _("Module") + " " + module.modulename + " " +
+                    _("is incompatible with this relinux version") + " (" + _("relinux version:") + " " +
+                    config.version + ", " + _("required version:") + " " + module.relinuxmoduleapi + ")")
+        return False
+    return True
 
 
 # Returns a list of modules
@@ -25,9 +37,16 @@ def getModules():
         if not os.path.isdir(dirs) or not "__init__.py" in os.listdir(dirs):
             continue
         file, pathname, desc = imp.find_module("__init__", [dirs])
-        if not isModule("__init__", file, pathname, desc):
+        module = imp.load_module("__init__", file, pathname, desc)
+        if not isModule(module):
             continue
-        returnme.append({"name": i, "file": file, "path": pathname, "desc": desc})
+        loadme = True
+        if not isCompatible(module):
+            loadme = False
+        if loadme:
+            returnme.append({"name": i, "file": file, "path": pathname, "desc": desc})
+        else:
+            logger.logW(tn, _("Module") + " " + module.modulename + " " + _("will not be loaded"))
     return returnme
 
 

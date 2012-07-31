@@ -10,7 +10,7 @@ import sys
 
 product = "Relinux"
 productunix = "relinux"
-version = 0.4
+version = "0.4a1"
 version_string = product + " version " + str(version)
 about_string = product + " is a free software designed to help you make a professional-looking OS easily"
 

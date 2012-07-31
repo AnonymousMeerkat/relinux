@@ -80,7 +80,7 @@ def genTN(tn):
 def logE(tn, text):
     if config.EStatus is True and not tn == "":
         #RLock.acquire()
-        text = tn + text
+        text = tn + MError + text
         writeAll(config.EFiles, text + MNewline)
         #RLock.release()
 
@@ -98,7 +98,7 @@ def logI(tn, text):
 def logW(tn, text):
     if config.IStatus is True and not tn == "":
         #RLock.acquire()
-        text = tn + text
+        text = tn + MWarning + text
         writeAll(config.WFiles, text + MNewline)
         #RLock.release()
 
