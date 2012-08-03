@@ -3,9 +3,9 @@ Anything GUI-related goes here
 @author: Anonymous Meerkat
 '''
 
-from tkinter import ttk
-from tkinter import filedialog
-import tkinter
+import Tkinter
+import tkFileDialog
+import ttk
 from relinux import config, configutils, logger
 
 
@@ -13,21 +13,21 @@ threadname = "GUI"
 tn = logger.genTN(threadname)
 
 
-# Scrolling frame, source: http://tkinter.unpy.net/wiki/VerticalScrolledFrame
-class VerticalScrolledFrame(tkinter.Frame):
+# Scrolling frame, source: http://Tkinter.unpy.net/wiki/VerticalScrolledFrame
+class VerticalScrolledFrame(Tkinter.Frame):
     def __init__(self, parent, *args, **kw):
-        tkinter.Frame.__init__(self, parent, *args, **kw)
-        vscrollbar = tkinter.Scrollbar(self, orient=tkinter.VERTICAL)
-        vscrollbar.pack(fill=tkinter.Y, side=tkinter.RIGHT, expand=tkinter.FALSE)
-        canvas = tkinter.Canvas(self, bd=0, highlightthickness=0,
+        Tkinter.Frame.__init__(self, parent, *args, **kw)
+        vscrollbar = Tkinter.Scrollbar(self, orient=Tkinter.VERTICAL)
+        vscrollbar.pack(fill=Tkinter.Y, side=Tkinter.RIGHT, expand=Tkinter.FALSE)
+        canvas = Tkinter.Canvas(self, bd=0, highlightthickness=0,
                         yscrollcommand=vscrollbar.set)
-        canvas.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=tkinter.TRUE)
+        canvas.pack(side=Tkinter.LEFT, fill=Tkinter.BOTH, expand=Tkinter.TRUE)
         vscrollbar.config(command=canvas.yview)
         canvas.xview_moveto(0)
         canvas.yview_moveto(0)
-        self.interior = interior = tkinter.Frame(canvas)
+        self.interior = interior = Tkinter.Frame(canvas)
         interior_id = canvas.create_window(0, 0, window=interior,
-                                           anchor=tkinter.NW)
+                                           anchor=Tkinter.NW)
 
         def _configure_interior(event):
             size = (interior.winfo_reqwidth(), interior.winfo_reqheight())
@@ -46,12 +46,12 @@ class VerticalScrolledFrame(tkinter.Frame):
 
 class About:
     def __init__(self, master):
-        top = self.top = tkinter.Toplevel(master, background=config.background)
+        top = self.top = Tkinter.Toplevel(master, background=config.background)
         top.title(config.product + " - " + _("About"))
-        w = tkinter.Label(top, text=config.about_string)
-        w.pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=True)
-        b = tkinter.Button(top, text=_("Close"), command=top.destroy)
-        b.pack(side=tkinter.BOTTOM)
+        w = Tkinter.Label(top, text=config.about_string)
+        w.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=True)
+        b = Tkinter.Button(top, text=_("Close"), command=top.destroy)
+        b.pack(side=Tkinter.BOTTOM)
 
 
 class Wizard(ttk.Notebook):
@@ -80,19 +80,19 @@ class Wizard(ttk.Notebook):
         for indx, child in self._children.items():
             if hasattr(child, "btnframe"):
                 child.btnframe.pack_forget()
-            child.btnframe = tkinter.Frame(child)
+            child.btnframe = Tkinter.Frame(child)
             child.btnframe.pack(side="bottom", fill="x", padx=6, pady=12)
-            nextbtn = tkinter.Button(child.btnframe, text=_("Next"), command=self.next_page)
+            nextbtn = Tkinter.Button(child.btnframe, text=_("Next"), command=self.next_page)
             nextbtn.pack(side="right", anchor="e", padx=6)
-            quitbtn = tkinter.Button(child.btnframe, text=_("Quit"), command=self.close)
+            quitbtn = Tkinter.Button(child.btnframe, text=_("Quit"), command=self.close)
             quitbtn.pack(side="left", anchor="w", padx=6)
             if indx > 0:
-                prevbtn = tkinter.Button(child.btnframe, text=_("Previous"),
+                prevbtn = Tkinter.Button(child.btnframe, text=_("Previous"),
                     command=self.prev_page)
                 prevbtn.pack(side="right", anchor="e", padx=6)
                 if indx == len(self._children) - 1:
                     nextbtn.configure(text=_("Finish"), command=self.close)
-            '''progressframe = tkinter.Frame(child)
+            '''progressframe = Tkinter.Frame(child)
             progressframe.pack(side="bottom", fill="x", padx=6)
             progress = ttk.Progressbar(progressframe)
             progress.pack(fill="x")'''
@@ -107,7 +107,7 @@ class Wizard(ttk.Notebook):
         self.master.destroy()
 
     def add_empty_page(self):
-        child = tkinter.Frame(self)
+        child = Tkinter.Frame(self)
         self._children[len(self._children)] = child
         self.add(child)
 
@@ -138,28 +138,28 @@ class Wizard(ttk.Notebook):
     current = property(_get_current, _set_current)
 
 
-class FileSelector(tkinter.Frame):
+class FileSelector(Tkinter.Frame):
     def __init__(self, *args, **kwargs):
-        tkinter.Frame.__init__(self, *args, **kwargs)
-        self.entry = tkinter.Entry(self)
-        self.button = tkinter.Button(self, text="...",  command=self._on_button)
+        Tkinter.Frame.__init__(self, *args, **kwargs)
+        self.entry = Tkinter.Entry(self)
+        self.button = Tkinter.Button(self, text="...",  command=self._on_button)
         self.button.grid(row=0, column=1)
         self.entry.grid(row=0, column=0)
 
     def _on_button(self):
-        s = filedialog.askopenfilename()
+        s = tkFileDialog.askopenfilename()
         if s != "":
             self.entry.delete(0, "end")
             self.entry.insert(0, s)
 
 
-class YesNo(tkinter.Frame):
+class YesNo(Tkinter.Frame):
     def __init__(self, *args, **kwargs):
-        tkinter.Frame.__init__(self, *args, **kwargs)
-        self.v = tkinter.IntVar()
-        self.y = tkinter.Radiobutton(self, text=_("Yes"), variable=self.v, value=1)
+        Tkinter.Frame.__init__(self, *args, **kwargs)
+        self.v = Tkinter.IntVar()
+        self.y = Tkinter.Radiobutton(self, text=_("Yes"), variable=self.v, value=1)
         self.y.grid(row=0, column=0)
-        self.n = tkinter.Radiobutton(self, text=_("No"), variable=self.v, value=2)
+        self.n = Tkinter.Radiobutton(self, text=_("No"), variable=self.v, value=2)
         self.n.grid(row=0, column=1)
 
     def set(self, bools):
@@ -179,11 +179,11 @@ class YesNo(tkinter.Frame):
             return None
 
 
-class Choice(tkinter.Frame):
+class Choice(Tkinter.Frame):
     def __init__(self, *args, **kwargs):
-        tkinter.Frame.__init__(self, *args, **kwargs)
+        Tkinter.Frame.__init__(self, *args, **kwargs)
         self.cb = ttk.Combobox(self)
-        self.entry = tkinter.Entry(self)
+        self.entry = Tkinter.Entry(self)
         self.cb.grid(row=0, column=0)
         self.cb.bind("<<ComboboxSelected>>", self._on_changed)
 
@@ -194,18 +194,18 @@ class Choice(tkinter.Frame):
             self.entry.grid_remove()
 
 
-class Multiple(tkinter.Frame):
+class Multiple(Tkinter.Frame):
     def __init__(self, *args, **kwargs):
-        tkinter.Frame.__init__(self, *args, **kwargs)
+        Tkinter.Frame.__init__(self, *args, **kwargs)
         self.entries = []
         self.pluses = []
         self.minuses = []
         self.addEntry(0)
 
     def addEntry(self, row):
-        self.entries.insert(row, tkinter.Entry(self))
-        self.pluses.insert(row, tkinter.Button(self, text="+", foreground="darkgreen", command=lambda: self._plus(row)))
-        self.minuses.insert(row, tkinter.Button(self, text="-", foreground="darkred", command=lambda: self._minus(row)))
+        self.entries.insert(row, Tkinter.Entry(self))
+        self.pluses.insert(row, Tkinter.Button(self, text="+", foreground="darkgreen", command=lambda: self._plus(row)))
+        self.minuses.insert(row, Tkinter.Button(self, text="-", foreground="darkred", command=lambda: self._minus(row)))
         self.entries[row].grid(row=row, column=0)
         self.minuses[row].grid(row=row, column=1)
         self.pluses[row].grid(row=row, column=2)
@@ -257,11 +257,11 @@ class GUI:
         self.wizard.master.minsize(400, 350)
         self.wizard.master.maxsize(800, 700)
         self.page1 = ttk.Notebook(self.wizard.page_container(1))
-        self.page0 = tkinter.Label(self.wizard.page_container(0), text=_("Welcome to relinux 0.4!\nClick on next to get started"))
+        self.page0 = Tkinter.Label(self.wizard.page_container(0), text=_("Welcome to relinux 0.4!\nClick on next to get started"))
         self.wizard.add_page_body(0, _("Welcome"), self.page0)
         self.wizard.add_page_body(1, _("Configure"), self.page1)
         self.wizard.add_tab()
-        self.page2 = tkinter.Label(self.wizard.page_container(2), text=_("Page 3"))
+        self.page2 = Tkinter.Label(self.wizard.page_container(2), text=_("Page 3"))
         self.wizard.add_page_body(2, _("Page 3"), self.page2)
         self.wizard.pack(fill="both", expand=True)
 
@@ -271,7 +271,7 @@ class GUI:
             cur = VerticalScrolledFrame(self.page1)
             self.page1.add(cur)
             self.page1.tab(c, text=i)
-            #curr = tkinter.Frame(cur.interior)
+            #curr = Tkinter.Frame(cur.interior)
             #curr.pack(side="top", fill="both", expand=1)
             secs = ttk.Notebook(cur.interior)
             secs.pack(side="top", fill="both", expand=1)
@@ -286,19 +286,19 @@ class GUI:
                         found = True
                         curr = subtabs[category]
                 if found is False:
-                    subtabs[category] = tkinter.Frame(secs)
+                    subtabs[category] = Tkinter.Frame(secs)
                     secs.add(subtabs[category])
                     secs.tab(subtabs[category], text=category)
                     curr = subtabs[category]
-                l = tkinter.Label(curr, text=configutils.getValueP(configs[i][x],
+                l = Tkinter.Label(curr, text=configutils.getValueP(configs[i][x],
                                                                    configutils.name))
-                l.grid(row=c1, sticky=tkinter.W)
+                l.grid(row=c1, sticky=Tkinter.W)
                 types = configutils.getValueP(configs[i][x], configutils.types)
                 value = configutils.getValueP(configs[i][x], configutils.value)
                 choices = configutils.getChoices(types)
                 multiple = configutils.getMultipleValues(value)
                 if types == configutils.yesno:
-                    #v = tkinter.IntVar()
+                    #v = Tkinter.IntVar()
                     #r = ttk.Radiobutton(curr, text="Yes", variable=v, value=1)
                     #r.grid(row=c1, column=1)
                     #r2 = ttk.Radiobutton(curr, text="No", variable=v, value=2)
@@ -321,7 +321,7 @@ class GUI:
                     e.grid(row=c1, column=1)
                     e.set(multiple)
                 else:
-                    e = tkinter.Entry(curr)
+                    e = Tkinter.Entry(curr)
                     e.grid(row=c1, column=1)
                     e.delete(0, "end")
                     e.insert(0, value)

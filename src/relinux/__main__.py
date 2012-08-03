@@ -13,7 +13,7 @@ from relinux import config
 import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
 from argparse import ArgumentParser
-import tkinter
+import Tkinter
 
 
 def version():
@@ -50,7 +50,7 @@ def main():
     buffer = configutils.parseCompressedBuffer(buffer2)
     '''for i in configutils.beautify(buffer1):
         print(i)'''
-    root = tkinter.Tk()
+    root = Tkinter.Tk()
     App = gui.GUI(root)
     App.fillConfiguration(buffer)
     aptcache = aptutil.getCache()

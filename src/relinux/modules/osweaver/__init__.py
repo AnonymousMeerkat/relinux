@@ -4,7 +4,7 @@ OSWeaver Module for relinux
 '''
 
 from relinux import threadmanager, config
-import tkinter
+import Tkinter
 
 relinuxmodule = True
 relinuxmoduleapi = "0.4a1"
@@ -31,7 +31,7 @@ def run(adict):
     aptcache = adict["aptcache"]
     gui = adict["gui"]
     pagenum = gui.wizard.add_tab()
-    gui.mypage = tkinter.Label(gui.wizard.page_container(pagenum), text=_("My Page"))
+    gui.mypage = Tkinter.Label(gui.wizard.page_container(pagenum), text=_("My Page"))
     gui.wizard.add_page_body(pagenum, _("Page"), gui.mypage)
 
 from relinux.modules.osweaver import isoutil, squashfs, tempsys
