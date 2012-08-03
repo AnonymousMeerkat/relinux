@@ -1,6 +1,6 @@
 """
 Contains streams for logging information
-@author: Anonymous Meerkat
+@author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 """
 
 from relinux import config

@@ -271,11 +271,27 @@ class GUI:
             cur = VerticalScrolledFrame(self.page1)
             self.page1.add(cur)
             self.page1.tab(c, text=i)
-            curr = tkinter.Frame(cur.interior)
-            curr.pack(side="top", fill="both", expand=1)
+            #curr = tkinter.Frame(cur.interior)
+            #curr.pack(side="top", fill="both", expand=1)
+            secs = ttk.Notebook(cur.interior)
+            secs.pack(side="top", fill="both", expand=1)
             c1 = 0
+            subtabs = {}
             for x in configs[i]:
-                l = tkinter.Label(curr, text=configutils.getValueP(configs[i][x], configutils.name))
+                curr = None
+                category = configutils.getValueP(configs[i][x], configutils.category)
+                found = False
+                for y in subtabs.keys():
+                    if y == category:
+                        found = True
+                        curr = subtabs[category]
+                if found is False:
+                    subtabs[category] = tkinter.Frame(secs)
+                    secs.add(subtabs[category])
+                    secs.tab(subtabs[category], text=category)
+                    curr = subtabs[category]
+                l = tkinter.Label(curr, text=configutils.getValueP(configs[i][x],
+                                                                   configutils.name))
                 l.grid(row=c1, sticky=tkinter.W)
                 types = configutils.getValueP(configs[i][x], configutils.types)
                 value = configutils.getValueP(configs[i][x], configutils.value)
