@@ -67,10 +67,14 @@ class renderer(threading.Thread):
     def _gradientSC(self, color1, color2, percent):
         col1 = float(float(color1) / 255)
         col2 = float(float(color2) / 255)
+        if percent > 1:
+            percent = 1.0
         ans = col1 - ((col1 - col2) * percent)
         fans = int(ans * 255)
         if fans > 255:
             fans = 255
+        if fans < 0:
+            fans = 0
         return fans
 
     def _gradient(self, rgb1, rgb2, percent):
@@ -97,23 +101,8 @@ class renderer(threading.Thread):
                              font=tkFont.NORMAL, fill="white")
         self.line()
     
-    def line(self):
-        if self.hover:
-            self._getDelta()
+    def _line(self, color):
         start = (0, 0, 0)
-        color = self.normalc
-        if self.obj.hovering:
-            if self.obj.anim <= 0.0:
-                self.startme = copy.copy(self.obj.lastcolor)
-            color = self._gradient(self.startme, self.hoverc, self.obj.anim)
-            self.obj.lastcolor = color
-        else:
-            if self.obj.anim <= 0.0:
-                self.startme = copy.copy(self.obj.lastcolor)
-            color = self._gradient(self.startme, self.normalc, self.obj.anim)
-            self.obj.lastcolor = color
-        if self.obj.clicking:
-            color = self.clickc
         for i in range(0, self.obj.width + 1):
             percent = float((float(i) / float(self.obj.width + 1)))
             self._drawPixel(i, self.obj.height, self._rgbtohex(self._gradient(start, color, percent)))
@@ -126,6 +115,32 @@ class renderer(threading.Thread):
             self.obj.anim = self.obj.anim + (0.1 * float((float(self.delta) * 100)))
             #time.sleep(float(float(1000 / 100) / 1000))
             self.line()
+    
+    def line(self):
+        if self.hover:
+            self._getDelta()
+        color = self.normalc
+        if self.obj.clicking:
+            if self.obj.anim <= 0.0:
+                self.startme = copy.copy(self.obj.lastcolor)
+            color = self._gradient(self.startme, self.clickc, self.obj.anim)
+            self.obj.lastcolor = color
+            self._line(color)
+            return
+        elif self.obj.hovering:
+            if self.obj.anim <= 0.0:
+                self.startme = copy.copy(self.obj.lastcolor)
+            color = self._gradient(self.startme, self.hoverc, self.obj.anim)
+            self.obj.lastcolor = color
+            self._line(color)
+            return
+        else:
+            if self.obj.anim <= 0.0:
+                self.startme = copy.copy(self.obj.lastcolor)
+            color = self._gradient(self.startme, self.normalc, self.obj.anim)
+            self.obj.lastcolor = color
+            self._line(color)
+            return
 
 
 # Custom button
@@ -162,6 +177,7 @@ class Button(Tkinter.Canvas):
         self.width = self.tk.call("font", "measure", tkFont.NORMAL, "-displayof", self, text) + 9
         self.config(width=(self.width + 2), height=self.height)
         self.text = text
+        renderer(self).start()
     
     def hoveringtrue(self, event):
         self.anim = 0.0
@@ -176,10 +192,12 @@ class Button(Tkinter.Canvas):
         renderer(self, True).start()
     
     def onclick(self, event):
+        self.anim = 0.0
         self.clicking = True
         renderer(self, True).start()
     
     def onunclick(self, event):
+        self.anim = 0.0
         self.clicking = False
         renderer(self, True).start()
         if self.command != None and self.commandvalid:
