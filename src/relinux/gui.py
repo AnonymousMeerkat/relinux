@@ -7,6 +7,9 @@ import Tkinter
 import tkFileDialog
 import ttk
 import tkFont
+import time
+import threading
+import copy
 from relinux import config, configutils, logger
 
 
@@ -45,6 +48,73 @@ class VerticalScrolledFrame(Tkinter.Frame):
         return
 
 
+class renderer(threading.Thread):
+    def __init__(self, obj, hover=False):
+        threading.Thread.__init__(self)
+        self.obj = obj
+        self.hover = hover
+        self.normalc = (140, 200, 255)
+        self.hoverc = (255, 150, 150)
+        self.clickc = (255, 0, 0)
+        self.startme = self.normalc
+
+    def _drawPixel(self, x, y, color):
+        self.obj.create_line(x, y, x + 1, y + 1, fill=color)
+
+    def _gradientSC(self, color1, color2, percent):
+        col1 = float(float(color1) / 255)
+        col2 = float(float(color2) / 255)
+        ans = col1 - ((col1 - col2) * percent)
+        fans = int(ans * 255)
+        if fans > 255:
+            fans = 255
+        return fans
+
+    def _gradient(self, rgb1, rgb2, percent):
+        r1, g1, b1 = rgb1
+        r2, g2, b2 = rgb2
+        return (self._gradientSC(r1, r2, percent), self._gradientSC(g1, g2, percent),
+                self._gradientSC(b1, b2, percent))
+
+    def _rgbtohex(self, rgb):
+        return '#%02x%02x%02x' % rgb
+
+    def run(self):
+        if self.hover:
+            self.line()
+            return
+        self.obj.create_rectangle(0, 0, self.obj.width, self.obj.height, fill="black")
+        self.obj.create_text((self.obj.width) / 2, (self.obj.height) / 2, text=self.obj.text, font=tkFont.NORMAL,
+                            fill="white")
+        self.line()
+    
+    def line(self):
+        start = (0, 0, 0)
+        color = self.normalc
+        if self.obj.hovering:
+            if self.obj.anim <= 0.0:
+                self.startme = copy.copy(self.obj.lastcolor)
+            color = self._gradient(self.startme, self.hoverc, self.obj.anim)
+            self.obj.lastcolor = color
+        else:
+            if self.obj.anim <= 0.0:
+                self.startme = copy.copy(self.obj.lastcolor)
+            color = self._gradient(self.startme, self.normalc, self.obj.anim)
+            self.obj.lastcolor = color
+        if self.obj.clicking:
+            color = self.clickc
+        for i in range(0, self.obj.width + 1):
+            percent = float((float(i) / float(self.obj.width + 1)))
+            self._drawPixel(i, self.obj.height, self._rgbtohex(self._gradient(start, color, percent)))
+        for i in range(0, self.obj.height + 1):
+            percent = float((float(i) / float(self.obj.height + 1)))
+            self._drawPixel(self.obj.width, i, self._rgbtohex(self._gradient(start, color, percent)))
+        if self.obj.anim < 1.0:
+            self.obj.anim = self.obj.anim + 0.1
+            time.sleep(float(float(1000 / 100) / 1000))
+            self.line()
+
+
 # Custom button
 class Button(Tkinter.Canvas):
     def __init__(self, parent, *args, **kw):
@@ -61,17 +131,19 @@ class Button(Tkinter.Canvas):
         self.height = tkFont.Font(font=label["font"]).actual("size") * -1 + 8
         self.width = 0
         self.hovering = False
+        self.anim = 1.0
         self.clicking = False
         self.commandvalid = False
         self.bind("<Enter>", self.hoveringtrue)
         self.bind("<Leave>", self.hoveringfalse)
         self.bind("<ButtonPress-1>", self.onclick)
         self.bind("<ButtonRelease-1>", self.onunclick)
+        self.lastcolor = (0, 0, 0)
         if textset == False:
             self.setText("")
         else:
             self.setText(textset)
-        self.render()
+        renderer(self).start()
 
     def setText(self, text):
         self.width = self.tk.call("font", "measure", tkFont.NORMAL, "-displayof", self, text) + 8
@@ -79,59 +151,26 @@ class Button(Tkinter.Canvas):
         self.text = text
     
     def hoveringtrue(self, event):
+        self.anim = 0.0
         self.hovering = True
         self.commandvalid = True
-        self.render()
+        renderer(self, True).start()
     
     def hoveringfalse(self, event):
+        self.anim = 0.0
         self.hovering = False
         self.commandvalid = False
-        self.render()
+        renderer(self, True).start()
     
     def onclick(self, event):
         self.clicking = True
-        self.render()
+        renderer(self, True).start()
     
     def onunclick(self, event):
         self.clicking = False
-        self.render()
+        renderer(self, True).start()
         if self.command != None and self.commandvalid:
             self.command()
-    
-    def _drawPixel(self, x, y, color):
-        self.create_line(x, y, x + 1, y + 1, fill=color)
-    
-    def _gradientSC(self, color1, color2, percent):
-        col1 = float(float(color1) / 255)
-        col2 = float(float(color2) / 255)
-        ans = col1 - ((col1 - col2) * percent)
-        return ans * 255
-    
-    def _gradient(self, rgb1, rgb2, percent):
-        r1, g1, b1 = rgb1
-        r2, g2, b2 = rgb2
-        return (self._gradientSC(r1, r2, percent), self._gradientSC(g1, g2, percent),
-                self._gradientSC(b1, b2, percent))
-    
-    def _rgbtohex(self, rgb):
-        return '#%02x%02x%02x' % rgb
-    
-    def render(self):
-        self.create_rectangle(0, 0, self.width, self.height, fill="black")
-        self.create_text((self.width) / 2, (self.height) / 2, text=self.text, font=tkFont.NORMAL,
-                         fill="white")
-        start = (0, 0, 0)
-        color = (140, 200, 255)
-        if self.hovering:
-            color = (255, 150, 150)
-        if self.clicking:
-            color = (255, 0, 0)
-        for i in range(0, self.width + 1):
-            percent = float((float(i) / float(self.width + 1)))
-            self._drawPixel(i, self.height, self._rgbtohex(self._gradient(start, color, percent)))
-        for i in range(0, self.height + 1):
-            percent = float((float(i) / float(self.height + 1)))
-            self._drawPixel(self.width, i, self._rgbtohex(self._gradient(start, color, percent)))
 
 
 class About:
@@ -331,8 +370,8 @@ class Multiple(Tkinter.Frame):
         self.remEntry(row)
 
     def __rePack(self, c):
-        self.pluses[c].command=lambda: self._plus(c)
-        self.minuses[c].command=lambda: self._minus(c)
+        self.pluses[c].command = lambda: self._plus(c)
+        self.minuses[c].command = lambda: self._minus(c)
         self.entries[c].grid(row=c, column=0)
         self.minuses[c].grid(row=c, column=1)
         self.pluses[c].grid(row=c, column=2)
