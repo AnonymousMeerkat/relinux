@@ -355,7 +355,7 @@ class GUI:
         self.wizard.add_page_body(1, _("Configure"), self.page1)
         self.wizard.add_tab()
         self.page2 = Tkinter.Frame(self.wizard.page_container(2))
-        Button(self.page2, text="We are having a FUN time!!").pack()
+        Button(self.page2, text="Test").pack()
         self.wizard.add_page_body(2, _("Page 3"), self.page2)
         self.wizard.pack(fill="both", expand=True)
 
