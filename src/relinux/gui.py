@@ -16,21 +16,28 @@ from relinux import config, configutils, logger
 threadname = "GUI"
 tn = logger.genTN(threadname)
 bg = "#383635"
+anims = True
 
 
-# Scrolling frame, source: http://Tkinter.unpy.net/wiki/VerticalScrolledFrame
+# Scrolling frame, based on http://Tkinter.unpy.net/wiki/VerticalScrolledFrame
 class VerticalScrolledFrame(Tkinter.Frame):
     def __init__(self, parent, *args, **kw):
+        if not "background" in kw.keys():
+            kw["background"] = bg
+        if not "borderwidth" in kw.keys():
+            kw["borderwidth"] = 0
+        if not "highlightthickness" in kw.keys():
+            kw["highlightthickness"] = 0
         Tkinter.Frame.__init__(self, parent, *args, **kw)
         vscrollbar = Tkinter.Scrollbar(self, orient=Tkinter.VERTICAL)
         vscrollbar.pack(fill=Tkinter.Y, side=Tkinter.RIGHT, expand=Tkinter.FALSE)
-        canvas = Tkinter.Canvas(self, bd=0, highlightthickness=0,
+        canvas = Tkinter.Canvas(self, kw, bd=0, highlightthickness=0,
                         yscrollcommand=vscrollbar.set)
         canvas.pack(side=Tkinter.LEFT, fill=Tkinter.BOTH, expand=Tkinter.TRUE)
         vscrollbar.config(command=canvas.yview)
         canvas.xview_moveto(0)
         canvas.yview_moveto(0)
-        self.interior = interior = Tkinter.Frame(canvas)
+        self.interior = interior = Tkinter.Frame(canvas, kw)
         interior_id = canvas.create_window(0, 0, window=interior,
                                            anchor=Tkinter.NW)
 
@@ -49,11 +56,11 @@ class VerticalScrolledFrame(Tkinter.Frame):
         return
 
 
+# Renderer
 class renderer(threading.Thread):
-    def __init__(self, obj, hover=False):
+    def __init__(self, obj):
         threading.Thread.__init__(self)
         self.obj = obj
-        self.hover = hover
         self.normalc = (140, 200, 255)
         self.hoverc = (255, 150, 150)
         self.clickc = (255, 0, 0)
@@ -92,33 +99,12 @@ class renderer(threading.Thread):
         self.time = thistime
 
     def run(self):
-        if self.hover:
-            self.line()
-            return
+        if not anims:
+            self.obj.anim = 1.0
+        self.loop()
+    
+    def loop(self):
         self._getDelta()
-        self.obj.create_rectangle(0, 0, self.obj.width, self.obj.height, fill=bg)
-        self.obj.create_text((self.obj.width) / 2, (self.obj.height) / 2, text=self.obj.text,
-                             font=tkFont.NORMAL, fill="white")
-        self.line()
-    
-    def _line(self, color):
-        start = (0, 0, 0)
-        for i in range(0, self.obj.width + 1):
-            percent = float((float(i) / float(self.obj.width + 1)))
-            self._drawPixel(i, self.obj.height, self._rgbtohex(self._gradient(start, color, percent)))
-        for i in range(0, self.obj.height + 1):
-            percent = float((float(i) / float(self.obj.height + 1)))
-            self._drawPixel(self.obj.width, i, self._rgbtohex(self._gradient(start, color, percent)))
-        self.obj.create_line(1, 1, 1, self.obj.height + 1, fill=self._rgbtohex(start))
-        self.obj.create_line(1, 1, self.obj.width + 1, 1, fill=self._rgbtohex(start))
-        if self.obj.anim < 1.0:
-            self.obj.anim = self.obj.anim + (0.1 * float((float(self.delta) * 100)))
-            #time.sleep(float(float(1000 / 100) / 1000))
-            self.line()
-    
-    def line(self):
-        if self.hover:
-            self._getDelta()
         color = self.normalc
         if self.obj.clicking:
             if self.obj.anim <= 0.0:
@@ -141,6 +127,21 @@ class renderer(threading.Thread):
             self.obj.lastcolor = color
             self._line(color)
             return
+    
+    def _line(self, color):
+        start = (0, 0, 0)
+        for i in range(0, self.obj.width):
+            percent = float((float(i) / float(self.obj.width)))
+            self._drawPixel(i, self.obj.height - 1, self._rgbtohex(self._gradient(start, color, percent)))
+        for i in range(0, self.obj.height):
+            percent = float((float(i) / float(self.obj.height)))
+            self._drawPixel(self.obj.width - 1, i, self._rgbtohex(self._gradient(start, color, percent)))
+        self.obj.create_line(0, 0, 0, self.obj.height - 1, fill=self._rgbtohex(start))
+        self.obj.create_line(0, 0, self.obj.width - 1, 0, fill=self._rgbtohex(start))
+        if self.obj.anim < 1.0:
+            self.obj.anim = self.obj.anim + (0.1 * float((float(self.delta) * 100)))
+            #time.sleep(float(float(1000 / 100) / 1000))
+            self.loop()
 
 
 # Custom button
@@ -154,9 +155,15 @@ class Button(Tkinter.Canvas):
         if "text" in kw.keys():
             textset = kw["text"]
             del kw["text"]
+        if not "background" in kw.keys():
+            kw["background"] = bg
+        if not "borderwidth" in kw.keys():
+            kw["borderwidth"] = 0
+        if not "highlightthickness" in kw.keys():
+            kw["highlightthickness"] = 0
         Tkinter.Canvas.__init__(self, parent, *args, **kw)
         label = Tkinter.Label(self, text="Unused")
-        self.height = tkFont.Font(font=label["font"]).actual("size") * -1 + 9
+        self.height = tkFont.Font(font=label["font"]).actual("size") * -1 + 8
         self.width = 1
         self.hovering = False
         self.anim = 1.0
@@ -171,35 +178,42 @@ class Button(Tkinter.Canvas):
             self.setText("")
         else:
             self.setText(textset)
+        self.render()
+    
+    def render(self, linesonly=False):
+        if not linesonly:
+            self.create_rectangle(0, 0, self.width, self.height, fill=bg)
+            self.create_text((self.width) / 2, (self.height) / 2, text=self.text,
+                                 font=tkFont.NORMAL, fill="white")
         renderer(self).start()
 
     def setText(self, text):
-        self.width = self.tk.call("font", "measure", tkFont.NORMAL, "-displayof", self, text) + 9
-        self.config(width=(self.width + 2), height=self.height)
+        self.width = self.tk.call("font", "measure", tkFont.NORMAL, "-displayof", self, text) + 12
+        self.config(width=(self.width), height=self.height)
         self.text = text
-        renderer(self).start()
+        self.render()
     
     def hoveringtrue(self, event):
         self.anim = 0.0
         self.hovering = True
         self.commandvalid = True
-        renderer(self, True).start()
+        self.render(True)
     
     def hoveringfalse(self, event):
         self.anim = 0.0
         self.hovering = False
         self.commandvalid = False
-        renderer(self, True).start()
+        self.render(True)
     
     def onclick(self, event):
-        self.anim = 0.0
+        self.anim = 1.0
         self.clicking = True
-        renderer(self, True).start()
+        self.render(True)
     
     def onunclick(self, event):
         self.anim = 0.0
         self.clicking = False
-        renderer(self, True).start()
+        self.render(True)
         if self.command != None and self.commandvalid:
             self.command()
 
@@ -240,7 +254,7 @@ class Wizard(ttk.Notebook):
         for indx, child in self._children.items():
             if hasattr(child, "btnframe"):
                 child.btnframe.pack_forget()
-            child.btnframe = Tkinter.Frame(child)
+            child.btnframe = Tkinter.Frame(child, background=bg, borderwidth=0, highlightthickness=0)
             child.btnframe.pack(side="bottom", fill="x", padx=6, pady=12)
             nextbtn = Button(child.btnframe, text=_("Next"), command=self.next_page)
             nextbtn.pack(side="right", anchor="e", padx=6)
@@ -302,8 +316,14 @@ class Wizard(ttk.Notebook):
 
 
 class FileSelector(Tkinter.Frame):
-    def __init__(self, *args, **kwargs):
-        Tkinter.Frame.__init__(self, *args, **kwargs)
+    def __init__(self, *args, **kw):
+        if not "background" in kw.keys():
+            kw["background"] = bg
+        if not "borderwidth" in kw.keys():
+            kw["borderwidth"] = 0
+        if not "highlightthickness" in kw.keys():
+            kw["highlightthickness"] = 0
+        Tkinter.Frame.__init__(self, *args, **kw)
         self.entry = Tkinter.Entry(self)
         self.button = Button(self, text="...", command=self._on_button)
         self.button.grid(row=0, column=1)
@@ -317,8 +337,14 @@ class FileSelector(Tkinter.Frame):
 
 
 class YesNo(Tkinter.Frame):
-    def __init__(self, *args, **kwargs):
-        Tkinter.Frame.__init__(self, *args, **kwargs)
+    def __init__(self, *args, **kw):
+        if not "background" in kw.keys():
+            kw["background"] = bg
+        if not "borderwidth" in kw.keys():
+            kw["borderwidth"] = 0
+        if not "highlightthickness" in kw.keys():
+            kw["highlightthickness"] = 0
+        Tkinter.Frame.__init__(self, *args, **kw)
         self.v = Tkinter.IntVar()
         self.y = Tkinter.Radiobutton(self, text=_("Yes"), variable=self.v, value=1)
         self.y.grid(row=0, column=0)
@@ -343,8 +369,14 @@ class YesNo(Tkinter.Frame):
 
 
 class Choice(Tkinter.Frame):
-    def __init__(self, *args, **kwargs):
-        Tkinter.Frame.__init__(self, *args, **kwargs)
+    def __init__(self, *args, **kw):
+        if not "background" in kw.keys():
+            kw["background"] = bg
+        if not "borderwidth" in kw.keys():
+            kw["borderwidth"] = 0
+        if not "highlightthickness" in kw.keys():
+            kw["highlightthickness"] = 0
+        Tkinter.Frame.__init__(self, *args, **kw)
         self.cb = ttk.Combobox(self)
         self.entry = Tkinter.Entry(self)
         self.cb.grid(row=0, column=0)
@@ -358,8 +390,14 @@ class Choice(Tkinter.Frame):
 
 
 class Multiple(Tkinter.Frame):
-    def __init__(self, *args, **kwargs):
-        Tkinter.Frame.__init__(self, *args, **kwargs)
+    def __init__(self, *args, **kw):
+        if not "background" in kw.keys():
+            kw["background"] = bg
+        if not "borderwidth" in kw.keys():
+            kw["borderwidth"] = 0
+        if not "highlightthickness" in kw.keys():
+            kw["highlightthickness"] = 0
+        Tkinter.Frame.__init__(self, *args, **kw)
         self.entries = []
         self.pluses = []
         self.minuses = []
@@ -424,20 +462,21 @@ class GUI:
         self.wizard.add_page_body(0, _("Welcome"), self.page0)
         self.wizard.add_page_body(1, _("Configure"), self.page1)
         self.wizard.add_tab()
-        self.page2 = Tkinter.Frame(self.wizard.page_container(2), background=bg)
-        Button(self.page2, text="Test", background=bg, borderwidth=0, highlightbackground=bg).pack()
+        self.page2 = Tkinter.Frame(self.wizard.page_container(2), background=bg, borderwidth=0, highlightthickness=0)
+        Tkinter.Label(self.page2, text="          ", background=bg, highlightthickness=0).pack()
+        Button(self.page2, text="Test").pack()
         self.wizard.add_page_body(2, _("Page 3"), self.page2)
         self.wizard.pack(fill="both", expand=True)
 
     def fillConfiguration(self, configs):
         c = 0
         for i in configs.keys():
-            cur = VerticalScrolledFrame(self.page1)
+            cur = Tkinter.Frame(self.page1)
             self.page1.add(cur)
             self.page1.tab(c, text=i)
             #curr = Tkinter.Frame(cur.interior)
             #curr.pack(side="top", fill="both", expand=1)
-            secs = ttk.Notebook(cur.interior)
+            secs = ttk.Notebook(cur)
             secs.pack(side="top", fill="both", expand=1)
             c1 = 0
             subtabs = {}
@@ -448,12 +487,15 @@ class GUI:
                 for y in subtabs.keys():
                     if y == category:
                         found = True
-                        curr = subtabs[category]
+                        curr = subtabs[category].interior
                 if found is False:
-                    subtabs[category] = Tkinter.Frame(secs)
+                    # TODO: Add Vertical Scrolled Frame
+                    frame = VerticalScrolledFrame(secs, background=bg, borderwidth=0,
+                                                  highlightthickness=0)
+                    subtabs[category] = frame
                     secs.add(subtabs[category])
                     secs.tab(subtabs[category], text=category)
-                    curr = subtabs[category]
+                    curr = subtabs[category].interior
                 l = Tkinter.Label(curr, text=configutils.getValueP(configs[i][x],
                                                                    configutils.name))
                 l.grid(row=c1, sticky=Tkinter.W)
