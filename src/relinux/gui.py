@@ -6,6 +6,7 @@ Anything GUI-related goes here
 import Tkinter
 import tkFileDialog
 import ttk
+import tkFont
 from relinux import config, configutils, logger
 
 
@@ -42,6 +43,95 @@ class VerticalScrolledFrame(Tkinter.Frame):
         canvas.bind('<Configure>', _configure_canvas)
 
         return
+
+
+# Custom button
+class Button(Tkinter.Canvas):
+    def __init__(self, parent, *args, **kw):
+        self.command = None
+        textset = False
+        if "command" in kw.keys():
+            self.command = kw["command"]
+            del kw["command"]
+        if "text" in kw.keys():
+            textset = kw["text"]
+            del kw["text"]
+        Tkinter.Canvas.__init__(self, parent, *args, **kw)
+        label = Tkinter.Label(self, text="Unused")
+        self.height = tkFont.Font(font=label["font"]).actual("size") * -1 + 8
+        self.width = 0
+        self.hovering = False
+        self.clicking = False
+        self.commandvalid = False
+        self.bind("<Enter>", self.hoveringtrue)
+        self.bind("<Leave>", self.hoveringfalse)
+        self.bind("<ButtonPress-1>", self.onclick)
+        self.bind("<ButtonRelease-1>", self.onunclick)
+        if textset == False:
+            self.setText("")
+        else:
+            self.setText(textset)
+        self.render()
+
+    def setText(self, text):
+        self.width = self.tk.call("font", "measure", tkFont.NORMAL, "-displayof", self, text) + 8
+        self.config(width=(self.width + 2), height=self.height)
+        self.text = text
+    
+    def hoveringtrue(self, event):
+        self.hovering = True
+        self.commandvalid = True
+        self.render()
+    
+    def hoveringfalse(self, event):
+        self.hovering = False
+        self.commandvalid = False
+        self.render()
+    
+    def onclick(self, event):
+        self.clicking = True
+        self.render()
+    
+    def onunclick(self, event):
+        self.clicking = False
+        self.render()
+        if self.command != None and self.commandvalid:
+            self.command()
+    
+    def _drawPixel(self, x, y, color):
+        self.create_line(x, y, x + 1, y + 1, fill=color)
+    
+    def _gradientSC(self, color1, color2, percent):
+        col1 = float(float(color1) / 255)
+        col2 = float(float(color2) / 255)
+        ans = col1 - ((col1 - col2) * percent)
+        return ans * 255
+    
+    def _gradient(self, rgb1, rgb2, percent):
+        r1, g1, b1 = rgb1
+        r2, g2, b2 = rgb2
+        return (self._gradientSC(r1, r2, percent), self._gradientSC(g1, g2, percent),
+                self._gradientSC(b1, b2, percent))
+    
+    def _rgbtohex(self, rgb):
+        return '#%02x%02x%02x' % rgb
+    
+    def render(self):
+        self.create_rectangle(0, 0, self.width, self.height, fill="black")
+        self.create_text((self.width) / 2, (self.height) / 2, text=self.text, font=tkFont.NORMAL,
+                         fill="white")
+        start = (0, 0, 0)
+        color = (140, 200, 255)
+        if self.hovering:
+            color = (255, 150, 150)
+        if self.clicking:
+            color = (255, 0, 0)
+        for i in range(0, self.width + 1):
+            percent = float((float(i) / float(self.width + 1)))
+            self._drawPixel(i, self.height, self._rgbtohex(self._gradient(start, color, percent)))
+        for i in range(0, self.height + 1):
+            percent = float((float(i) / float(self.height + 1)))
+            self._drawPixel(self.width, i, self._rgbtohex(self._gradient(start, color, percent)))
 
 
 class About:
@@ -82,16 +172,17 @@ class Wizard(ttk.Notebook):
                 child.btnframe.pack_forget()
             child.btnframe = Tkinter.Frame(child)
             child.btnframe.pack(side="bottom", fill="x", padx=6, pady=12)
-            nextbtn = Tkinter.Button(child.btnframe, text=_("Next"), command=self.next_page)
+            nextbtn = Button(child.btnframe, text=_("Next"), command=self.next_page)
             nextbtn.pack(side="right", anchor="e", padx=6)
-            quitbtn = Tkinter.Button(child.btnframe, text=_("Quit"), command=self.close)
+            quitbtn = Button(child.btnframe, text=_("Quit"), command=self.close)
             quitbtn.pack(side="left", anchor="w", padx=6)
             if indx > 0:
-                prevbtn = Tkinter.Button(child.btnframe, text=_("Previous"),
+                prevbtn = Button(child.btnframe, text=_("Previous"),
                     command=self.prev_page)
                 prevbtn.pack(side="right", anchor="e", padx=6)
                 if indx == len(self._children) - 1:
-                    nextbtn.configure(text=_("Finish"), command=self.close)
+                    nextbtn.setText("Finish")
+                    nextbtn.command = self.close
             '''progressframe = Tkinter.Frame(child)
             progressframe.pack(side="bottom", fill="x", padx=6)
             progress = ttk.Progressbar(progressframe)
@@ -99,9 +190,11 @@ class Wizard(ttk.Notebook):
 
     def next_page(self):
         self.current += 1
+        self.select(self.current)
 
     def prev_page(self):
         self.current -= 1
+        self.select(self.current)
 
     def close(self):
         self.master.destroy()
@@ -142,7 +235,7 @@ class FileSelector(Tkinter.Frame):
     def __init__(self, *args, **kwargs):
         Tkinter.Frame.__init__(self, *args, **kwargs)
         self.entry = Tkinter.Entry(self)
-        self.button = Tkinter.Button(self, text="...",  command=self._on_button)
+        self.button = Button(self, text="...", command=self._on_button)
         self.button.grid(row=0, column=1)
         self.entry.grid(row=0, column=0)
 
@@ -204,8 +297,8 @@ class Multiple(Tkinter.Frame):
 
     def addEntry(self, row):
         self.entries.insert(row, Tkinter.Entry(self))
-        self.pluses.insert(row, Tkinter.Button(self, text="+", foreground="darkgreen", command=lambda: self._plus(row)))
-        self.minuses.insert(row, Tkinter.Button(self, text="-", foreground="darkred", command=lambda: self._minus(row)))
+        self.pluses.insert(row, Button(self, text="+", command=lambda: self._plus(row)))
+        self.minuses.insert(row, Button(self, text="-", command=lambda: self._minus(row)))
         self.entries[row].grid(row=row, column=0)
         self.minuses[row].grid(row=row, column=1)
         self.pluses[row].grid(row=row, column=2)
@@ -238,8 +331,8 @@ class Multiple(Tkinter.Frame):
         self.remEntry(row)
 
     def __rePack(self, c):
-        self.pluses[c].config(command=lambda: self._plus(c))
-        self.minuses[c].config(command=lambda: self._minus(c))
+        self.pluses[c].command=lambda: self._plus(c)
+        self.minuses[c].command=lambda: self._minus(c)
         self.entries[c].grid(row=c, column=0)
         self.minuses[c].grid(row=c, column=1)
         self.pluses[c].grid(row=c, column=2)
@@ -261,7 +354,8 @@ class GUI:
         self.wizard.add_page_body(0, _("Welcome"), self.page0)
         self.wizard.add_page_body(1, _("Configure"), self.page1)
         self.wizard.add_tab()
-        self.page2 = Tkinter.Label(self.wizard.page_container(2), text=_("Page 3"))
+        self.page2 = Tkinter.Frame(self.wizard.page_container(2))
+        Button(self.page2, text="We are having a FUN time!!").pack()
         self.wizard.add_page_body(2, _("Page 3"), self.page2)
         self.wizard.pack(fill="both", expand=True)
 
