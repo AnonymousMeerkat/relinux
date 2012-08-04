@@ -15,6 +15,7 @@ from relinux import config, configutils, logger
 
 threadname = "GUI"
 tn = logger.genTN(threadname)
+bg = "#383635"
 
 
 # Scrolling frame, source: http://Tkinter.unpy.net/wiki/VerticalScrolledFrame
@@ -57,6 +58,8 @@ class renderer(threading.Thread):
         self.hoverc = (255, 150, 150)
         self.clickc = (255, 0, 0)
         self.startme = self.normalc
+        self.delta = 0
+        self.time = time.time()
 
     def _drawPixel(self, x, y, color):
         self.obj.create_line(x, y, x + 1, y + 1, fill=color)
@@ -79,16 +82,24 @@ class renderer(threading.Thread):
     def _rgbtohex(self, rgb):
         return '#%02x%02x%02x' % rgb
 
+    def _getDelta(self):
+        thistime = time.time()
+        self.delta = thistime - self.time
+        self.time = thistime
+
     def run(self):
         if self.hover:
             self.line()
             return
-        self.obj.create_rectangle(0, 0, self.obj.width, self.obj.height, fill="black")
-        self.obj.create_text((self.obj.width) / 2, (self.obj.height) / 2, text=self.obj.text, font=tkFont.NORMAL,
-                            fill="white")
+        self._getDelta()
+        self.obj.create_rectangle(0, 0, self.obj.width, self.obj.height, fill=bg)
+        self.obj.create_text((self.obj.width) / 2, (self.obj.height) / 2, text=self.obj.text,
+                             font=tkFont.NORMAL, fill="white")
         self.line()
     
     def line(self):
+        if self.hover:
+            self._getDelta()
         start = (0, 0, 0)
         color = self.normalc
         if self.obj.hovering:
@@ -109,9 +120,11 @@ class renderer(threading.Thread):
         for i in range(0, self.obj.height + 1):
             percent = float((float(i) / float(self.obj.height + 1)))
             self._drawPixel(self.obj.width, i, self._rgbtohex(self._gradient(start, color, percent)))
+        self.obj.create_line(1, 1, 1, self.obj.height + 1, fill=self._rgbtohex(start))
+        self.obj.create_line(1, 1, self.obj.width + 1, 1, fill=self._rgbtohex(start))
         if self.obj.anim < 1.0:
-            self.obj.anim = self.obj.anim + 0.1
-            time.sleep(float(float(1000 / 100) / 1000))
+            self.obj.anim = self.obj.anim + (0.1 * float((float(self.delta) * 100)))
+            #time.sleep(float(float(1000 / 100) / 1000))
             self.line()
 
 
@@ -128,8 +141,8 @@ class Button(Tkinter.Canvas):
             del kw["text"]
         Tkinter.Canvas.__init__(self, parent, *args, **kw)
         label = Tkinter.Label(self, text="Unused")
-        self.height = tkFont.Font(font=label["font"]).actual("size") * -1 + 8
-        self.width = 0
+        self.height = tkFont.Font(font=label["font"]).actual("size") * -1 + 9
+        self.width = 1
         self.hovering = False
         self.anim = 1.0
         self.clicking = False
@@ -146,7 +159,7 @@ class Button(Tkinter.Canvas):
         renderer(self).start()
 
     def setText(self, text):
-        self.width = self.tk.call("font", "measure", tkFont.NORMAL, "-displayof", self, text) + 8
+        self.width = self.tk.call("font", "measure", tkFont.NORMAL, "-displayof", self, text) + 9
         self.config(width=(self.width + 2), height=self.height)
         self.text = text
     
@@ -393,8 +406,8 @@ class GUI:
         self.wizard.add_page_body(0, _("Welcome"), self.page0)
         self.wizard.add_page_body(1, _("Configure"), self.page1)
         self.wizard.add_tab()
-        self.page2 = Tkinter.Frame(self.wizard.page_container(2))
-        Button(self.page2, text="Test").pack()
+        self.page2 = Tkinter.Frame(self.wizard.page_container(2), background=bg)
+        Button(self.page2, text="Test", background=bg, borderwidth=0, highlightbackground=bg).pack()
         self.wizard.add_page_body(2, _("Page 3"), self.page2)
         self.wizard.pack(fill="both", expand=True)
 
