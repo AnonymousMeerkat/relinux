@@ -18,6 +18,293 @@ tn = logger.genTN(threadname)
 bg = "#383635"
 anims = True
 
+normalc = (140, 200, 255)
+hoverc = (255, 150, 150)
+clickc = (255, 0, 0)
+
+
+def _rgbtohex(rgb):
+    return '#%02x%02x%02x' % rgb
+
+
+def _setDefault(lists, **kw):
+    for i in kw.keys():
+        if not i in lists:
+            lists[i] = kw[i]
+
+def _setPixel(obj, pixel, x, y, color):
+    obj.coords(pixel, x, y, x + 1, y + 1)
+    obj.itemconfig(pixel, fill=color)
+
+def _getPixel(obj, x, y, color):
+    return obj.create_line(x, y, x + 1, y + 1, fill=color)
+
+# Rectangle Renderer for the Glowy theme
+class GlowyRectangleRenderer(threading.Thread):
+    def __init__(self, obj):
+        threading.Thread.__init__(self)
+        self.obj = obj
+        self.startme = normalc
+        self.delta = 0
+        self.time = time.time()
+        self.stopme = False
+    
+    def stop(self):
+        self.stopme = True
+
+    def _gradientSC(self, color1, color2, percent):
+        col1 = float(float(color1) / 255)
+        col2 = float(float(color2) / 255)
+        if percent > 1:
+            percent = 1.0
+        ans = col1 - ((col1 - col2) * percent)
+        fans = int(ans * 255)
+        if fans > 255:
+            fans = 255
+        if fans < 0:
+            fans = 0
+        return fans
+
+    def _gradient(self, rgb1, rgb2, percent):
+        r1, g1, b1 = rgb1
+        r2, g2, b2 = rgb2
+        return (self._gradientSC(r1, r2, percent), self._gradientSC(g1, g2, percent),
+                self._gradientSC(b1, b2, percent))
+
+    def _getDelta(self):
+        thistime = time.time()
+        self.delta = thistime - self.time
+        self.time = thistime
+
+    def run(self):
+        if not anims:
+            self.obj.anim = 1.0
+        self.loop()
+    
+    def loop(self):
+        if self.stopme:
+            return
+        self._getDelta()
+        color = normalc
+        if self.obj.clicking:
+            if self.obj.anim <= 0.0:
+                self.startme = copy.copy(self.obj.lastcolor)
+            color = self._gradient(self.startme, clickc, self.obj.anim)
+            self.obj.lastcolor = color
+            self._line(color)
+            return
+        elif self.obj.hovering:
+            if self.obj.anim <= 0.0:
+                self.startme = copy.copy(self.obj.lastcolor)
+            color = self._gradient(self.startme, hoverc, self.obj.anim)
+            self.obj.lastcolor = color
+            self._line(color)
+            return
+        else:
+            if self.obj.anim <= 0.0:
+                self.startme = copy.copy(self.obj.lastcolor)
+            color = self._gradient(self.startme, normalc, self.obj.anim)
+            self.obj.lastcolor = color
+            self._line(color)
+            return
+    
+    def _line(self, color):
+        start = (0, 0, 0)
+        for i in range(0, self.obj.width):
+            percent = float((float(i) / float(self.obj.width)))
+            _setPixel(self.obj, self.obj.c_bottom[i], i, self.obj.height - 1,
+                               _rgbtohex(self._gradient(start, color, percent)))
+        for i in range(0, self.obj.height):
+            percent = float((float(i) / float(self.obj.height)))
+            _setPixel(self.obj, self.obj.c_right[i], self.obj.width - 1, i,
+                               _rgbtohex(self._gradient(start, color, percent)))
+        self.obj.coords(self.obj.c_left, 0, 0, 0, self.obj.height)
+        self.obj.coords(self.obj.c_top, 0, 0, self.obj.width, 0)
+        self.obj.itemconfig(self.obj.c_left, fill=_rgbtohex(start))
+        self.obj.itemconfig(self.obj.c_top, fill=_rgbtohex(start))
+        willloop = False
+        if self.obj.anim < 1.0 and not self.stopme:
+            self.obj.anim = self.obj.anim + (0.1 * float((float(self.delta) * 100)))
+            #time.sleep(float(float(1000 / 100) / 1000))
+            willloop = True
+        if willloop:
+            self.loop()
+        else:
+            if self.obj.finishrenderingcmd != None:
+                self.obj.finishrenderingcmd()
+
+
+# Glowy button
+class Button(Tkinter.Canvas):
+    def __init__(self, parent, *args, **kw):
+        self.command = None
+        textset = False
+        bindclick = True
+        bindunclick = True
+        self.mousedown = None
+        if "command" in kw.keys():
+            self.command = kw["command"]
+            del(kw["command"])
+        if "text" in kw.keys():
+            textset = kw["text"]
+            del(kw["text"])
+        if "bindclick" in kw.keys():
+            bindclick = kw["bindclick"]
+            del(kw["bindclick"])
+        if "bindunclick" in kw.keys():
+            bindunclick = kw["bindunclick"]
+            del(kw["bindunclick"])
+        if "mousedown" in kw.keys():
+            self.mousedown = kw["mousedown"]
+            del(kw["mousedown"])
+        _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
+        Tkinter.Canvas.__init__(self, parent, *args, **kw)
+        label = Tkinter.Label(self, text="Unused")
+        self.font = tkFont.Font(font=label["font"])
+        self.height = self.font.actual("size") * -1 + 8
+        self.width = 1
+        self.hovering = False
+        self.anim = 1.0
+        self.clicking = False
+        self.commandvalid = False
+        self.text = "hi"
+        self.c_text = self.create_text(self.width / 2, self.height / 2, text=self.text,
+                                 font=self.font, fill="white")
+        self.c_top = self.create_line(0, 0, 0, self.height, fill="#000")
+        self.c_left = self.create_line(0, 0, self.width, 0, fill="#000")
+        self.c_bottom = []
+        self.c_right = []
+        self.setHeight(self.height)
+        self.setWidth(self.width)
+        self.bind("<Enter>", self.hoveringtrue)
+        self.bind("<Leave>", self.hoveringfalse)
+        self.finishrenderingcmd = None
+        if bindclick:
+            self.bind("<ButtonPress-1>", self.onclick)
+        if bindunclick:
+            self.bind("<ButtonRelease-1>", self.onunclick)
+        self.lastcolor = (0, 0, 0)
+        self.currrenderer = None
+        if textset == False:
+            self.setText("")
+        else:
+            self.setText(textset)
+        self.render()
+
+    def render(self, linesonly=False):
+        currr = self.currrenderer != None and self.currrenderer.isAlive()
+        if currr:
+            self.currrenderer.stop()
+            #self.currrenderer.join()
+        if not linesonly:
+            #self.create_rectangle(0, 0, self.width, self.height, fill=bg)
+            #self.create_text((self.width) / 2, (self.height) / 2, text=self.text,
+            #                     font=self.font, fill="white")
+            self.coords(self.c_text, (self.width) / 2, (self.height) / 2)
+            self.itemconfig(self.c_text, text=self.text, font=self.font, fill="white")
+        self.currrenderer = GlowyRectangleRenderer(self)
+        self.currrenderer.start()
+    
+    def setWidth(self, width):
+        self.width = width
+        self.config(width=self.width)
+        for i in self.c_bottom:
+            self.delete(i)
+        self.coords(self.c_top, 0, 0, 0, self.height)
+        for i in range(0, self.width):
+            self.c_bottom.append(_getPixel(self, i, self.height, "#000"))
+    
+    def setHeight(self, height):
+        self.height = height
+        self.config(height=self.height)
+        for i in self.c_right:
+            self.delete(i)
+        self.coords(self.c_left, 0, 0, self.width, 0)
+        for i in range(0, self.height):
+            self.c_right.append(_getPixel(self, self.width, i, "#000"))
+
+    def setText(self, text):
+        self.setWidth(self.tk.call("font", "measure", tkFont.NORMAL, "-displayof", self, text) + 12)
+        self.text = text
+        self.render()
+    
+    def hoveringtrue(self, event):
+        self.anim = 0.0
+        self.hovering = True
+        self.commandvalid = True
+        self.render(True)
+    
+    def hoveringfalse(self, event):
+        self.anim = 0.0
+        self.hovering = False
+        self.commandvalid = False
+        self.render(True)
+    
+    def onclick(self, event):
+        self.anim = 1.0
+        self.clicking = True
+        self.render(True)
+        if self.mousedown != None:
+            self.mousedown()
+    
+    def onunclick(self, event):
+        self.anim = 0.0
+        self.clicking = False
+        self.render(True)
+        if self.command != None and self.commandvalid:
+            self.command()
+
+
+# Temporary Entry Box
+class Entry(Tkinter.Entry):
+    def __init__(self, parent, *args, **kw):
+        _setDefault(kw, background=bg, foreground="white", selectbackground="white",
+                    selectforeground=bg, borderwidth=0, highlightbackground=_rgbtohex(normalc),
+                    highlightcolor=_rgbtohex(hoverc))
+        Tkinter.Entry.__init__(self, parent, *args, **kw)
+
+
+# Temporary Label
+class Label(Tkinter.Label):
+    def __init__(self, parent, *args, **kw):
+        _setDefault(kw, background=bg, foreground="white", borderwidth=0,
+                    highlightbackground=_rgbtohex(normalc), highlightcolor=_rgbtohex(hoverc))
+        Tkinter.Label.__init__(self, parent, *args, **kw)
+
+
+# Glowy Radiobutton (based on the Glowy Button)
+class Radiobutton(Button):
+    def __init__(self, parent, *args, **kw):
+        if "variable" in kw:
+            self.variable = kw["variable"]
+            del(kw["variable"])
+        if "value" in kw:
+            self.value = kw["value"]
+            del(kw["value"])
+        _setDefault(kw, bindunclick=False, mousedown=self.select)
+        Button.__init__(self, parent, *args, **kw)
+        self.finishrenderingcmd = self.finishrendering
+        self.render()
+        self.notfirst = False
+
+    def select(self):
+        self.variable.set(self.value)
+    
+    def finishrendering(self):
+        if not self.notfirst:
+            self._callback()
+            self.variable.trace("w", self._callback)
+            self.notfirst = True
+            self.finishrenderingcmd = None
+
+    def _callback(self, *args):
+        if self.variable.get() == self.value:
+            self.clicking = True
+            self.render(True)
+        else:
+            self.clicking = False
+            self.render(True)
+
 
 # Scrolling frame, based on http://Tkinter.unpy.net/wiki/VerticalScrolledFrame
 class VerticalScrolledFrame(Tkinter.Frame):
@@ -52,170 +339,6 @@ class VerticalScrolledFrame(Tkinter.Frame):
             if interior.winfo_reqwidth() != canvas.winfo_width():
                 canvas.itemconfigure(interior_id, width=canvas.winfo_width())
         canvas.bind('<Configure>', _configure_canvas)
-
-        return
-
-
-# Renderer
-class renderer(threading.Thread):
-    def __init__(self, obj):
-        threading.Thread.__init__(self)
-        self.obj = obj
-        self.normalc = (140, 200, 255)
-        self.hoverc = (255, 150, 150)
-        self.clickc = (255, 0, 0)
-        self.startme = self.normalc
-        self.delta = 0
-        self.time = time.time()
-
-    def _drawPixel(self, x, y, color):
-        self.obj.create_line(x, y, x + 1, y + 1, fill=color)
-
-    def _gradientSC(self, color1, color2, percent):
-        col1 = float(float(color1) / 255)
-        col2 = float(float(color2) / 255)
-        if percent > 1:
-            percent = 1.0
-        ans = col1 - ((col1 - col2) * percent)
-        fans = int(ans * 255)
-        if fans > 255:
-            fans = 255
-        if fans < 0:
-            fans = 0
-        return fans
-
-    def _gradient(self, rgb1, rgb2, percent):
-        r1, g1, b1 = rgb1
-        r2, g2, b2 = rgb2
-        return (self._gradientSC(r1, r2, percent), self._gradientSC(g1, g2, percent),
-                self._gradientSC(b1, b2, percent))
-
-    def _rgbtohex(self, rgb):
-        return '#%02x%02x%02x' % rgb
-
-    def _getDelta(self):
-        thistime = time.time()
-        self.delta = thistime - self.time
-        self.time = thistime
-
-    def run(self):
-        if not anims:
-            self.obj.anim = 1.0
-        self.loop()
-    
-    def loop(self):
-        self._getDelta()
-        color = self.normalc
-        if self.obj.clicking:
-            if self.obj.anim <= 0.0:
-                self.startme = copy.copy(self.obj.lastcolor)
-            color = self._gradient(self.startme, self.clickc, self.obj.anim)
-            self.obj.lastcolor = color
-            self._line(color)
-            return
-        elif self.obj.hovering:
-            if self.obj.anim <= 0.0:
-                self.startme = copy.copy(self.obj.lastcolor)
-            color = self._gradient(self.startme, self.hoverc, self.obj.anim)
-            self.obj.lastcolor = color
-            self._line(color)
-            return
-        else:
-            if self.obj.anim <= 0.0:
-                self.startme = copy.copy(self.obj.lastcolor)
-            color = self._gradient(self.startme, self.normalc, self.obj.anim)
-            self.obj.lastcolor = color
-            self._line(color)
-            return
-    
-    def _line(self, color):
-        start = (0, 0, 0)
-        for i in range(0, self.obj.width):
-            percent = float((float(i) / float(self.obj.width)))
-            self._drawPixel(i, self.obj.height - 1, self._rgbtohex(self._gradient(start, color, percent)))
-        for i in range(0, self.obj.height):
-            percent = float((float(i) / float(self.obj.height)))
-            self._drawPixel(self.obj.width - 1, i, self._rgbtohex(self._gradient(start, color, percent)))
-        self.obj.create_line(0, 0, 0, self.obj.height - 1, fill=self._rgbtohex(start))
-        self.obj.create_line(0, 0, self.obj.width - 1, 0, fill=self._rgbtohex(start))
-        if self.obj.anim < 1.0:
-            self.obj.anim = self.obj.anim + (0.1 * float((float(self.delta) * 100)))
-            #time.sleep(float(float(1000 / 100) / 1000))
-            self.loop()
-
-
-# Custom button
-class Button(Tkinter.Canvas):
-    def __init__(self, parent, *args, **kw):
-        self.command = None
-        textset = False
-        if "command" in kw.keys():
-            self.command = kw["command"]
-            del kw["command"]
-        if "text" in kw.keys():
-            textset = kw["text"]
-            del kw["text"]
-        if not "background" in kw.keys():
-            kw["background"] = bg
-        if not "borderwidth" in kw.keys():
-            kw["borderwidth"] = 0
-        if not "highlightthickness" in kw.keys():
-            kw["highlightthickness"] = 0
-        Tkinter.Canvas.__init__(self, parent, *args, **kw)
-        label = Tkinter.Label(self, text="Unused")
-        self.height = tkFont.Font(font=label["font"]).actual("size") * -1 + 8
-        self.width = 1
-        self.hovering = False
-        self.anim = 1.0
-        self.clicking = False
-        self.commandvalid = False
-        self.bind("<Enter>", self.hoveringtrue)
-        self.bind("<Leave>", self.hoveringfalse)
-        self.bind("<ButtonPress-1>", self.onclick)
-        self.bind("<ButtonRelease-1>", self.onunclick)
-        self.lastcolor = (0, 0, 0)
-        if textset == False:
-            self.setText("")
-        else:
-            self.setText(textset)
-        self.render()
-    
-    def render(self, linesonly=False):
-        if not linesonly:
-            self.create_rectangle(0, 0, self.width, self.height, fill=bg)
-            self.create_text((self.width) / 2, (self.height) / 2, text=self.text,
-                                 font=tkFont.NORMAL, fill="white")
-        renderer(self).start()
-
-    def setText(self, text):
-        self.width = self.tk.call("font", "measure", tkFont.NORMAL, "-displayof", self, text) + 12
-        self.config(width=(self.width), height=self.height)
-        self.text = text
-        self.render()
-    
-    def hoveringtrue(self, event):
-        self.anim = 0.0
-        self.hovering = True
-        self.commandvalid = True
-        self.render(True)
-    
-    def hoveringfalse(self, event):
-        self.anim = 0.0
-        self.hovering = False
-        self.commandvalid = False
-        self.render(True)
-    
-    def onclick(self, event):
-        self.anim = 1.0
-        self.clicking = True
-        self.render(True)
-    
-    def onunclick(self, event):
-        self.anim = 0.0
-        self.clicking = False
-        self.render(True)
-        if self.command != None and self.commandvalid:
-            self.command()
 
 
 class About:
@@ -324,7 +447,7 @@ class FileSelector(Tkinter.Frame):
         if not "highlightthickness" in kw.keys():
             kw["highlightthickness"] = 0
         Tkinter.Frame.__init__(self, *args, **kw)
-        self.entry = Tkinter.Entry(self)
+        self.entry = Entry(self)
         self.button = Button(self, text="...", command=self._on_button)
         self.button.grid(row=0, column=1)
         self.entry.grid(row=0, column=0)
@@ -338,17 +461,12 @@ class FileSelector(Tkinter.Frame):
 
 class YesNo(Tkinter.Frame):
     def __init__(self, *args, **kw):
-        if not "background" in kw.keys():
-            kw["background"] = bg
-        if not "borderwidth" in kw.keys():
-            kw["borderwidth"] = 0
-        if not "highlightthickness" in kw.keys():
-            kw["highlightthickness"] = 0
+        _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
         Tkinter.Frame.__init__(self, *args, **kw)
         self.v = Tkinter.IntVar()
-        self.y = Tkinter.Radiobutton(self, text=_("Yes"), variable=self.v, value=1)
+        self.y = Radiobutton(self, text=_("Yes"), variable=self.v, value=1)
         self.y.grid(row=0, column=0)
-        self.n = Tkinter.Radiobutton(self, text=_("No"), variable=self.v, value=2)
+        self.n = Radiobutton(self, text=_("No"), variable=self.v, value=2)
         self.n.grid(row=0, column=1)
 
     def set(self, bools):
@@ -370,15 +488,10 @@ class YesNo(Tkinter.Frame):
 
 class Choice(Tkinter.Frame):
     def __init__(self, *args, **kw):
-        if not "background" in kw.keys():
-            kw["background"] = bg
-        if not "borderwidth" in kw.keys():
-            kw["borderwidth"] = 0
-        if not "highlightthickness" in kw.keys():
-            kw["highlightthickness"] = 0
+        _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
         Tkinter.Frame.__init__(self, *args, **kw)
         self.cb = ttk.Combobox(self)
-        self.entry = Tkinter.Entry(self)
+        self.entry = Entry(self)
         self.cb.grid(row=0, column=0)
         self.cb.bind("<<ComboboxSelected>>", self._on_changed)
 
@@ -391,12 +504,7 @@ class Choice(Tkinter.Frame):
 
 class Multiple(Tkinter.Frame):
     def __init__(self, *args, **kw):
-        if not "background" in kw.keys():
-            kw["background"] = bg
-        if not "borderwidth" in kw.keys():
-            kw["borderwidth"] = 0
-        if not "highlightthickness" in kw.keys():
-            kw["highlightthickness"] = 0
+        _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
         Tkinter.Frame.__init__(self, *args, **kw)
         self.entries = []
         self.pluses = []
@@ -404,7 +512,7 @@ class Multiple(Tkinter.Frame):
         self.addEntry(0)
 
     def addEntry(self, row):
-        self.entries.insert(row, Tkinter.Entry(self))
+        self.entries.insert(row, Entry(self))
         self.pluses.insert(row, Button(self, text="+", command=lambda: self._plus(row)))
         self.minuses.insert(row, Button(self, text="-", command=lambda: self._minus(row)))
         self.entries[row].grid(row=row, column=0)
@@ -489,15 +597,14 @@ class GUI:
                         found = True
                         curr = subtabs[category].interior
                 if found is False:
-                    # TODO: Add Vertical Scrolled Frame
                     frame = VerticalScrolledFrame(secs, background=bg, borderwidth=0,
                                                   highlightthickness=0)
                     subtabs[category] = frame
                     secs.add(subtabs[category])
                     secs.tab(subtabs[category], text=category)
                     curr = subtabs[category].interior
-                l = Tkinter.Label(curr, text=configutils.getValueP(configs[i][x],
-                                                                   configutils.name))
+                l = Label(curr, text=configutils.getValueP(configs[i][x],
+                                                           configutils.name))
                 l.grid(row=c1, sticky=Tkinter.W)
                 types = configutils.getValueP(configs[i][x], configutils.types)
                 value = configutils.getValueP(configs[i][x], configutils.value)
@@ -527,7 +634,7 @@ class GUI:
                     e.grid(row=c1, column=1)
                     e.set(multiple)
                 else:
-                    e = Tkinter.Entry(curr)
+                    e = Entry(curr)
                     e.grid(row=c1, column=1)
                     e.delete(0, "end")
                     e.insert(0, value)

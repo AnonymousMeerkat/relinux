@@ -11,7 +11,7 @@ my $str = get_raw_host_arch();
 if($str ne '')
 {
 	print get_raw_host_arch() . "\n";
-	exit 0
+	exit 0;
 } else {
-	exit 1
+	exit 1;
 }

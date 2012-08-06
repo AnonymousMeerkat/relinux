@@ -1,0 +1,7 @@
+MODNAME="relinux_archdetect"
+INTERFACE="archdetect.i"
+SOURCES="archdetect.c"
+TYPE="python"
+INCLUDES="/usr/include/python2.7"
+LIBRARIES="dpkg"
+BUILDLANG="c"

@@ -1,0 +1,6 @@
+MODNAME="glowy"
+INTERFACE="glowy.i"
+SOURCES="glowy.cpp"
+TYPE="python"
+INCLUDES="/usr/include/python2.7"
+BUILDLANG="c++"
