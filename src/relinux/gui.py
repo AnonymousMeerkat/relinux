@@ -33,6 +33,8 @@ def _setDefault(lists, **kw):
             lists[i] = kw[i]
 
 def _setPixel(obj, pixel, x, y, color):
+    if obj.busy:
+        _setPixel(obj, pixel, x, y, color)
     obj.coords(pixel, x, y, x + 1, y + 1)
     obj.itemconfig(pixel, fill=color)
 
@@ -161,8 +163,8 @@ class Button(Tkinter.Canvas):
         Tkinter.Canvas.__init__(self, parent, *args, **kw)
         label = Tkinter.Label(self, text="Unused")
         self.font = tkFont.Font(font=label["font"])
-        self.height = self.font.actual("size") * -1 + 8
-        self.width = 1
+        self.height = 0
+        self.width = 0
         self.hovering = False
         self.anim = 1.0
         self.clicking = False
@@ -174,11 +176,12 @@ class Button(Tkinter.Canvas):
         self.c_left = self.create_line(0, 0, self.width, 0, fill="#000")
         self.c_bottom = []
         self.c_right = []
-        self.setHeight(self.height)
+        self.setHeight(self.font.actual("size") * -1 + 8)
         self.setWidth(self.width)
         self.bind("<Enter>", self.hoveringtrue)
         self.bind("<Leave>", self.hoveringfalse)
         self.finishrenderingcmd = None
+        self.busy = False
         if bindclick:
             self.bind("<ButtonPress-1>", self.onclick)
         if bindunclick:
@@ -206,25 +209,52 @@ class Button(Tkinter.Canvas):
         self.currrenderer.start()
     
     def setWidth(self, width):
+        self.busy = True
+        orig = self.width
+        rrange = range(orig, width)
+        inverted = False
+        if width - orig < 0:
+            rrange = range(width, orig)
+            inverted = True
         self.width = width
-        self.config(width=self.width)
-        for i in self.c_bottom:
-            self.delete(i)
-        self.coords(self.c_top, 0, 0, 0, self.height)
-        for i in range(0, self.width):
-            self.c_bottom.append(_getPixel(self, i, self.height, "#000"))
+        self.config(width=width)
+        self.coords(self.c_top, 0, 0, width, 0)
+        if inverted:
+            for i in reversed(rrange):
+                self.delete(self.c_bottom.pop(i))
+        else:
+            for i in rrange:
+                self.c_bottom.append(_getPixel(self, i, self.height, "#000"))
+            #print(str(len(self.c_bottom) == self.width))
+            #print("LEN2 " + str(len(self.c_bottom)) + " " + str(width))
+        self.busy = False
     
     def setHeight(self, height):
+        self.busy = True
+        orig = self.height
+        rrange = range(orig, height)
+        inverted = False
+        if height - orig < 0:
+            rrange = range(height, orig)
+            inverted = True
         self.height = height
-        self.config(height=self.height)
-        for i in self.c_right:
-            self.delete(i)
-        self.coords(self.c_left, 0, 0, self.width, 0)
-        for i in range(0, self.height):
-            self.c_right.append(_getPixel(self, self.width, i, "#000"))
+        self.config(height=height)
+        self.coords(self.c_left, 0, 0, 0, height)
+        if inverted:
+            for i in reversed(rrange):
+                self.delete(self.c_right.pop(i))
+        else:
+            for i in rrange:
+                self.c_right.append(_getPixel(self, self.width, i, "#000"))
+            #print(str(len(self.c_right) == self.height))
+            print(str(len(self.c_right)) + " " + str(self.height))
+        self.busy = False
 
     def setText(self, text):
+        if self.currrenderer != None and self.currrenderer.isAlive():
+            self.currrenderer.stop()
         self.setWidth(self.tk.call("font", "measure", tkFont.NORMAL, "-displayof", self, text) + 12)
+        self.setHeight(self.height)
         self.text = text
         self.render()
     
@@ -275,12 +305,8 @@ class Label(Tkinter.Label):
 # Glowy Radiobutton (based on the Glowy Button)
 class Radiobutton(Button):
     def __init__(self, parent, *args, **kw):
-        if "variable" in kw:
-            self.variable = kw["variable"]
-            del(kw["variable"])
-        if "value" in kw:
-            self.value = kw["value"]
-            del(kw["value"])
+        self.variable = kw.pop("variable", None)
+        self.value = kw.pop("value", 0)
         _setDefault(kw, bindunclick=False, mousedown=self.select)
         Button.__init__(self, parent, *args, **kw)
         self.finishrenderingcmd = self.finishrendering
@@ -351,30 +377,28 @@ class About:
         b.pack(side=Tkinter.BOTTOM)
 
 
-class Wizard(ttk.Notebook):
+class Wizard(Tkinter.Frame):
     def on_change_tab(self, *args):
         w = self.select()
         self.current = self.index(w)
 
-    def __init__(self, master=None, **kw):
+    def __init__(self, master=None, *args, **kw):
+        self.master = master
+        self.pages = []
+        self.current = 0
         npages = kw.pop('npages', 3)
-        kw['style'] = 'Wizard.TNotebook'
-        #ttk.Style(master).layout('Wizard.TNotebook.Tab', '')
-        ttk.Notebook.__init__(self, master, **kw)
-
-        self._children = {}
-
+        _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
+        Tkinter.Frame.__init__(self, master, *args, **kw)
         for page in range(npages):
             logger.logVV(tn, _("Creating page") + " " + str(page))
             self.add_empty_page()
-
-        self.current = 0
+        self.pages[0].pack(fill='both', expand=1)
         self._wizard_buttons()
         self.bind("<<NotebookTabChanged>>", self.on_change_tab)
 
     def _wizard_buttons(self):
         # Place wizard buttons on the pages
-        for indx, child in self._children.items():
+        for indx, child in enumerate(self.pages):
             if hasattr(child, "btnframe"):
                 child.btnframe.pack_forget()
             child.btnframe = Tkinter.Frame(child, background=bg, borderwidth=0, highlightthickness=0)
@@ -387,55 +411,49 @@ class Wizard(ttk.Notebook):
                 prevbtn = Button(child.btnframe, text=_("Previous"),
                     command=self.prev_page)
                 prevbtn.pack(side="right", anchor="e", padx=6)
-                if indx == len(self._children) - 1:
+                if indx == len(self.pages) - 1:
                     nextbtn.setText("Finish")
                     nextbtn.command = self.close
             '''progressframe = Tkinter.Frame(child)
             progressframe.pack(side="bottom", fill="x", padx=6)
             progress = ttk.Progressbar(progressframe)
             progress.pack(fill="x")'''
+    
+    def _switch_page(self, current):
+        self.pages[self.current].pack_forget()
+        self.current = current
+        self.pages[self.current].pack(fill='both', expand=1)
 
     def next_page(self):
-        self.current += 1
-        self.select(self.current)
+        if self.current == len(self.pages):
+            return
+        self._switch_page(self.current + 1)
 
     def prev_page(self):
-        self.current -= 1
-        self.select(self.current)
+        if self.current == 0:
+            return
+        self._switch_page(self.current - 1)
 
     def close(self):
         self.master.destroy()
 
     def add_empty_page(self):
-        child = Tkinter.Frame(self)
-        self._children[len(self._children)] = child
-        self.add(child)
+        self.pages.append(Tkinter.Frame(self, background=bg, borderwidth=0, highlightthickness=0))
 
     def add_tab(self):
         self.add_empty_page()
         self._wizard_buttons()
-        return (len(self._children) - 1)
+        return (len(self.pages) - 1)
 
     def add_page_body(self, tab_id, title, body):
-        self.tab(tab_id, text=title)
+        #self.tab(tab_id, text=title)
         body.pack(side='top', fill='both', padx=6, pady=12, expand=1)
 
-    def page_container(self, page_num):
-        if page_num in self._children:
-            return self._children[page_num]
+    def page(self, page_num):
+        if page_num < len(self.pages):
+            return self.pages[page_num]
         else:
             logger.logE(tn, _("Page") + " " + str(page_num) + " " + _("does not exist"))
-
-    def _get_current(self):
-        return self._current
-
-    def _set_current(self, curr):
-        if curr not in self._children:
-            logger.logE(tn, _("Page") + " " + curr + " " + _("does not exist"))
-        self._current = curr
-        self.select(self._children[self._current])
-
-    current = property(_get_current, _set_current)
 
 
 class FileSelector(Tkinter.Frame):
@@ -562,16 +580,16 @@ class GUI:
     def __init__(self, master):
         self.root = master
         self.root.title(config.product)
-        self.wizard = Wizard(npages=2)
+        self.wizard = Wizard(self.root, npages=2)
         self.wizard.master.minsize(400, 350)
         self.wizard.master.maxsize(800, 700)
-        self.page1 = ttk.Notebook(self.wizard.page_container(1))
-        self.page0 = Tkinter.Label(self.wizard.page_container(0), text=_("Welcome to relinux 0.4!\nClick on next to get started"))
+        self.page1 = ttk.Notebook(self.wizard.page(1))
+        self.page0 = Label(self.wizard.page(0), text=_("Welcome to relinux 0.4!\nClick on next to get started"))
         self.wizard.add_page_body(0, _("Welcome"), self.page0)
         self.wizard.add_page_body(1, _("Configure"), self.page1)
         self.wizard.add_tab()
-        self.page2 = Tkinter.Frame(self.wizard.page_container(2), background=bg, borderwidth=0, highlightthickness=0)
-        Tkinter.Label(self.page2, text="          ", background=bg, highlightthickness=0).pack()
+        self.page2 = Tkinter.Frame(self.wizard.page(2), background=bg, borderwidth=0, highlightthickness=0)
+        Label(self.page2, text="          ").pack()
         Button(self.page2, text="Test").pack()
         self.wizard.add_page_body(2, _("Page 3"), self.page2)
         self.wizard.pack(fill="both", expand=True)
