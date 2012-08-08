@@ -16,6 +16,9 @@ from argparse import ArgumentParser
 import Tkinter
 
 
+def exitprog():
+    sys.exit()
+
 def version():
     print((config.version_string))
     sys.exit()
@@ -45,6 +48,7 @@ def main():
         logger.verbose()
     if args.veryverbose is True:
         logger.veryverbose()
+    modules = modloader.getModules()
     buffer1 = configutils.getBuffer(open("../../relinux.conf"))
     buffer2 = configutils.compress(buffer1)
     buffer = configutils.parseCompressedBuffer(buffer2)
@@ -59,8 +63,6 @@ def main():
         modloader.runModule(modloader.loadModule(i), {"gui": App, "config": buffer, "aptcache": aptcache})
     root.mainloop()
 
-from relinux import gui, configutils, logger, aptutil, modloader
-modules = modloader.getModules()
-
 if __name__ == '__main__':
+    from relinux import gui, configutils, logger, aptutil, modloader
     main()
