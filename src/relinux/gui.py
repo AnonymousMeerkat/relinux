@@ -5,7 +5,6 @@ Anything GUI-related goes here
 
 import Tkinter
 import tkFileDialog
-import ttk
 import tkFont
 import time
 import threading
@@ -38,8 +37,11 @@ def _setDefault(lists, **kw):
 def _setPixel(obj, pixel, x, y, color):
     if obj.busy:
         _setPixel(obj, pixel, x, y, color)
-    obj.coords(pixel, x, y, x + 1, y + 1)
-    obj.itemconfig(pixel, fill=color)
+    try:
+        obj.coords(pixel, x, y, x + 1, y + 1)
+        obj.itemconfig(pixel, fill=color)
+    except:
+        raise
 
 def _getPixel(obj, x, y, color):
     return obj.create_line(x, y, x + 1, y + 1, fill=color)
@@ -93,6 +95,7 @@ class glowyFade(threading.Thread):
             self._getDelta()
             self.func(_gradient(self.col1, self.col2, self.anim))
             self.anim = self.anim + (0.1 * float((float(self.delta) * 100)))
+            time.sleep(0.001)
 
 
 
@@ -105,6 +108,8 @@ class GlowyRectangleRenderer(threading.Thread):
         self.delta = 0
         self.time = time.time()
         self.stopme = False
+        self.rlisf = True
+        self.obj.renderlock.trace("w", self._rlfc)
 
     def stop(self):
         self.stopme = True
@@ -113,11 +118,18 @@ class GlowyRectangleRenderer(threading.Thread):
         thistime = time.time()
         self.delta = thistime - self.time
         self.time = thistime
+    
+    def _rlfc(self, *args):
+        if self.obj.renderlock.get() == 0 and self.rlisf:
+            print("OK!")
+            self.rlisf = False
+            self.obj.renderlock.set(1)
+            self.loop()
 
     def run(self):
         if not anims:
             self.obj.anim = 1.0
-        self.loop()
+        self._rlfc()
 
     def loop(self):
         while True:
@@ -133,8 +145,9 @@ class GlowyRectangleRenderer(threading.Thread):
             self.obj.lastcolor = color
             self._line(color)
             self.obj.anim += (0.1 * float((float(self.delta) * 100)))
-            if not (not self.stopme and self.obj.anim < 1.0):
+            if self.stopme or self.obj.anim >= 1.0:
                 break
+        self.obj.renderlock.set(0)
         if self.obj.finishrenderingcmd != None:
             self.obj.finishrenderingcmd()
 
@@ -143,13 +156,17 @@ class GlowyRectangleRenderer(threading.Thread):
             return
         start = (0, 0, 0)
         for i in range(0, self.obj.width):
+            if self.stopme:
+                return
             percent = float((float(i) / float(self.obj.width)))
             _setPixel(self.obj, self.obj.c_bottom[i], i, self.obj.height - 1,
                                _rgbtohex(_gradient(start, color, percent)))
         for i in range(0, self.obj.height):
+            if self.stopme:
+                return
             percent = float((float(i) / float(self.obj.height)))
             _setPixel(self.obj, self.obj.c_right[i], self.obj.width - 1, i,
-                               _rgbtohex(_gradient(start, color, percent)))
+                                _rgbtohex(_gradient(start, color, percent)))
         self.obj.coords(self.obj.c_left, 0, 0, 0, self.obj.height)
         self.obj.coords(self.obj.c_top, 0, 0, self.obj.width, 0)
         self.obj.itemconfig(self.obj.c_left, fill=_rgbtohex(start))
@@ -159,35 +176,73 @@ class GlowyRectangleRenderer(threading.Thread):
 # Glowy component
 class Component(Tkinter.Canvas):
     def __init__(self, parent, *args, **kw):
-        bindclick = kw.pop("bindclick", True)
-        bindunclick = kw.pop("bindunclick", True)
         _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
         Tkinter.Canvas.__init__(self, parent, *args, **kw)
         self.height = 0
         self.width = 0
-        self.hovering = False
-        self.clicking = False
         self.anim = 1.0
         self.c_top = self.create_line(0, 0, 0, self.height, fill="#000")
         self.c_left = self.create_line(0, 0, self.width, 0, fill="#000")
         self.c_bottom = []
         self.c_right = []
-        self.setHeight(self.font.actual("size") * -1 + 8)
+        self.setHeight(self.height)
         self.setWidth(self.width)
-        self.bind("<Enter>", self.hoveringtrue)
-        self.bind("<Leave>", self.hoveringfalse)
         self.finishrenderingcmd = None
+        self.renderlock = Tkinter.IntVar()
+        self.renderlock.set(0)
         self.busy = False
-        if bindclick:
-            self.bind("<ButtonPress-1>", self.onclick)
-        if bindunclick:
-            self.bind("<ButtonRelease-1>", self.onunclick)
         self.lastcolor = (0, 0, 0)
         self.currrenderer = None
 
     def __del__(self):
         self.currrenderer.stop()
         self.busy = False
+
+    def setWidth(self, width):
+        self.busy = True
+        orig = self.width
+        rrange = range(orig, width)
+        inverted = False
+        if width - orig < 0:
+            rrange = range(width, orig)
+            inverted = True
+        self.width = width
+        self.config(width=width)
+        self.coords(self.c_top, 0, 0, width, 0)
+        if inverted:
+            for i in reversed(rrange):
+                self.delete(self.c_bottom.pop(i))
+        else:
+            for i in rrange:
+                self.c_bottom.append(_getPixel(self, i, self.height - 1, "#000"))
+        self.busy = False
+
+    def setHeight(self, height):
+        self.busy = True
+        orig = self.height
+        rrange = range(orig, height)
+        inverted = False
+        if height - orig < 0:
+            rrange = range(height, orig)
+            inverted = True
+        self.height = height
+        self.config(height=height)
+        self.coords(self.c_left, 0, 0, 0, height)
+        if inverted:
+            for i in reversed(rrange):
+                self.delete(self.c_right.pop(i))
+        else:
+            for i in rrange:
+                self.c_right.append(_getPixel(self, self.width - 1, i, "#000"))
+        self.busy = False
+    
+    def renderlines(self):
+        currr = self.currrenderer != None and self.currrenderer.isAlive()
+        if currr:
+            self.currrenderer.stop()
+            #self.currrenderer.join()
+        self.currrenderer = GlowyRectangleRenderer(self)
+        self.currrenderer.start()
 
 
 # Glowy button
@@ -211,10 +266,13 @@ class Button(Tkinter.Canvas):
         self.text = ""
         self.c_text = self.create_text(self.width / 2, self.height / 2, text=self.text,
                                  font=self.font, fill="white")
-        self.c_top = self.create_line(0, 0, 0, self.height, fill="#000")
-        self.c_left = self.create_line(0, 0, self.width, 0, fill="#000")
-        self.c_bottom = []
-        self.c_right = []
+        normalch = _rgbtohex(normalc)
+        self.c_left = self.create_line(0, 0, 0, self.height, fill=normalch)
+        self.c_top = self.create_line(0, 0, self.width, 0, fill=normalch)
+        #self.c_bottom = []
+        #self.c_right = []
+        self.c_bottom = self.create_line(0, self.height, self.width, self.height, fill=normalch)
+        self.c_right = self.create_line(self.width, 0, self.width, self.height, fill=normalch)
         self.setHeight(self.font.actual("size") * -1 + 8)
         self.setWidth(self.width)
         self.bind("<Enter>", self.hoveringtrue)
@@ -226,108 +284,88 @@ class Button(Tkinter.Canvas):
         if bindunclick:
             self.bind("<ButtonRelease-1>", self.onunclick)
         self.lastcolor = (0, 0, 0)
-        self.currrenderer = None
+        self.renderthread = None
         if textset == False:
             self.setText("")
         else:
             self.setText(textset)
-        self.render()
-    
+        #self.render()
+
     def __del__(self):
-        self.currrenderer.stop()
+        if self.renderthread != None and self.renderthread.isAlive():
+            self.renderthread.stop()
         self.busy = False
 
-    def render(self, linesonly=False):
-        currr = self.currrenderer != None and self.currrenderer.isAlive()
-        if currr:
-            self.currrenderer.stop()
-            #self.currrenderer.join()
-        if not linesonly:
-            #self.create_rectangle(0, 0, self.width, self.height, fill=bg)
-            #self.create_text((self.width) / 2, (self.height) / 2, text=self.text,
-            #                     font=self.font, fill="white")
-            self.coords(self.c_text, (self.width) / 2, (self.height) / 2)
-            self.itemconfig(self.c_text, text=self.text, font=self.font, fill="white")
-        self.currrenderer = GlowyRectangleRenderer(self)
-        self.currrenderer.start()
-    
+    def render(self, anims=True):
+        if self.renderthread != None and self.renderthread.isAlive():
+            self.renderthread.stop()
+        color = normalc
+        if self.hovering:
+            color = hoverc
+        if self.clicking:
+            color = clickc
+        if self.lastcolor == color:
+            return
+        if anims:
+            self.renderthread = glowyFade(self.setLineColor, copy.copy(self.lastcolor), color)
+            self.renderthread.start()
+        else:
+            self.setLineColor(color)
+
+    def setLineColor(self, color):
+        self.lastcolor = color
+        colorh = _rgbtohex(color)
+        self.itemconfig(self.c_top, fill=colorh)
+        self.itemconfig(self.c_bottom, fill=colorh)
+        self.itemconfig(self.c_left, fill=colorh)
+        self.itemconfig(self.c_right, fill=colorh)
+
     def setWidth(self, width):
         self.busy = True
-        orig = self.width
-        rrange = range(orig, width)
-        inverted = False
-        if width - orig < 0:
-            rrange = range(width, orig)
-            inverted = True
         self.width = width
         self.config(width=width)
-        _updwidth = self.config()["width"]
-        updwidth = _updwidth[len(_updwidth) - 1]
-        if int(updwidth) != self.width:
-            logger.logE(tn, "Width was not able to be updated! " + str(updwidth) + " " + 
-                        str(self.width))
-        self.coords(self.c_top, 0, 0, width, 0)
-        if inverted:
-            for i in reversed(rrange):
-                self.delete(self.c_bottom.pop(i))
-        else:
-            for i in rrange:
-                self.c_bottom.append(_getPixel(self, i, self.height - 1, "#000"))
-        if self.width != len(self.c_bottom):
-            logger.logW(tn, "Width was not able to be updated! " + len(self.c_bottom) + " " + 
-                        str(self.width))
+        self.coords(self.c_top, 0, 0, width - 1, 0)
+        self.coords(self.c_bottom, 0, self.height - 1, width, self.height - 1)
         self.busy = False
-    
+
     def setHeight(self, height):
         self.busy = True
-        orig = self.height
-        rrange = range(orig, height)
-        inverted = False
-        if height - orig < 0:
-            rrange = range(height, orig)
-            inverted = True
         self.height = height
         self.config(height=height)
-        self.coords(self.c_left, 0, 0, 0, height)
-        if inverted:
-            for i in reversed(rrange):
-                self.delete(self.c_right.pop(i))
-        else:
-            for i in rrange:
-                self.c_right.append(_getPixel(self, self.width - 1, i, "#000"))
+        self.coords(self.c_left, 0, 0, 0, height - 1)
+        self.coords(self.c_right, self.width - 1, 0, self.width - 1, height - 1)
         self.busy = False
 
     def setText(self, text):
-        if self.currrenderer != None and self.currrenderer.isAlive():
-            self.currrenderer.stop()
         self.setWidth(self.tk.call("font", "measure", tkFont.NORMAL, "-displayof", self, text) + 12)
         self.setHeight(self.height)
         self.text = text
-        self.render()
-    
+        self.coords(self.c_text, (self.width) / 2, (self.height) / 2)
+        self.itemconfig(self.c_text, text=self.text, font=self.font, fill="white")
+
     def hoveringtrue(self, event):
         self.anim = 0.0
         self.hovering = True
         self.commandvalid = True
-        self.render(True)
-    
+        self.render()
+
     def hoveringfalse(self, event):
         self.anim = 0.0
         self.hovering = False
         self.commandvalid = False
-        self.render(True)
-    
+        self.render()
+
     def onclick(self, event):
         self.anim = 1.0
         self.clicking = True
-        self.render(True)
+        self.render(False)
         if self.mousedown != None:
             self.mousedown()
-    
+
     def onunclick(self, event):
         self.anim = 0.0
         self.clicking = False
-        self.render(True)
+        self.render()
         if self.command != None and self.commandvalid:
             self.command()
 
@@ -420,31 +458,23 @@ class Combobox(Tkinter.OptionMenu):
 # Glowy Radiobutton (based on the Glowy Button)
 class Radiobutton(Button):
     def __init__(self, parent, *args, **kw):
-        self.variable = kw.pop("variable", None)
+        self.variable = kw.pop("variable", Tkinter.IntVar(0))
         self.value = kw.pop("value", 0)
         _setDefault(kw, bindunclick=False, mousedown=self.select)
         Button.__init__(self, parent, *args, **kw)
-        self.finishrenderingcmd = self.finishrendering
-        self.render()
-        self.notfirst = False
+        self._callback()
+        self.variable.trace("w", self._callback)
 
     def select(self):
         self.variable.set(self.value)
-    
-    def finishrendering(self):
-        if not self.notfirst:
-            self._callback()
-            self.variable.trace("w", self._callback)
-            self.notfirst = True
-            self.finishrenderingcmd = None
 
     def _callback(self, *args):
         if self.variable.get() == self.value:
             self.clicking = True
-            self.render(True)
+            self.render(False)
         else:
             self.clicking = False
-            self.render(True)
+            self.render(False)
 
 
 # Glowy Notebook
@@ -455,6 +485,7 @@ class Notebook(Tkinter.Frame):
         self.current = Tkinter.IntVar()
         self.current.set(0)
         self.old = 0
+        self.finishedtb = None
         npages = kw.pop('npages', 0)
         _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
         Tkinter.Frame.__init__(self, master, *args, **kw)
@@ -467,25 +498,27 @@ class Notebook(Tkinter.Frame):
 
     def _tab_buttons(self):
         # Place tab buttons on the pages
-        #for indx, child in enumerate(self.pages):
-            if hasattr(self, "btnframe"):
-                self.btnframe.pack_forget()
-            self.btnframe = Tkinter.Frame(self, background=bg, borderwidth=0, highlightthickness=0)
-            self.btnframe.pack(side="top", fill="x", padx=6, pady=6)
-            for indx1, child1 in enumerate(self.pages):
-                btn = Radiobutton(self.btnframe, variable=self.current, value=indx1, text=child1.text)
-                btn.grid(row=0, column=indx1)
-            '''nextbtn = Button(child.btnframe, text=_("Next"), command=self._select)
-            nextbtn.pack(side="right", anchor="e", padx=6)
-            quitbtn = Button(child.btnframe, text=_("Quit"), command=self.close)
-            quitbtn.pack(side="left", anchor="w", padx=6)
-            if indx > 0:
-                prevbtn = Button(child.btnframe, text=_("Previous"),
-                    command=self._select)
-                prevbtn.pack(side="right", anchor="e", padx=6)
-                if indx == len(self.pages) - 1:
-                    nextbtn.setText("Finish")
-                    nextbtn.command = self.close'''
+        if hasattr(self, "tabframe"):
+            self.tabframe.pack_forget()
+        self.tabframe = Tkinter.Frame(self, background=bg, borderwidth=0, highlightthickness=0)
+        self.tabframe.pack(side="top", fill="x", padx=6, pady=6)
+        for indx1, child1 in enumerate(self.pages):
+            btn = Radiobutton(self.tabframe, variable=self.current, value=indx1,
+                                text=child1.text)
+            btn.grid(row=0, column=indx1)
+        '''nextbtn = Button(child.btnframe, text=_("Next"), command=self._select)
+        nextbtn.pack(side="right", anchor="e", padx=6)
+        quitbtn = Button(child.btnframe, text=_("Quit"), command=self.close)
+        quitbtn.pack(side="left", anchor="w", padx=6)
+        if indx > 0:
+            prevbtn = Button(child.btnframe, text=_("Previous"),
+                command=self._select)
+            prevbtn.pack(side="right", anchor="e", padx=6)
+            if indx == len(self.pages) - 1:
+                nextbtn.setText("Finish")
+                nextbtn.command = self.close'''
+        if self.finishedtb != None:
+            self.finishedtb()
     
     def _select(self, *args):
         self.pages[self.old].pack_forget()
@@ -558,31 +591,29 @@ class VerticalScrolledFrame(Tkinter.Frame):
         b.pack(side=Tkinter.BOTTOM)'''
 
 
-class Wizard(Tkinter.Frame):
-    def on_change_tab(self, *args):
-        w = self.select()
-        self.current = self.index(w)
-
+class Wizard(Notebook):
     def __init__(self, master=None, *args, **kw):
         self.master = master
-        self.pages = []
-        self.current = 0
-        npages = kw.pop('npages', 3)
-        _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
-        Tkinter.Frame.__init__(self, master, *args, **kw)
-        for page in range(npages):
+        #self.pages = []
+        #self.current = 0
+        #npages = kw.pop('npages', 0)
+        #_setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
+        Notebook.__init__(self, master, *args, **kw)
+        self.finishedtb = self._wizard_buttons
+        '''for page in range(npages):
             logger.logVV(tn, _("Creating page") + " " + str(page))
             self.add_empty_page()
-        self.pages[0].pack(fill='both', expand=1)
-        self._wizard_buttons()
-        self.bind("<<NotebookTabChanged>>", self.on_change_tab)
+        #self.pages[0].pack(fill='both', expand=1)
+        #self._wizard_buttons()'''
 
     def _wizard_buttons(self):
         # Place wizard buttons on the pages
+        logger.logW(tn, "WIZARDPAGES:" + str(len(self.pages)))
         for indx, child in enumerate(self.pages):
             if hasattr(child, "btnframe"):
                 child.btnframe.pack_forget()
-            child.btnframe = Tkinter.Frame(child, background=bg, borderwidth=0, highlightthickness=0)
+            child.btnframe = Tkinter.Frame(child, background=bg, borderwidth=0,
+                                           highlightthickness=0)
             child.btnframe.pack(side="bottom", fill="x", padx=6, pady=12)
             nextbtn = Button(child.btnframe, text=_("Next"), command=self.next_page)
             nextbtn.pack(side="right", anchor="e", padx=6)
@@ -599,27 +630,22 @@ class Wizard(Tkinter.Frame):
             progressframe.pack(side="bottom", fill="x", padx=6)
             progress = ttk.Progressbar(progressframe)
             progress.pack(fill="x")'''
-    
-    def _switch_page(self, current):
-        self.pages[self.current].pack_forget()
-        self.current = current
-        self.pages[self.current].pack(fill='both', expand=1)
 
     def next_page(self):
         if self.current == len(self.pages):
             return
-        self._switch_page(self.current + 1)
+        self.current.set(self.current.get() + 1)
 
     def prev_page(self):
         if self.current == 0:
             return
-        self._switch_page(self.current - 1)
+        self.current.set(self.current.get() - 1)
 
     def close(self):
         #self.master.destroy()
         exitprog()
 
-    def add_empty_page(self):
+    '''def add_empty_page(self):
         self.pages.append(Tkinter.Frame(self, background=bg, borderwidth=0, highlightthickness=0))
 
     def add_tab(self):
@@ -635,7 +661,7 @@ class Wizard(Tkinter.Frame):
         if page_num < len(self.pages):
             return self.pages[page_num]
         else:
-            logger.logE(tn, _("Page") + " " + str(page_num) + " " + _("does not exist"))
+            logger.logE(tn, _("Page") + " " + str(page_num) + " " + _("does not exist"))'''
 
 
 class FileSelector(Tkinter.Frame):

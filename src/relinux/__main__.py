@@ -54,11 +54,11 @@ def main():
     buffer = configutils.parseCompressedBuffer(buffer2)
     '''for i in configutils.beautify(buffer1):
         print(i)'''
+    aptcache = aptutil.getCache()
     root = Tkinter.Tk()
     #root.overrideredirect(Tkinter.TRUE) # Coming soon!
     App = gui.GUI(root)
     App.fillConfiguration(buffer)
-    aptcache = aptutil.getCache()
     for i in modules:
         modloader.runModule(modloader.loadModule(i), {"gui": App, "config": buffer, "aptcache": aptcache})
     root.mainloop()
