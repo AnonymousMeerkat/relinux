@@ -55,7 +55,7 @@ def main():
     '''for i in configutils.beautify(buffer1):
         print(i)'''
     root = Tkinter.Tk()
-    #root.overrideredirect(1) # Coming soon!
+    #root.overrideredirect(Tkinter.TRUE) # Coming soon!
     App = gui.GUI(root)
     App.fillConfiguration(buffer)
     aptcache = aptutil.getCache()

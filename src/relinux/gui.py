@@ -44,6 +44,58 @@ def _setPixel(obj, pixel, x, y, color):
 def _getPixel(obj, x, y, color):
     return obj.create_line(x, y, x + 1, y + 1, fill=color)
 
+def _gradientSC(color1, color2, percent):
+    col1 = float(float(color1) / 255)
+    col2 = float(float(color2) / 255)
+    if percent > 1:
+        percent = 1.0
+    ans = col1 - ((col1 - col2) * percent)
+    fans = int(ans * 255)
+    if fans > 255:
+        fans = 255
+    if fans < 0:
+        fans = 0
+    return fans
+
+def _gradient(rgb1, rgb2, percent):
+    r1, g1, b1 = rgb1
+    r2, g2, b2 = rgb2
+    return (_gradientSC(r1, r2, percent), _gradientSC(g1, g2, percent),
+            _gradientSC(b1, b2, percent))
+
+class glowyFade(threading.Thread):
+    def __init__(self, func, color1, color2):
+        threading.Thread.__init__(self)
+        self.func = func
+        self.col1 = color1
+        self.col2 = color2
+        self.anim = 0.0
+        self.time = time.time()
+        self.delta = 0
+        self.stopme = False
+    
+    def stop(self):
+        self.stopme = True
+
+    def _getDelta(self):
+        thistime = time.time()
+        self.delta = thistime - self.time
+        self.time = thistime
+
+    def run(self):
+        if not anims:
+            self.func(self.col2)
+        else:
+            self.loop()
+
+    def loop(self):
+        while self.anim < 1.0 and not self.stopme:
+            self._getDelta()
+            self.func(_gradient(self.col1, self.col2, self.anim))
+            self.anim = self.anim + (0.1 * float((float(self.delta) * 100)))
+
+
+
 # Rectangle Renderer for the Glowy theme
 class GlowyRectangleRenderer(threading.Thread):
     def __init__(self, obj):
@@ -53,28 +105,9 @@ class GlowyRectangleRenderer(threading.Thread):
         self.delta = 0
         self.time = time.time()
         self.stopme = False
-    
+
     def stop(self):
         self.stopme = True
-
-    def _gradientSC(self, color1, color2, percent):
-        col1 = float(float(color1) / 255)
-        col2 = float(float(color2) / 255)
-        if percent > 1:
-            percent = 1.0
-        ans = col1 - ((col1 - col2) * percent)
-        fans = int(ans * 255)
-        if fans > 255:
-            fans = 255
-        if fans < 0:
-            fans = 0
-        return fans
-
-    def _gradient(self, rgb1, rgb2, percent):
-        r1, g1, b1 = rgb1
-        r2, g2, b2 = rgb2
-        return (self._gradientSC(r1, r2, percent), self._gradientSC(g1, g2, percent),
-                self._gradientSC(b1, b2, percent))
 
     def _getDelta(self):
         thistime = time.time()
@@ -85,34 +118,26 @@ class GlowyRectangleRenderer(threading.Thread):
         if not anims:
             self.obj.anim = 1.0
         self.loop()
-    
+
     def loop(self):
-        if self.stopme:
-            return
-        self._getDelta()
-        color = normalc
-        if self.obj.clicking:
+        while True:
+            self._getDelta()
+            color = normalc
+            if self.obj.clicking:
+                color = clickc
+            elif self.obj.hovering:
+                color = hoverc
             if self.obj.anim <= 0.0:
                 self.startme = copy.copy(self.obj.lastcolor)
-            color = self._gradient(self.startme, clickc, self.obj.anim)
+            color = _gradient(self.startme, color, self.obj.anim)
             self.obj.lastcolor = color
             self._line(color)
-            return
-        elif self.obj.hovering:
-            if self.obj.anim <= 0.0:
-                self.startme = copy.copy(self.obj.lastcolor)
-            color = self._gradient(self.startme, hoverc, self.obj.anim)
-            self.obj.lastcolor = color
-            self._line(color)
-            return
-        else:
-            if self.obj.anim <= 0.0:
-                self.startme = copy.copy(self.obj.lastcolor)
-            color = self._gradient(self.startme, normalc, self.obj.anim)
-            self.obj.lastcolor = color
-            self._line(color)
-            return
-    
+            self.obj.anim += (0.1 * float((float(self.delta) * 100)))
+            if not (not self.stopme and self.obj.anim < 1.0):
+                break
+        if self.obj.finishrenderingcmd != None:
+            self.obj.finishrenderingcmd()
+
     def _line(self, color):
         if self.stopme:
             return
@@ -120,50 +145,59 @@ class GlowyRectangleRenderer(threading.Thread):
         for i in range(0, self.obj.width):
             percent = float((float(i) / float(self.obj.width)))
             _setPixel(self.obj, self.obj.c_bottom[i], i, self.obj.height - 1,
-                               _rgbtohex(self._gradient(start, color, percent)))
+                               _rgbtohex(_gradient(start, color, percent)))
         for i in range(0, self.obj.height):
             percent = float((float(i) / float(self.obj.height)))
             _setPixel(self.obj, self.obj.c_right[i], self.obj.width - 1, i,
-                               _rgbtohex(self._gradient(start, color, percent)))
+                               _rgbtohex(_gradient(start, color, percent)))
         self.obj.coords(self.obj.c_left, 0, 0, 0, self.obj.height)
         self.obj.coords(self.obj.c_top, 0, 0, self.obj.width, 0)
         self.obj.itemconfig(self.obj.c_left, fill=_rgbtohex(start))
         self.obj.itemconfig(self.obj.c_top, fill=_rgbtohex(start))
-        willloop = False
-        if self.obj.anim < 1.0 and not self.stopme:
-            self.obj.anim = self.obj.anim + (0.1 * float((float(self.delta) * 100)))
-            #time.sleep(float(float(1000 / 100) / 1000))
-            willloop = True
-        if willloop and not self.stopme:
-            self.loop()
-        else:
-            if self.obj.finishrenderingcmd != None:
-                self.obj.finishrenderingcmd()
+
+
+# Glowy component
+class Component(Tkinter.Canvas):
+    def __init__(self, parent, *args, **kw):
+        bindclick = kw.pop("bindclick", True)
+        bindunclick = kw.pop("bindunclick", True)
+        _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
+        Tkinter.Canvas.__init__(self, parent, *args, **kw)
+        self.height = 0
+        self.width = 0
+        self.hovering = False
+        self.clicking = False
+        self.anim = 1.0
+        self.c_top = self.create_line(0, 0, 0, self.height, fill="#000")
+        self.c_left = self.create_line(0, 0, self.width, 0, fill="#000")
+        self.c_bottom = []
+        self.c_right = []
+        self.setHeight(self.font.actual("size") * -1 + 8)
+        self.setWidth(self.width)
+        self.bind("<Enter>", self.hoveringtrue)
+        self.bind("<Leave>", self.hoveringfalse)
+        self.finishrenderingcmd = None
+        self.busy = False
+        if bindclick:
+            self.bind("<ButtonPress-1>", self.onclick)
+        if bindunclick:
+            self.bind("<ButtonRelease-1>", self.onunclick)
+        self.lastcolor = (0, 0, 0)
+        self.currrenderer = None
+
+    def __del__(self):
+        self.currrenderer.stop()
+        self.busy = False
 
 
 # Glowy button
 class Button(Tkinter.Canvas):
     def __init__(self, parent, *args, **kw):
-        self.command = None
-        textset = False
-        bindclick = True
-        bindunclick = True
-        self.mousedown = None
-        if "command" in kw.keys():
-            self.command = kw["command"]
-            del(kw["command"])
-        if "text" in kw.keys():
-            textset = kw["text"]
-            del(kw["text"])
-        if "bindclick" in kw.keys():
-            bindclick = kw["bindclick"]
-            del(kw["bindclick"])
-        if "bindunclick" in kw.keys():
-            bindunclick = kw["bindunclick"]
-            del(kw["bindunclick"])
-        if "mousedown" in kw.keys():
-            self.mousedown = kw["mousedown"]
-            del(kw["mousedown"])
+        self.command = kw.pop("command", None)
+        textset = kw.pop("text", False)
+        bindclick = kw.pop("bindclick", True)
+        bindunclick = kw.pop("bindunclick", True)
+        self.mousedown = kw.pop("mousedown", None)
         _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
         Tkinter.Canvas.__init__(self, parent, *args, **kw)
         label = Tkinter.Label(self, text="Unused")
@@ -174,7 +208,7 @@ class Button(Tkinter.Canvas):
         self.anim = 1.0
         self.clicking = False
         self.commandvalid = False
-        self.text = "hi"
+        self.text = ""
         self.c_text = self.create_text(self.width / 2, self.height / 2, text=self.text,
                                  font=self.font, fill="white")
         self.c_top = self.create_line(0, 0, 0, self.height, fill="#000")
@@ -303,8 +337,30 @@ class Entry(Tkinter.Entry):
     def __init__(self, parent, *args, **kw):
         _setDefault(kw, background=bg, foreground="white", selectbackground="white",
                     selectforeground=bg, borderwidth=0, highlightbackground=_rgbtohex(normalc),
-                    highlightcolor=_rgbtohex(hoverc))
+                    highlightcolor=_rgbtohex(clickc))
+        self.lastcolor = normalc
+        self.renderthread = None
         Tkinter.Entry.__init__(self, parent, *args, **kw)
+        self.bind("<Enter>", self.hoveringtrue)
+        self.bind("<Leave>", self.hoveringfalse)
+
+    def _setHB(self, value):
+        self.lastcolor = value
+        self.config(highlightbackground=_rgbtohex(value))
+
+    def hoveringtrue(self, *args):
+        if self.renderthread != None and self.renderthread.isAlive():
+            self.renderthread.stop()
+        self.renderthread = glowyFade(self._setHB, copy.copy(self.lastcolor), hoverc)
+        self.renderthread.start()
+        #self.config(highlightbackground=_rgbtohex(hoverc))
+
+    def hoveringfalse(self, *args):
+        if self.renderthread != None and self.renderthread.isAlive():
+            self.renderthread.stop()
+        self.renderthread = glowyFade(self._setHB, copy.copy(self.lastcolor), normalc)
+        self.renderthread.start()
+        #self.config(highlightbackground=_rgbtohex(normalc))
 
 
 # Temporary Label
@@ -329,6 +385,8 @@ class Combobox(Tkinter.OptionMenu):
         self.current = Tkinter.StringVar()
         self.choices = choices
         Tkinter.OptionMenu.__init__(self, parent, self.current, *self.choices)
+        self.renderthread = None
+        self.lastcolor = normalc
         self.config(background=bg, foreground="white", borderwidth=0,
                     highlightthickness=1, relief=Tkinter.FLAT, highlightbackground=_rgbtohex(normalc),
                     padx=2, pady=2, activebackground=bg, activeforeground="white")
@@ -340,11 +398,23 @@ class Combobox(Tkinter.OptionMenu):
     def set(self, value):
         self.current.set(value)
     
+    def _setHB(self, value):
+        self.lastcolor = value
+        self.config(highlightbackground=_rgbtohex(value))
+    
     def hoveringtrue(self, *args):
-        self.config(highlightbackground=_rgbtohex(hoverc))
+        if self.renderthread != None and self.renderthread.isAlive():
+            self.renderthread.stop()
+        self.renderthread = glowyFade(self._setHB, copy.copy(self.lastcolor), hoverc)
+        self.renderthread.start()
+        #self.config(highlightbackground=_rgbtohex(hoverc))
     
     def hoveringfalse(self, *args):
-        self.config(highlightbackground=_rgbtohex(normalc))
+        if self.renderthread != None and self.renderthread.isAlive():
+            self.renderthread.stop()
+        self.renderthread = glowyFade(self._setHB, copy.copy(self.lastcolor), normalc)
+        self.renderthread.start()
+        #self.config(highlightbackground=_rgbtohex(normalc))
 
 
 # Glowy Radiobutton (based on the Glowy Button)
