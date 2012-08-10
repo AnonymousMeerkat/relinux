@@ -75,7 +75,7 @@ class glowyFade(threading.Thread):
         self.time = time.time()
         self.delta = 0
         self.stopme = False
-    
+
     def stop(self):
         self.stopme = True
 
@@ -98,7 +98,6 @@ class glowyFade(threading.Thread):
             time.sleep(0.001)
 
 
-
 # Rectangle Renderer for the Glowy theme
 class GlowyRectangleRenderer(threading.Thread):
     def __init__(self, obj):
@@ -118,7 +117,7 @@ class GlowyRectangleRenderer(threading.Thread):
         thistime = time.time()
         self.delta = thistime - self.time
         self.time = thistime
-    
+
     def _rlfc(self, *args):
         if self.obj.renderlock.get() == 0 and self.rlisf:
             print("OK!")
@@ -283,7 +282,7 @@ class Button(Tkinter.Canvas):
             self.bind("<ButtonPress-1>", self.onclick)
         if bindunclick:
             self.bind("<ButtonRelease-1>", self.onunclick)
-        self.lastcolor = (0, 0, 0)
+        self.lastcolor = normalc
         self.renderthread = None
         if textset == False:
             self.setText("")
@@ -404,7 +403,7 @@ class Entry(Tkinter.Entry):
 # Temporary Label
 class Label(Tkinter.Label):
     def __init__(self, parent, *args, **kw):
-        _setDefault(kw, background=bg, foreground="white", borderwidth=0,
+        _setDefault(kw, background=bg, foreground="white", borderwidth=0, pady=6, padx=6,
                     highlightbackground=_rgbtohex(normalc), highlightcolor=_rgbtohex(hoverc))
         Tkinter.Label.__init__(self, parent, *args, **kw)
 
