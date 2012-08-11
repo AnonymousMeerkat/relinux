@@ -14,6 +14,7 @@ import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
 from argparse import ArgumentParser
 import Tkinter
+import threading
 
 
 def exitprog():
@@ -48,20 +49,43 @@ def main():
         logger.verbose()
     if args.veryverbose is True:
         logger.veryverbose()
-    modules = modloader.getModules()
-    buffer1 = configutils.getBuffer(open("../../relinux.conf"))
-    buffer2 = configutils.compress(buffer1)
-    buffer = configutils.parseCompressedBuffer(buffer2)
-    '''for i in configutils.beautify(buffer1):
-        print(i)'''
-    aptcache = aptutil.getCache()
+    modules = []
+    aptcache = []
+    cbuffer = []
     root = Tkinter.Tk()
+    App = None
+    def startProg(splash):
+        global modules, aptcache, cbuffer
+        spprogn = 5
+        spprog = 0
+        def calcPercent():
+            ans = float(float(spprog) / spprogn) * 100
+            return ans
+        splash.setProgress(calcPercent(), "Loading modules...")
+        modules = modloader.getModules()
+        spprog += 1
+        splash.setProgress(calcPercent(), "Parsing configuration...")
+        buffer1 = configutils.getBuffer(open("../../relinux.conf"))
+        buffer2 = configutils.compress(buffer1)
+        cbuffer = configutils.parseCompressedBuffer(buffer2)
+        '''for i in configutils.beautify(buffer1):
+            print(i)'''
+        spprog += 1
+        splash.setProgress(calcPercent(), "Reading APT Cache...")
+        aptcache = aptutil.getCache()
+        spprog += 1
+        splash.setProgress(calcPercent(), "Loading the GUI...")
+        App = gui.GUI(root)
+        spprog += 1
+        splash.setProgress(calcPercent(), "Filling in configuration...")
+        App.fillConfiguration(cbuffer)
+        spprog += 1
+        splash.setProgress(calcPercent(), "Launching relinux")
+    splash = gui.Splash(root, startProg)
+    root.mainloop()
     #root.overrideredirect(Tkinter.TRUE) # Coming soon!
-    App = gui.GUI(root)
-    App.fillConfiguration(buffer)
     for i in modules:
         modloader.runModule(modloader.loadModule(i), {"gui": App, "config": buffer, "aptcache": aptcache})
-    root.mainloop()
 
 if __name__ == '__main__':
     from relinux import gui, configutils, logger, aptutil, modloader

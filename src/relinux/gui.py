@@ -9,6 +9,7 @@ import tkFont
 import time
 import threading
 import copy
+from PIL import Image, ImageTk
 from relinux import config, configutils, logger
 from relinux.__main__ import exitprog
 
@@ -65,6 +66,18 @@ def _gradient(rgb1, rgb2, percent):
     return (_gradientSC(r1, r2, percent), _gradientSC(g1, g2, percent),
             _gradientSC(b1, b2, percent))
 
+class FuncThread(threading.Thread):
+    def __init__(self, target, ondie, *args):
+        self._target = target
+        self._args = args
+        self.ondie = ondie
+        threading.Thread.__init__(self)
+ 
+    def run(self):
+        self._target(*self._args)
+        if self.ondie != None:
+            self.ondie()
+
 class glowyFade(threading.Thread):
     def __init__(self, func, color1, color2):
         threading.Thread.__init__(self)
@@ -120,7 +133,6 @@ class GlowyRectangleRenderer(threading.Thread):
 
     def _rlfc(self, *args):
         if self.obj.renderlock.get() == 0 and self.rlisf:
-            print("OK!")
             self.rlisf = False
             self.obj.renderlock.set(1)
             self.loop()
@@ -607,7 +619,6 @@ class Wizard(Notebook):
 
     def _wizard_buttons(self):
         # Place wizard buttons on the pages
-        logger.logW(tn, "WIZARDPAGES:" + str(len(self.pages)))
         for indx, child in enumerate(self.pages):
             if hasattr(child, "btnframe"):
                 child.btnframe.pack_forget()
@@ -781,6 +792,66 @@ class Multiple(Tkinter.Frame):
     def _rePack(self):
         for c in list(range(len(self.entries))):
             self.__rePack(c)
+
+
+class Progressbar(Tkinter.Canvas):
+    def __init__(self, parent, width, *args, **kw):
+        _setDefault(kw, border=0, highlightthickness=1, bg=bg, highlightbackground="black",
+                    height=15, width=width)
+        Tkinter.Canvas.__init__(self, parent, *args, **kw)
+        self.progressbar = self.create_rectangle(0, 0, 0, 0, fill=lightbg)
+        self.currprogress = 0
+        self.setProgress(0)
+
+    def setProgress(self, newprogress):
+        self.currprogress = newprogress
+        width = self.winfo_width()
+        if width <= 1:
+            width = self.winfo_reqwidth()
+        calc = float(float(newprogress) / float(100))
+        calc1 = int(calc * self.winfo_width())
+        self.coords(self.progressbar, 0, 0, calc1, self.winfo_reqheight())
+
+    def getProgress(self):
+        return self.currprogress
+
+
+
+class Splash(Tkinter.Toplevel):
+    def __init__(self, master, func):
+        Tkinter.Toplevel.__init__(self, master)
+        self.root = master
+        self.root.withdraw()
+        self.overrideredirect(Tkinter.TRUE)
+        self.progress = Progressbar(self, 480)
+        self.image = ImageTk.PhotoImage(Image.open("../../splash.png"))
+        self.textvar = Tkinter.StringVar()
+        self.progresstext = Label(self, textvariable=self.textvar,
+                                  height=15, width=480, anchor=Tkinter.W)
+        self.imgw = self.image.width()
+        self.imgh = self.image.height()
+        self.w = self.imgw
+        self.h = self.imgh + 32
+        self.x = self.root.winfo_screenwidth() / 2 - self.w / 2
+        self.y = self.root.winfo_screenheight() / 2 - self.h / 2
+        self.geometry("%dx%d+%d+%d" % (self.w, self.h, self.x, self.y))
+        self.panel = Label(self, image=self.image)
+        self.panel.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=True)
+        self.progress.pack(side=Tkinter.BOTTOM, fill=Tkinter.X, expand=True)
+        self.progresstext.pack(side=Tkinter.BOTTOM, fill=Tkinter.X, expand=True)
+        self.update()
+        self.thread = FuncThread(func, self.endSplash, self)
+        self.thread.start()
+
+    def setProgress(self, progress, text):
+        self.progress.setProgress(progress)
+        self.textvar.set(text)
+        self.update()
+    
+    def endSplash(self):
+        self.root.update()
+        self.root.deiconify()
+        self.withdraw()
 
 
 class GUI:
