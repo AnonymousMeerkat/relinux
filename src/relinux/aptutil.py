@@ -14,6 +14,29 @@ ge = 0x03
 gt = 0x04
 
 
+# OpProgress implementation
+class OpProgress(apt.progress.base.OpProgress):
+    def __init__(self, update, finish):
+        apt.progress.base.OpProgress.__init__(self)
+        self.old_op = ""
+        self.updatefunc = update
+        self.finishfunc = finish
+
+    def update(self, percent=None):
+        apt.progress.base.OpProgress.update(self, percent)
+        op = self.op
+        if self.major_change and self.old_op:
+            op = self.old_op
+        self.updatefunc(op, percent)
+        self.old_op = self.op
+
+    def done(self):
+        apt.progress.base.OpProgress.done(self)
+        if self.old_op:
+            self.finishfunc(self.old_op)
+        self.old_op = ""
+
+
 # Initializes APT
 def initApt():
     apt.apt_pkg.init()
@@ -21,8 +44,11 @@ def initApt():
 
 # Returns an APT cache
 # Note that this can take around 2-30 seconds
-def getCache():
-    return apt.apt_pkg.Cache()
+def getCache(progress=None):
+    if progress:
+        return apt.apt_pkg.Cache(progress)
+    else:
+        return apt.apt_pkg.Cache()
 
 
 # Returns an APT DepCache

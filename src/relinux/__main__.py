@@ -14,7 +14,6 @@ import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
 from argparse import ArgumentParser
 import Tkinter
-import threading
 
 
 def exitprog():
@@ -24,6 +23,9 @@ def version():
     print((config.version_string))
     sys.exit()
 
+aptops = 4
+captop = 0
+minis = 0.0
 
 def main():
     logger.normal()
@@ -58,29 +60,42 @@ def main():
         global modules, aptcache, cbuffer
         spprogn = 5
         spprog = 0
-        def calcPercent():
-            ans = float(float(spprog) / spprogn) * 100
+        def calcSubPercent(p, p1):
+            ans = float(float(p) / p1)
             return ans
-        splash.setProgress(calcPercent(), "Loading modules...")
+        def calcPercent(def2=(spprog, spprogn)):
+            ans = float(float(calcSubPercent(*def2)) * float(100))
+            return ans
+        splash.setProgress(calcPercent((spprog, spprogn)), "Loading modules...")
         modules = modloader.getModules()
         spprog += 1
-        splash.setProgress(calcPercent(), "Parsing configuration...")
+        splash.setProgress(calcPercent((spprog, spprogn)), "Parsing configuration...")
         buffer1 = configutils.getBuffer(open("../../relinux.conf"))
         buffer2 = configutils.compress(buffer1)
         cbuffer = configutils.parseCompressedBuffer(buffer2)
         '''for i in configutils.beautify(buffer1):
             print(i)'''
         spprog += 1
-        splash.setProgress(calcPercent(), "Reading APT Cache...")
-        aptcache = aptutil.getCache()
+        splash.setProgress(calcPercent((spprog, spprogn)), "Reading APT Cache...")
+        def aptupdate(op, percent):
+            global minis
+            if percent != None:
+                minis += float(float(percent) / 100)
+            splash.setProgress(calcPercent((calcSubPercent(minis + captop, aptops) + spprog, spprogn)),
+                               "Reading APT Cache... (" + op + ")")
+        def aptdone(op):
+            global minis, captop
+            minis = 0.0
+            captop += 1
+        aptcache = aptutil.getCache(aptutil.OpProgress(aptupdate, aptdone))
         spprog += 1
-        splash.setProgress(calcPercent(), "Loading the GUI...")
+        splash.setProgress(calcPercent((spprog, spprogn)), "Loading the GUI...")
         App = gui.GUI(root)
         spprog += 1
-        splash.setProgress(calcPercent(), "Filling in configuration...")
+        splash.setProgress(calcPercent((spprog, spprogn)), "Filling in configuration...")
         App.fillConfiguration(cbuffer)
         spprog += 1
-        splash.setProgress(calcPercent(), "Launching relinux")
+        splash.setProgress(calcPercent((spprog, spprogn)), "Launching relinux")
     splash = gui.Splash(root, startProg)
     root.mainloop()
     #root.overrideredirect(Tkinter.TRUE) # Coming soon!

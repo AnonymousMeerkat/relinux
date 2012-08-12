@@ -62,10 +62,10 @@ def checkMatched(m):
 
 
 # Returns an empty-line-cleaned version of the buffer
-def cleanEmptyLines(buffer):
+def cleanEmptyLines(buffers):
     patt = re.compile("^ *$")
     returnme = []
-    for i in buffer:
+    for i in buffers:
         m = patt.match(i)
         if not checkMatched(m):
             returnme.append(i)
@@ -73,18 +73,18 @@ def cleanEmptyLines(buffer):
 
 
 # Returns a flat version of the buffer (i.e. no indenting)
-def unIndent(buffer):
+def unIndent(buffers):
     returnme = []
-    for i in buffer:
+    for i in buffers:
         returnme.append(re.sub("^ *", "", i))
     return returnme
 
 
 # Returns a comment-cleaned version of the buffer
-def cleanComments(buffer):
+def cleanComments(buffers):
     patt = re.compile("^ *#.*")
     returnme = []
-    for i in buffer:
+    for i in buffers:
         m = patt.match(i)
         if not checkMatched(m):
             returnme.append(i)
@@ -92,28 +92,28 @@ def cleanComments(buffer):
 
 
 # Returns a compressed version of the buffer
-def compress(buffer):
-    buffer = cleanComments(buffer)
-    buffer = cleanEmptyLines(buffer)
-    return unIndent(buffer)
+def compress(buffers):
+    buffers = cleanComments(buffers)
+    buffers = cleanEmptyLines(buffers)
+    return unIndent(buffers)
 
 
 # Returns the different sections of the buffer
-def getSections(buffer):
+def getSections(buffers):
     patt = re.compile("^ *Section *.*")
     returnme = []
-    for i in buffer:
+    for i in buffers:
         m = patt.match(i)
         if checkMatched(m):
             returnme.append(i.split()[1].strip())
     return returnme
 
 
-# Returns the different options of the buffer
-def getOptions(buffer):
+# Returns the options of the buffer
+def getOptions(buffers):
     patt = re.compile("^ *Option *.*")
     returnme = []
-    for i in buffer:
+    for i in buffers:
         m = patt.match(i)
         if checkMatched(m):
             returnme.append(i.split()[1].strip())
@@ -121,12 +121,12 @@ def getOptions(buffer):
 
 
 # Returns all lines within a section of the buffer (it will not parse them though)
-def getLinesWithinSection(buffer, section):
+def getLinesWithinSection(buffers, section):
     patt = re.compile("^ *Section *" + section + ".*")
     patte = re.compile("^ *EndSection *.*")
     returnme = []
     x = 0
-    for i in buffer:
+    for i in buffers:
         m = patt.match(i)
         if checkMatched(m):
             if x == 1:
@@ -140,12 +140,12 @@ def getLinesWithinSection(buffer, section):
 
 
 # Returns all lines within an option of the buffer (it will not parse them though)
-def getLinesWithinOption(buffer, option):
+def getLinesWithinOption(buffers, option):
     patt = re.compile("^ *Option *" + option + ".*")
     patte = re.compile("^ *EndOption *.*")
     returnme = []
     x = 0
-    for i in buffer:
+    for i in buffers:
         m = patt.match(i)
         if checkMatched(m):
             if x == 1:
@@ -159,10 +159,10 @@ def getLinesWithinOption(buffer, option):
 
 
 # Returns the parsed properties in a dictionary (the buffer has to be compressed though)
-def getProperties(buffer):
+def getProperties(buffers):
     patt = re.compile(r"^ *(.*?):(.*)")
     returnme = {}
-    for i in buffer:
+    for i in buffers:
         m = patt.match(i)
         if checkMatched(m):
             returnme[m.group(1)] = m.group(2).strip()
@@ -170,9 +170,9 @@ def getProperties(buffer):
 
 
 # Returns the value for an property (it will only show the first result, so you have to run getLinesWithinOption)
-def getProperty(buffer, option):
+def getProperty(buffers, option):
     patt = re.compile("^ *" + option + " *:(.*)")
-    for i in buffer:
+    for i in buffers:
         m = patt.match(i)
         if checkMatched(m):
             return m.group(1).strip()
@@ -213,27 +213,27 @@ def _getKernel(t, kernelVersion=None):
 
 # Returns the kernel specified by the buffer
 def getKernel(buffer1):
-    buffer = buffer1.lower()
-    if buffer == "current":
+    buffers = buffer1.lower()
+    if buffers == "current":
         return _getKernel(3)
-    if buffer == "newest" or buffer == "latest":
+    if buffers == "newest" or buffers == "latest":
         return _getKernel(1)
-    if buffer == "oldest":
+    if buffers == "oldest":
         return _getKernel(2)
-    return _getKernel(0, buffer)
+    return _getKernel(0, buffers)
 
 
 # Returns a human-readable version of a compressed buffer (if it isn't compressed, it will look weird)
-def beautify(buffer):
+def beautify(buffers):
     returnme = []
     returnme.append("# " + config.product + " Configuration File")
     returnme.append("")
     returnme.append("")
-    for i in getSections(buffer):
+    for i in getSections(buffers):
         returnme.append("Section " + i)
         returnme.append("")
         returnme.append("")
-        buffer1 = getLinesWithinSection(buffer, i)
+        buffer1 = getLinesWithinSection(buffers, i)
         for x in getOptions(buffer1):
             returnme.append("  Option " + x)
             returnme.append("")
@@ -251,9 +251,9 @@ def beautify(buffer):
 
 
 # Returns a buffer from a configuration file
-def getBuffer(file, strip=True):
+def getBuffer(files, strip=True):
     returnme = []
-    for line in file:
+    for line in files:
         if not line or line is None:
             break
         if strip is True:
@@ -270,11 +270,11 @@ def getBuffer(file, strip=True):
 # Dict3 = Properties
 # Notes: This will take a lot of RAM, and it will take a relatively long time (around 1-3 secs)
 #        Try to only use this function once, and distribute the result to the functions who need this
-def parseCompressedBuffer(buffer):
+def parseCompressedBuffer(buffers):
     returnme = {}
-    for i in getSections(buffer):
+    for i in getSections(buffers):
         returnme[i] = {}
-        liness = getLinesWithinSection(buffer, i)
+        liness = getLinesWithinSection(buffers, i)
         for x in getOptions(liness):
             returnme[i][x] = getProperties(getLinesWithinOption(liness, x))
     return returnme
@@ -282,14 +282,14 @@ def parseCompressedBuffer(buffer):
 
 # Returns a compressed buffer from a parsed buffer
 # This is the opposite of parseCompressedBuffer
-def compressParsedBuffer(buffer):
+def compressParsedBuffer(buffers):
     returnme = []
-    for i in buffer.keys():
+    for i in buffers.keys():
         returnme.append("Section " + i)
-        for x in buffer[i].keys():
+        for x in buffers[i].keys():
             returnme.append("Option " + x)
-            for y in buffer[i][x].keys():
-                returnme.append(y + ": " + buffer[i][x][y])
+            for y in buffers[i][x].keys():
+                returnme.append(y + ": " + buffers[i][x][y])
             returnme.append("EndOption")
         returnme.append("EndSection")
     return returnme
@@ -300,16 +300,16 @@ def compressParsedBuffer(buffer):
 
 
 # Finds the value of a property (buffer is the parsed getProperties buffer)
-def getValueP(buffer, propertys):
-    for i in buffer.keys():
+def getValueP(buffers, propertys):
+    for i in buffers.keys():
         if i.lower() == propertys.lower():
-            return buffer[i]
+            return buffers[i]
     return None
 
 
 # Returns the value of an option
-def getValue(buffer):
-    return getValueP(buffer, value)
+def getValue(buffers):
+    return getValueP(buffers, value)
 
 
 # Returns a boolean (None if not a boolean)
