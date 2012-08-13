@@ -53,12 +53,12 @@ def main():
         logger.veryverbose()
     modules = []
     aptcache = []
-    cbuffer = []
+    cbuffer = {}
     root = Tkinter.Tk()
     App = None
     def startProg(splash):
         global modules, aptcache, cbuffer
-        spprogn = 5
+        spprogn = 6
         spprog = 0
         def calcSubPercent(p, p1):
             ans = float(float(p) / p1)
@@ -80,7 +80,7 @@ def main():
         def aptupdate(op, percent):
             global minis
             if percent != None:
-                minis += float(float(percent) / 100)
+                minis += calcSubPercent(percent, 100)
             splash.setProgress(calcPercent((calcSubPercent(minis + captop, aptops) + spprog, spprogn)),
                                "Reading APT Cache... (" + op + ")")
         def aptdone(op):
@@ -95,12 +95,15 @@ def main():
         splash.setProgress(calcPercent((spprog, spprogn)), "Filling in configuration...")
         App.fillConfiguration(cbuffer)
         spprog += 1
+        splash.setProgress(calcPercent((spprog, spprogn)), "Running modules...")
+        for i in modules:
+            modloader.runModule(modloader.loadModule(i),
+                                {"gui": App, "config": cbuffer, "aptcache": aptcache})
+        spprog += 1
         splash.setProgress(calcPercent((spprog, spprogn)), "Launching relinux")
     splash = gui.Splash(root, startProg)
-    root.mainloop()
     #root.overrideredirect(Tkinter.TRUE) # Coming soon!
-    for i in modules:
-        modloader.runModule(modloader.loadModule(i), {"gui": App, "config": buffer, "aptcache": aptcache})
+    root.mainloop()
 
 if __name__ == '__main__':
     from relinux import gui, configutils, logger, aptutil, modloader

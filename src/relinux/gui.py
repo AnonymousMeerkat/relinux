@@ -19,6 +19,7 @@ tn = logger.genTN(threadname)
 bg = "#383635"
 lightbg = "#656260"
 lightbghover = "#807b79"
+lightbgclick="#595655"
 anims = True
 
 normalc = (140, 200, 255)
@@ -426,6 +427,14 @@ class GScrollbar(Tkinter.Scrollbar):
         _setDefault(kw, background=lightbg, borderwidth=0, relief=Tkinter.FLAT,
                     activebackground=lightbghover, troughcolor=bg)
         Tkinter.Scrollbar.__init__(self, parent, *args, **kw)
+        self.bind("<ButtonPress-1>", self.onclick)
+        self.bind("<ButtonRelease-1>", self.onunclick)
+    
+    def onclick(self, *args):
+        self.config(activebackground=lightbgclick)
+
+    def onunclick(self, *args):
+        self.config(activebackground=lightbghover)
 
 
 # Temporary Combobox
