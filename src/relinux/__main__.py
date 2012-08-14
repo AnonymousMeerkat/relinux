@@ -14,6 +14,7 @@ import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
 from argparse import ArgumentParser
 import Tkinter
+import time
 
 
 def exitprog():

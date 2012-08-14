@@ -9,6 +9,7 @@ import tkFont
 import time
 import threading
 import copy
+import math
 from PIL import Image, ImageTk
 from relinux import config, configutils, logger
 from relinux.__main__ import exitprog
@@ -19,7 +20,7 @@ tn = logger.genTN(threadname)
 bg = "#383635"
 lightbg = "#656260"
 lightbghover = "#807b79"
-lightbgclick="#595655"
+lightbgclick = "#595655"
 anims = True
 
 normalc = (140, 200, 255)
@@ -258,6 +259,7 @@ class Component(Tkinter.Canvas):
 
 
 # Glowy button
+'''
 class Button(Tkinter.Canvas):
     def __init__(self, parent, *args, **kw):
         self.command = kw.pop("command", None)
@@ -325,6 +327,8 @@ class Button(Tkinter.Canvas):
             self.setLineColor(color)
 
     def setLineColor(self, color):
+        if self.clicking:
+            color = clickc
         self.lastcolor = color
         colorh = _rgbtohex(color)
         self.itemconfig(self.c_top, fill=colorh)
@@ -379,6 +383,66 @@ class Button(Tkinter.Canvas):
         self.clicking = False
         self.render()
         if self.command != None and self.commandvalid:
+            self.command()
+'''
+
+# Temporary Button
+class Button(Tkinter.Label):
+    def __init__(self, parent, *args, **kw):
+        self.command = kw.pop("command", None)
+        bindclick = kw.pop("bindclick", True)
+        bindunclick = kw.pop("bindunclick", True)
+        self.mousedown = kw.pop("mousedown", None)
+        _setDefault(kw, background=bg, foreground="white", borderwidth=0, pady=3, padx=8,
+                        highlightbackground=_rgbtohex(normalc), highlightthickness=1)
+        Tkinter.Label.__init__(self, parent, *args, **kw)
+        self.lastcolor = normalc
+        self.renderthread = None
+        self.hovering = False
+        self.clicking = False
+        self.bind("<Enter>", self.hoveringtrue)
+        self.bind("<Leave>", self.hoveringfalse)
+        if bindclick:
+            self.bind("<ButtonPress-1>", self.onclick)
+        if bindunclick:
+            self.bind("<ButtonRelease-1>", self.onunclick)
+    
+    def render(self, anims=True):
+        if self.renderthread != None and self.renderthread.isAlive():
+            self.renderthread.stop()
+        color = normalc
+        if self.hovering:
+            color = hoverc
+        if self.clicking:
+            color = clickc
+        if anims:
+            self.renderthread = glowyFade(self._setHB, copy.copy(self.lastcolor), color)
+            self.renderthread.start()
+        else:
+            self._setHB(color)
+
+    def _setHB(self, value):
+        self.lastcolor = value
+        self.config(highlightbackground=_rgbtohex(value))
+
+    def hoveringtrue(self, *args):
+        self.hovering = True
+        self.render()
+
+    def hoveringfalse(self, *args):
+        self.hovering = False
+        self.render()
+    
+    def onclick(self, *args):
+        self.clicking = True
+        self.render(False)
+        if self.mousedown != None:
+            self.mousedown()
+    
+    def onunclick(self, *args):
+        self.clicking = False
+        self.render(True)
+        if self.command != None and self.hovering:
             self.command()
 
 
@@ -643,7 +707,7 @@ class Wizard(Notebook):
                     command=self.prev_page)
                 prevbtn.pack(side="right", anchor="e", padx=6)
                 if indx == len(self.pages) - 1:
-                    nextbtn.setText("Finish")
+                    nextbtn.config(text="Finish")
                     nextbtn.command = self.close
             '''progressframe = Tkinter.Frame(child)
             progressframe.pack(side="bottom", fill="x", padx=6)
@@ -833,7 +897,15 @@ class Splash(Tkinter.Toplevel):
         self.root.withdraw()
         self.overrideredirect(Tkinter.TRUE)
         self.progress = Progressbar(self, 480)
-        self.image = ImageTk.PhotoImage(Image.open("../../splash.png"))
+        self.image1 = Image.open("../../splash.png")
+        self.image2 = Image.open("../../splash_glowy.png")
+        self.images = []
+        for i in range(0, 11):
+            percent = float(float(i) / 10)
+            self.images.append(ImageTk.PhotoImage(Image.blend(self.image1, self.image2, percent)))
+        print(len(self.images))
+        #self.image = ImageTk.PhotoImage(Image.blend(self.image1, self.image2, 0.0))
+        self.image = self.images[0]
         self.textvar = Tkinter.StringVar()
         self.progresstext = Label(self, textvariable=self.textvar,
                                   height=15, width=480, anchor=Tkinter.W)
@@ -853,14 +925,25 @@ class Splash(Tkinter.Toplevel):
         self.thread.start()
 
     def setProgress(self, progress, text):
+        progress = int(math.floor(progress))
+        if progress > 100:
+            progress = 100
+        if progress < 0:
+            progress = 0
         self.progress.setProgress(progress)
         self.textvar.set(text)
+        percent = float(float(progress) / 100)
+        print(progress / 10)
+        self.image = self.images[progress / 10]
+        #self.image = ImageTk.PhotoImage(Image.blend(self.image1, self.image2, percent))
+        self.panel.configure(image=self.image)
         self.update()
     
     def endSplash(self):
         self.root.update()
         self.root.deiconify()
         self.withdraw()
+        del(self)
 
 
 class GUI:
