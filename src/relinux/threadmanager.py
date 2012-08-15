@@ -43,6 +43,7 @@ def checkThread(thread):
     if thread in threadsrunning:
         if not thread["thread"].isAlive():
             threadsrunning.remove(thread)
+            threadsdone.append(thread)
 
 
 # Thread loop
