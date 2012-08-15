@@ -72,7 +72,7 @@ def defineWriter(files, lists):
 genisotree = {"deps": [], "tn": "ISOTree"}
 class genISOTree(threading.Thread):
     def __init__(self):
-        self.tn = logger.genTN(copypreseed["tn"])
+        self.tn = logger.genTN(genisotree["tn"])
 
     def run(self):
         logger.logI(self.tn, _("Generating ISO Tree"))
