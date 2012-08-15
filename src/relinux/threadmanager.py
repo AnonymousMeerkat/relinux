@@ -17,7 +17,7 @@ def findRunnableThreads(threads):
     cpumax = fsutil.getCPUCount()
     current = 0
     for i in threads:
-        if not i in threadsdone and current < cpumax:
+        if not i in threadsdone and not i in threadsrunning and current < cpumax:
             deps = 0
             depsl = len(i["deps"])
             for x in i["deps"]:

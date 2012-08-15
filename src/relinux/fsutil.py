@@ -92,7 +92,7 @@ def sizeTrans(size, htom=True):
 # Makes a directory
 def makedir(dirs, tn=""):
     if not os.path.exists(dirs):
-        logger.logVV(tn, _("Creating directory") + " " + dir)
+        logger.logVV(tn, _("Creating directory") + " " + str(dir))
         os.makedirs(dirs)
 
 
@@ -103,13 +103,13 @@ def maketree(arr, tn=""):
 
 
 # Simple implementation of the touch utility
-def touch(file, tn=""):
-    if os.path.exists(file):
-        logger.logVV(tn, _("Touching file") + " " + file)
-        os.utime(file, None)
+def touch(files, tn=""):
+    if os.path.exists(files):
+        logger.logVV(tn, _("Touching file") + " " + str(files))
+        os.utime(files, None)
     else:
-        logger.logVV(tn, _("Creating file") + " " + file)
-        open(file, "w").close()
+        logger.logVV(tn, _("Creating file") + " " + str(files))
+        open(files, "w").close()
 
 
 # Same as maketree, but for files instead
@@ -120,27 +120,27 @@ def makefiles(arr, tn=""):
 
 # Removes a file
 # If followlink is True, then it will remove both the link and the origin
-def rm(file, followlink=False, tn=""):
-    rfile = file
-    dfile = delink(file)
+def rm(files, followlink=False, tn=""):
+    rfile = files
+    dfile = delink(files)
     rmstring = "Removing "
-    if os.path.isdir(file):
+    if os.path.isdir(files):
         rmstring += "directory "
     if dfile is not None:
-        file = dfile
+        files = dfile
         rmstring += "symlink "
-    if os.path.isfile(file):
-        logger.logVV(tn, _(rmstring) + file)
+    if os.path.isfile(files):
+        logger.logVV(tn, _(rmstring) + files)
         os.remove(rfile)
         if followlink is True and dfile is not None:
-            logger.logVV(tn, _("Removing") + " " + file)
-            os.remove(file)
-    elif os.path.isdir(file):
-        logger.logVV(tn, _(rmstring + file))
+            logger.logVV(tn, _("Removing") + " " + files)
+            os.remove(files)
+    elif os.path.isdir(files):
+        logger.logVV(tn, _(rmstring + files))
         shutil.rmtree(rfile)
         if followlink is True and dfile is not None:
-            logger.logVV(tn, _("Removing directory") + " " + file)
-            os.remove(file)
+            logger.logVV(tn, _("Removing directory") + " " + files)
+            os.remove(files)
 
 
 # Removes a list of files
