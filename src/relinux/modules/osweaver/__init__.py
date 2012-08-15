@@ -15,6 +15,7 @@ isotreel = config.ISOTree + "/"
 tmpsys = config.TempSys + "/"
 configs = {}
 aptcache = {}
+page = {}
 
 
 def runThreads():
@@ -26,12 +27,20 @@ def runThreads():
 
 
 def run(adict):
-    global configs, aptcache
+    global configs, aptcache, page
     configs = adict["config"]["OSWeaver"]
     aptcache = adict["aptcache"]
     ourgui = adict["gui"]
     pagenum = ourgui.wizard.add_tab()
-    ourgui.mypage = gui.Label(ourgui.wizard.page(pagenum), text=_("My Page"))
-    ourgui.wizard.add_page_body(pagenum, _("Page"), ourgui.mypage)
+    page = gui.Frame(ourgui.wizard.page(pagenum))
+    ourgui.wizard.add_page_body(pagenum, _("OSWeaver"), page)
+    page.frame = gui.Frame(page, borderwidth=2, relief=Tkinter.GROOVE)
+    page.progress = gui.Progressbar(page)
+    page.progress.pack(fill=Tkinter.X, expand=True, side=Tkinter.BOTTOM,
+                          anchor=Tkinter.S)
+    page.frame.pack(fill=Tkinter.BOTH, expand=True, anchor=Tkinter.CENTER)
+    page.button = gui.Button(page.frame, text="Start!", command=runThreads)
+    page.button.pack()
+
 
 from relinux.modules.osweaver import isoutil, squashfs, tempsys

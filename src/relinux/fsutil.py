@@ -348,8 +348,8 @@ def ife_getbuffers(file):
 
 # Interactive file editor
 # Function must return an array:
-#     0 = Write line? True or False
-#     1 = Line to write (which, of course, will not be written if 0 = False), String
+#     0 = Write line? Boolean
+#     1 = Line to write (which, of course, will not be written if 0 is False), String
 def ife(buffers, func):
     for i in buffers[3]:
         r = func(i)

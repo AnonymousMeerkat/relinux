@@ -258,6 +258,13 @@ class Component(Tkinter.Canvas):
         self.currrenderer.start()
 
 
+# Temporary Frame
+class Frame(Tkinter.Frame):
+    def __init__(self, parent, *args, **kw):
+        _setDefault(kw, highlightthickness=0, borderwidth=0, background=bg, relief=Tkinter.FLAT)
+        Tkinter.Frame.__init__(self, parent, *args, **kw)
+
+
 # Glowy button
 '''
 class Button(Tkinter.Canvas):
@@ -562,7 +569,7 @@ class Radiobutton(Button):
 
 
 # Glowy Notebook
-class Notebook(Tkinter.Frame):
+class Notebook(Frame):
     def __init__(self, master=None, *args, **kw):
         self.master = master
         self.pages = []
@@ -572,7 +579,7 @@ class Notebook(Tkinter.Frame):
         self.finishedtb = None
         npages = kw.pop('npages', 0)
         _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
-        Tkinter.Frame.__init__(self, master, *args, **kw)
+        Frame.__init__(self, master, *args, **kw)
         if npages > 0:
             for page in range(npages):
                 self.add_empty_page()
@@ -584,7 +591,7 @@ class Notebook(Tkinter.Frame):
         # Place tab buttons on the pages
         if hasattr(self, "tabframe"):
             self.tabframe.pack_forget()
-        self.tabframe = Tkinter.Frame(self, background=bg, borderwidth=0, highlightthickness=0)
+        self.tabframe = Frame(self, background=bg, borderwidth=0, highlightthickness=0)
         self.tabframe.pack(side="top", fill="x", padx=6, pady=6)
         for indx1, child1 in enumerate(self.pages):
             btn = Radiobutton(self.tabframe, variable=self.current, value=indx1,
@@ -613,7 +620,7 @@ class Notebook(Tkinter.Frame):
         self.master.destroy()
 
     def add_empty_page(self):
-        self.pages.append(Tkinter.Frame(self, background=bg, borderwidth=0, highlightthickness=0, relief=Tkinter.FLAT))
+        self.pages.append(Frame(self, relief=Tkinter.FLAT))
         self.pages[len(self.pages) - 1].text = ""
 
     def add_tab(self):
@@ -636,10 +643,10 @@ class Notebook(Tkinter.Frame):
 
 
 # Scrolling frame, based on http://Tkinter.unpy.net/wiki/VerticalScrolledFrame
-class VerticalScrolledFrame(Tkinter.Frame):
+class VerticalScrolledFrame(Frame):
     def __init__(self, parent, *args, **kw):
         _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0, relief=Tkinter.FLAT)
-        Tkinter.Frame.__init__(self, parent, *args, **kw)
+        Frame.__init__(self, parent, *args, **kw)
         vscrollbar = GScrollbar(self, orient=Tkinter.VERTICAL)
         vscrollbar.pack(fill=Tkinter.Y, side=Tkinter.RIGHT, expand=Tkinter.FALSE)
         canvas = Tkinter.Canvas(self, kw, yscrollcommand=vscrollbar.set)
@@ -647,7 +654,7 @@ class VerticalScrolledFrame(Tkinter.Frame):
         vscrollbar.config(command=canvas.yview)
         canvas.xview_moveto(0)
         canvas.yview_moveto(0)
-        self.interior = interior = Tkinter.Frame(canvas, kw)
+        self.interior = interior = Frame(canvas, kw)
         interior.pack(fill=Tkinter.BOTH, expand=Tkinter.TRUE)
         interior_id = canvas.create_window(0, 0, window=interior,
                                            anchor=Tkinter.NW)
@@ -695,8 +702,7 @@ class Wizard(Notebook):
         for indx, child in enumerate(self.pages):
             if hasattr(child, "btnframe"):
                 child.btnframe.pack_forget()
-            child.btnframe = Tkinter.Frame(child, background=bg, borderwidth=0,
-                                           highlightthickness=0)
+            child.btnframe = Frame(child)
             child.btnframe.pack(side="bottom", fill="x", padx=6, pady=12)
             nextbtn = Button(child.btnframe, text=_("Next"), command=self.next_page)
             nextbtn.pack(side="right", anchor="e", padx=6)
@@ -747,15 +753,9 @@ class Wizard(Notebook):
             logger.logE(tn, _("Page") + " " + str(page_num) + " " + _("does not exist"))'''
 
 
-class FileSelector(Tkinter.Frame):
+class FileSelector(Frame):
     def __init__(self, *args, **kw):
-        if not "background" in kw.keys():
-            kw["background"] = bg
-        if not "borderwidth" in kw.keys():
-            kw["borderwidth"] = 0
-        if not "highlightthickness" in kw.keys():
-            kw["highlightthickness"] = 0
-        Tkinter.Frame.__init__(self, *args, **kw)
+        Frame.__init__(self, *args, **kw)
         self.entry = Entry(self)
         self.button = Button(self, text="...", command=self._on_button)
         self.button.grid(row=0, column=1)
@@ -768,10 +768,9 @@ class FileSelector(Tkinter.Frame):
             self.entry.insert(0, s)
 
 
-class YesNo(Tkinter.Frame):
+class YesNo(Frame):
     def __init__(self, *args, **kw):
-        _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
-        Tkinter.Frame.__init__(self, *args, **kw)
+        Frame.__init__(self, *args, **kw)
         self.v = Tkinter.IntVar()
         self.y = Radiobutton(self, text=_("Yes"), variable=self.v, value=1)
         self.y.grid(row=0, column=0)
@@ -795,10 +794,9 @@ class YesNo(Tkinter.Frame):
             return None
 
 
-class Choice(Tkinter.Frame):
+class Choice(Frame):
     def __init__(self, parent, choices, *args, **kw):
-        _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
-        Tkinter.Frame.__init__(self, parent, *args, **kw)
+        Frame.__init__(self, parent, *args, **kw)
         self.cb = Combobox(self, choices)
         self.entry = Entry(self)
         self.cb.grid(row=0, column=0)
@@ -811,10 +809,9 @@ class Choice(Tkinter.Frame):
             self.entry.grid_remove()
 
 
-class Multiple(Tkinter.Frame):
+class Multiple(Frame):
     def __init__(self, *args, **kw):
-        _setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
-        Tkinter.Frame.__init__(self, *args, **kw)
+        Frame.__init__(self, *args, **kw)
         self.entries = []
         self.pluses = []
         self.minuses = []
@@ -868,9 +865,9 @@ class Multiple(Tkinter.Frame):
 
 
 class Progressbar(Tkinter.Canvas):
-    def __init__(self, parent, width, *args, **kw):
+    def __init__(self, parent, *args, **kw):
         _setDefault(kw, border=0, highlightthickness=1, bg=bg, highlightbackground="black",
-                    height=15, width=width)
+                    height=15)
         Tkinter.Canvas.__init__(self, parent, *args, **kw)
         self.progressbar = self.create_rectangle(0, 0, 0, 0, fill=lightbg)
         self.currprogress = 0
@@ -882,7 +879,7 @@ class Progressbar(Tkinter.Canvas):
         if width <= 1:
             width = self.winfo_reqwidth()
         calc = float(float(newprogress) / float(100))
-        calc1 = int(calc * self.winfo_width())
+        calc1 = int(calc * width)
         self.coords(self.progressbar, 0, 0, calc1, self.winfo_reqheight())
 
     def getProgress(self):
@@ -896,14 +893,13 @@ class Splash(Tkinter.Toplevel):
         self.root = master
         self.root.withdraw()
         self.overrideredirect(Tkinter.TRUE)
-        self.progress = Progressbar(self, 480)
+        self.progress = Progressbar(self)
         self.image1 = Image.open("../../splash.png")
         self.image2 = Image.open("../../splash_glowy.png")
         self.images = []
         for i in range(0, 11):
             percent = float(float(i) / 10)
             self.images.append(ImageTk.PhotoImage(Image.blend(self.image1, self.image2, percent)))
-        print(len(self.images))
         #self.image = ImageTk.PhotoImage(Image.blend(self.image1, self.image2, 0.0))
         self.image = self.images[0]
         self.textvar = Tkinter.StringVar()
@@ -933,7 +929,6 @@ class Splash(Tkinter.Toplevel):
         self.progress.setProgress(progress)
         self.textvar.set(text)
         percent = float(float(progress) / 100)
-        print(progress / 10)
         self.image = self.images[progress / 10]
         #self.image = ImageTk.PhotoImage(Image.blend(self.image1, self.image2, percent))
         self.panel.configure(image=self.image)
@@ -958,7 +953,7 @@ class GUI:
         self.wizard.add_page_body(0, _("Welcome"), self.page0)
         self.wizard.add_page_body(1, _("Configure"), self.page1)
         self.wizard.add_tab()
-        self.page2 = Tkinter.Frame(self.wizard.page(2), background=bg, borderwidth=0, highlightthickness=0)
+        self.page2 = Frame(self.wizard.page(2))
         Label(self.page2, text="          ").pack()
         Button(self.page2, text="Test").pack()
         self.wizard.add_page_body(2, _("Page 3"), self.page2)
@@ -975,7 +970,7 @@ class GUI:
     def fillConfiguration(self, configs):
         c = 0
         for i in configs.keys():
-            cur = Tkinter.Frame(self.page1)
+            cur = Frame(self.page1)
             ids = self.page1.add_tab()
             self.page1.add_page_body(ids, i, cur)
             #self.page1.add(cur)

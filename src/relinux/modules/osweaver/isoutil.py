@@ -20,9 +20,22 @@ threadname = "ISOTree"
 ct = "1"
 # C False
 cf = "0"
-# Options
-isogenopts = ("-r -cache-inodes -J -l -b " + isotreel + "isolinux/isolinux.bin -c " + isotreel +
-              "isolinux/boot.cat -no-emul-boot " +
+# ISO Generation Options
+# Options:
+# -r                   Use the Rock Ridge protocol
+# -V label             Label of the ISO
+# -cache-inodes        Enable caching inodes and device numbers
+# -J                   Use Joliet specification to let pathnames use 64 characters
+# -l                   Allow 31-character filenames (Joliet will replace this of course)
+# -b bootimage         Boot with the specified image
+# -c bootcatalog       Path to generate the boot catalog
+# -no-emul-boot        Shows that the boot image specified is a "no emulation" image
+#                         This means that the system will not perform any disk emulation when running it
+# -boot-load-size 4    Number of virtual sectors to load
+# -boot-info-table     Add a boot information table to the boot image
+# -o file              Output image
+isogenopts = ("-r -cache-inodes -J -l -b " + isotreel + "isolinux/isolinux.bin -c " + isotreel + 
+              "isolinux/boot.cat -no-emul-boot " + 
               "-boot-load-size 4 -boot-info-table")
 
 
@@ -32,8 +45,8 @@ def getDiskName():
 
 
 # Shows a file not found error
-def showFileNotFound(file, dirs, tn):
-    logger.logE(tn, logger.Error + file + " " + _("not found") + "." + _("Copy") + " " + file +
+def showFileNotFound(files, dirs, tn):
+    logger.logE(tn, files + " " + _("not found") + "." + _("Copy") + " " + files + 
                 " " + _("to") + " " + dirs)
 
 
@@ -48,8 +61,8 @@ def copyFile(src, dst, critical=False):
 
 # C precompiler definition writer
 # lists - Dictionary containing all options needed
-def defineWriter(file, lists):
-    d = open(file, "w")
+def defineWriter(files, lists):
+    d = open(files, "w")
     for i in lists.keys():
         d.write("#define " + i + " " + lists[i] + "\n")
     d.close()
@@ -107,7 +120,7 @@ class copySysLinux(threading.Thread):
         copyFile("/usr/lib/syslinux/isolinux.bin", isotreel + "isolinux/", True)
         copyFile("/usr/lib/syslinux/vesamenu.c32", isotreel + "isolinux/", True)
         logger.logVV(self.tn, _("Copying isolinux.cfg to the ISO tree"))
-        copyFile(configutils.getValue(configs[configutils.isolinuxfile], isotreel +
+        copyFile(configutils.getValue(configs[configutils.isolinuxfile], isotreel + 
                                       "isolinux/isolinux.cfg", True))
         # Edit the isolinux.cfg file to replace the variables
         logger.logV(_("Editing isolinux.cfg"))
@@ -178,7 +191,7 @@ class genRAMDisk(threading.Thread):
 
     def run(self):
         logger.logV(self.tn, _("Generating ramdisk"))
-        os.system("mkinitramfs -o " + isotreel + "casper/initrd.gz " +
+        os.system("mkinitramfs -o " + isotreel + "casper/initrd.gz " + 
                   configutils.getKernel(configutils.getValue(configs[configutils.kernel])))
 genramdisk["thread"] = genRAMDisk
 
@@ -205,17 +218,17 @@ class genWUBI(threading.Thread):
     def run(self):
         if configutils.parseBoolean(configutils.getValue(configs[configutils.enablewubi])) is True:
             logger.logV(self.tn, _("Generating the windows autorun.inf"))
-            file = open(isotreel + "autorun.inf", "w")
-            file.write("[autorun]\n")
-            file.write("open=wubi.exe\n")
-            file.write("icon=wubi.exe,0\n")
-            file.write("label=Install " + configutils.getValue(configs[configutils.sysname]) + "\n")
-            file.write("\n")
-            file.write("[Content]\n")
-            file.write("MusicFiles=false\n")
-            file.write("PictureFiles=false\n")
-            file.write("VideoFiles=false\n")
-            file.close()
+            files = open(isotreel + "autorun.inf", "w")
+            files.write("[autorun]\n")
+            files.write("open=wubi.exe\n")
+            files.write("icon=wubi.exe,0\n")
+            files.write("label=Install " + configutils.getValue(configs[configutils.sysname]) + "\n")
+            files.write("\n")
+            files.write("[Content]\n")
+            files.write("MusicFiles=false\n")
+            files.write("PictureFiles=false\n")
+            files.write("VideoFiles=false\n")
+            files.close()
 genwubi["thread"] = genWUBI
 
 
@@ -228,21 +241,21 @@ class USBComp(threading.Thread):
     def run(self):
         logger.logI(self.tn, _("Making the ISO compatible with a USB burner"))
         logger.logVV(self.tn, _("Writing .disk/info"))
-        file = open(isotreel + ".disk/info", "w")
-        file.write(getDiskName())
-        file.close()
+        files = open(isotreel + ".disk/info", "w")
+        files.write(getDiskName())
+        files.close()
         logger.logV(self.tn, _("Making symlink pointing to the ISO root dir"))
         os.symlink(isotreel + "ubuntu", isotreel)
         logger.logVV(self.tn, _("Writing release notes URL"))
-        file = open(isotreel + ".disk/release_notes_url", "w")
-        file.write(configutils.getValue(configs[configutils.url]) + "\n")
-        file.close()
+        files = open(isotreel + ".disk/release_notes_url", "w")
+        files.write(configutils.getValue(configs[configutils.url]) + "\n")
+        files.close()
         logger.logVV(self.tn, _("Writing .disk/base_installable"))
         fsutil.touch(isotreel + ".disk/base_installable")
         logger.logVV(self.tn, _("Writing CD Type"))
-        file = open(isotreel + ".disk/cd_type", "w")
-        file.write("full_cd/single\n")
-        file.close()
+        files = open(isotreel + ".disk/cd_type", "w")
+        files.write("full_cd/single\n")
+        files.close()
 usbcomp["thread"] = USBComp
 
 
@@ -263,36 +276,22 @@ class genISO(threading.Thread):
                              configutils.getValue(configs[configutils.isolevel]))
         # Generate MD5 checksums
         logger.logV(self.tn, _("Generating MD5 sums"))
-        file = open(isotreel + "md5sum.txt")
+        files = open(isotreel + "md5sum.txt")
         for x in fsutil.listdir(isotreel, {"recurse": True}):
             i = re.sub(r"^ *" + isotreel + ".*", ".", x)
             if i.find("isotree") == -1 and i.find("md5sum") == -1:
                 logger.logVV(self.tn, _("Writing MD5 sum of") + " " + i)
-                file.write(fsutil.genFinalMD5(i))
-        file.close()
-        # Generate the ISO
-        # Options:
-        # -r                   Use the Rock Ridge protocol
-        # -V label             Label of the ISO
-        # -cache-inodes        Enable caching inodes and device numbers
-        # -J                   Use Joliet specification to let pathnames use 64 characters
-        # -l                   Force usage of 31-character filenames
-        # -b bootimage         Boot with the specified image
-        # -c bootcatalog       Path to generate the boot catalog
-        # -no-emul-boot        Shows that the boot image specified is a "no emulation" image
-        #                         This means that the system will not perform any disk emulation when running it
-        # -boot-load-size 4    Number of virtual sectors to load
-        # -boot-info-table     Add a boot information table at offset 8 in the boot image
-        # -o file              Output image
+                files.write(fsutil.genFinalMD5(i))
+        files.close()
         logger.logI(self.tn, _("Generating the ISO"))
-        os.system(configutils.getValue(configs[configutils.isogenerator]) + " " + isogenopts + " -V " +
-                  configutils.getValue(configs[configutils.label]) + " -o " +
+        os.system(configutils.getValue(configs[configutils.isogenerator]) + " " + isogenopts + " -V " + 
+                  configutils.getValue(configs[configutils.label]) + " -o " + 
                   configutils.getValue(configs[configutils.isolocation]))
         # Generate the MD5 sum
         logger.logV(self.tn, _("Generating MD5 sum for the ISO"))
-        file = open(configs[configutils.isolocation] + ".md5", "w")
-        file.write(fsutil.genFinalMD5(i))
-        file.close()
+        files = open(configs[configutils.isolocation] + ".md5", "w")
+        files.write(fsutil.genFinalMD5(i))
+        files.close()
 
 threads = threads1
 threads.append(geniso)

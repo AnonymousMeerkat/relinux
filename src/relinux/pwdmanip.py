@@ -13,10 +13,10 @@ def checkMatched(m):
 
 
 # Returns a parsed list of /etc/passwd entries (i.e. PP Entry)
-def parsePasswdEntries(buffer):
+def parsePasswdEntries(buffers):
     patt = re.compile("^(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?).*")
     returnme = []
-    for i in buffer:
+    for i in buffers:
         m = patt.match(i)
         if checkMatched(m):
             buff = {}
@@ -32,10 +32,10 @@ def parsePasswdEntries(buffer):
 
 
 # Returns a parsed list of /etc/group entries (i.e. PG Entry)
-def parseGroupEntries(buffer):
+def parseGroupEntries(buffers):
     patt = re.compile("^(.*?):(.*?):(.*?):(.*?)")
     returnme = []
-    for i in buffer:
+    for i in buffers:
         m = patt.match(i)
         if checkMatched(m):
             buff = {}
@@ -49,10 +49,10 @@ def parseGroupEntries(buffer):
 
 
 # Returns a parsed list of /etc/shadow entries (i.e. PS Entry)
-def parseShadowEntries(buffer):
+def parseShadowEntries(buffers):
     patt = re.compile("^(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?).*")
     returnme = []
-    for i in buffer:
+    for i in buffers:
         m = patt.match(i)
         if checkMatched(m):
             buff = {}
@@ -84,18 +84,18 @@ def _join(arr, char):
 
 
 # The function opposite to parsePasswdEntries
-def PPtoEntry(buffer):
+def PPtoEntry(buffers):
     returnme = []
-    for i in buffer:
+    for i in buffers:
         returnme.append(_join([i["user"], i["passwd"], i["uid"], i["gid"], i["name"], i["home"],
                                i["shell"]], ":"))
     return returnme
 
 
 # The function opposite to parseGroupEntries
-def PGtoEntry(buffer):
+def PGtoEntry(buffers):
     returnme = []
-    for i in buffer:
+    for i in buffers:
         # Sort of hard to read (at least for me) so I'll split it up
         # returnme.append(
         #     _join([
@@ -111,9 +111,9 @@ def PGtoEntry(buffer):
 
 
 # The function opposite to parseShadowEntries
-def PStoEntry(buffer):
+def PStoEntry(buffers):
     returnme = []
-    for i in buffer:
+    for i in buffers:
         returnme.append(_join([i["user"], i["passwd"], i["lastpwdchange"], i["minpwdchange"],
                                i["maxpwdchange"], i["warnperiod"], i["inactive"], i["expire"],
                                i["reserved"]], ":"))
@@ -121,11 +121,11 @@ def PStoEntry(buffer):
 
 
 # Returns a list of entries from a user ID regex (buffer must contain PP entries)
-def getPPByUID(regex, buffer):
+def getPPByUID(regex, buffers):
     patt = re.compile("^.*" + regex + ".*$")
     returnme = []
-    for i in buffer:
-        m = patt.match(i.uid)
+    for i in buffers:
+        m = patt.match(i["uid"])
         if checkMatched(m):
             returnme.append(i)
     return returnme

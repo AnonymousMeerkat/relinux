@@ -3,7 +3,7 @@ Generates a temporary filesystem to hack on
 @author: Anonymous Meerkat
 '''
 
-from relinux import logger, config, configutils, fsutil, pwdmanip, aptutil
+from relinux import logger, config, configutils, fsutil, pwdmanip, aptutil, numrange
 from relinux.modules.osweaver import tmpsys, configs, aptcache
 import os
 import shutil
@@ -37,7 +37,7 @@ tmpsystree["thread"] = genTempSysTree
 
 
 # Copy the contents of /etc/ and /var/ to the tempsys
-cpetcvar = {"deps": [tmpsystree], "tn": "TempSysTree"}
+cpetcvar = {"deps": [tmpsystree], "tn": "EtcVar"}
 class copyEtcVar(threading.Thread):
     def __init__(self):
         self.tn = logger.genTN(cpetcvar["tn"])
@@ -68,8 +68,9 @@ class remConfig(threading.Thread):
                         tmpsys + "etc/ssh/ssh_host_dsa_key", tmpsys + "etc/ssh/ssh_host_rsa_key.pub",
                         tmpsys + "etc/group", tmpsys + "etc/passwd", tmpsys + "etc/shadow",
                         tmpsys + "etc/shadow-", tmpsys + "etc/gshadow", tmpsys + "etc/gshadow-",
-                        tmpsys + "etc/wicd/wired-settings.conf", tmpsys + "etc/wicd/wireless-settings.conf",
-                        tmpsys + "etc/printcap", tmpsys + "etc/cups/printers.conf"])
+                        tmpsys + "etc/wicd/wired-settings.conf",
+                        tmpsys + "etc/wicd/wireless-settings.conf", tmpsys + "etc/printcap",
+                        tmpsys + "etc/cups/printers.conf"])
 remconfig["thread"] = remConfig
 
 
@@ -96,8 +97,8 @@ class remTempVar(threading.Thread):
     def run(self):
         logger.logV(self.tn, _("Removing temporary files in /var"))
         # Remove all files in these directories (but not directories inside them)
-        for i in ["etc/NetworkManager/system-connections/", "var/run", "var/log", "var/mail", "var/spool",
-                  "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]:
+        for i in ["etc/NetworkManager/system-connections/", "var/run", "var/log", "var/mail",
+                  "var/spool", "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]:
             fsutil.adrm(tmpsys + i,
                         {"excludes": False, "remdirs": False, "remsymlink": True, "remfullpath": False},
                         None, self.tn)
@@ -116,7 +117,7 @@ class genVarLogs(threading.Thread):
         for i in ["dpkg.log", "lastlog", "mail.log", "syslog", "auth.log", "daemon.log", "faillog",
                           "lpr.log", "mail.warn", "user.log", "boot", "debug", "mail.err", "messages", "wtmp",
                           "bootstrap.log", "dmesg", "kern.log", "mail.info"]:
-            logger.logVV(logger.Tab + _("Creating") + " " + i)
+            logger.logVV(logger.MTab + _("Creating") + " " + i)
             fsutil.touch(tmpsys + "var/log/" + i)
 genvarlogs["thread"] = genVarLogs
 
@@ -159,7 +160,7 @@ class remUsers(threading.Thread):
     def run(self):
         # Setup the password and group stuff
         logger.logI(self.tn, _("Removing conflicting users"))
-        passwdf = tmpsys + "/etc/passwd"
+        passwdf = tmpsys + "etc/passwd"
         #passwdfile = open(passwdf, "r")
         #passwdstat = fsutil.getStat(passwdf)
         #passwdbuffer = configutils.getBuffer(passwdfile)
@@ -170,9 +171,35 @@ class remUsers(threading.Thread):
         buffers[3] = pe
         # Users to "delete" on the live system
         logger.logV("Gathering users to remove")
-        usrs = pwdmanip.getPPByUID("[5-9][0-9][0-9]", pe)
-        usrs.extend(pwdmanip.getPPByUID("[1-9][0-9][0-9][0-9]", pe))
-        usrs.extend(pwdmanip.getPPByUID("999", pe))
+        nobody = ""
+        for x in pe:
+            if x["user"] == "nobody":
+                nobody = x
+        if nobody == "":
+            logger.logE(self.tn, _("User 'nobody' could not be found!"))
+        max_uid = 1999
+        sysrange = 500
+        nuid = int(nobody["uid"])
+        if nuid <= 100:
+            # nobody has been assigned to the conventional system UID range
+            max_uid = 1999
+            sysrange = 100
+        elif nuid < 500:
+            # nobody has been assigned to the RHEL system UID range
+            max_uid = 1999
+            sysrange = 500
+        elif nuid >= 65530 and nuid <= 65535:
+            # nobody has been assigned to the highest possible unsigned short integer (16 bit) range
+            max_uid = nuid - 1
+            sysrange = 555
+        elif nuid >= 32766:
+            # nobody has been assigned to the highest possible signed short integer (16 bit) range
+            max_uid = nuid - 1
+            sysrange = 500
+        else:
+            max_uid = 1999
+            sysrange = 555
+        usrs = pwdmanip.getPPByUID(numrange.gen_num_range(sysrange, max_uid), pe)
         if config.VVStatus is False:
             logger.logV(_("Removing them"))
         logger.logVV(_("Removing users in /etc/passwd"))
@@ -228,11 +255,11 @@ class CasperConfEditor(threading.Thread):
 
     # Casper Variable Editor
     # lists - Dictionary containing all options needed
-    def _varEditor(self, file, lists):
-        buffers = fsutil.ife_getbuffers(file)
+    def _varEditor(self, files, lists):
+        buffers = fsutil.ife_getbuffers(files)
         fsutil.ife(buffers, lambda line: self.__varEditor(line, lists))
         # In case the file is broken, we'll add the lines needed
-        buffers = open(file, "a")
+        buffers = open(files, "a")
         for i in lists:
             if lists[i] is not None:
                 buffers.write("export " + i + "=" + lists[i] + "\n")

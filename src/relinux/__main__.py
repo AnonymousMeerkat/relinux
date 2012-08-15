@@ -50,7 +50,7 @@ def main():
         logger.quiet()
     if args.verbose is True:
         logger.verbose()
-    if args.veryverbose is True:
+    if args.veryverbose is True or True:
         logger.veryverbose()
     modules = []
     aptcache = []
@@ -58,7 +58,7 @@ def main():
     root = Tkinter.Tk()
     App = None
     def startProg(splash):
-        global modules, aptcache, cbuffer
+        global modules, aptcache, cbuffer, App
         spprogn = 6
         spprog = 0
         def calcSubPercent(p, p1):
