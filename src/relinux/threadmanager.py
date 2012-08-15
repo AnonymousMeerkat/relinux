@@ -7,21 +7,19 @@ from relinux import config, fsutil
 import time
 
 #threads = []
-threadsdone = []
-threadsrunning = []
 
 
 # Finds threads that can currently run (and have not already run)
-def findRunnableThreads(threads):
+def findRunnableThreads(threads, threadsdone, threadsrunning):
     returnme = []
     cpumax = fsutil.getCPUCount()
     current = 0
     for i in threads:
-        if not i in threadsdone and current < cpumax:
+        if not i["id"] in threadsdone and current < cpumax:
             deps = 0
             depsl = len(i["deps"])
             for x in i["deps"]:
-                if x in threadsdone:
+                if x["id"] in threadsdone:
                     deps = deps + 1
             if deps >= depsl:
                 returnme.append(i)
@@ -32,27 +30,31 @@ def findRunnableThreads(threads):
 
 
 # Run a thread
-def runThread(thread):
-    if not thread["thread"].isAlive():
-        threadsrunning.append(thread)
+def runThread(thread, threadsdone, threadsrunning):
+    if not thread["thread"].isAlive() and not thread["id"] in threadsdone:
+        threadsrunning.append(thread["id"])
         thread["thread"].start()
 
 
 # Check if a thread is alive
-def checkThread(thread):
-    if thread in threadsrunning:
+def checkThread(thread, threadsdone, threadsrunning):
+    if thread["id"] in threadsrunning:
         if not thread["thread"].isAlive():
-            threadsrunning.remove(thread)
-            threadsdone.append(thread)
+            threadsrunning.remove(thread["id"])
+            threadsdone.append(thread["id"])
 
 
 # Thread loop
 def threadLoop(threads):
+    threadsdone = []
+    threadsrunning = []
+    for x in range(len(threads)):
+        threads[x]["id"] = x
     while config.ThreadStop is False:
         # Clear old threads
         for x in threadsrunning:
-            checkThread(x)
+            checkThread(x, threadsdone, threadsrunning)
         # Run runnable threads
-        for x in findRunnableThreads(threads):
-            runThread(x)
-        time.sleep(1 / config.ThreadRPS)
+        for x in findRunnableThreads(threads, threadsdone, threadsrunning):
+            runThread(x, threadsdone, threadsrunning)
+        time.sleep(float(1.0 / config.ThreadRPS))
