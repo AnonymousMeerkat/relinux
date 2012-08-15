@@ -79,7 +79,7 @@ class genISOTree(threading.Thread):
         # Make the tree
         fsutil.maketree([isotreel + "casper", isotreel + "preseed",
                           isotreel + "isolinux", isotreel + ".disk"])
-genisotree["thread"] = genISOTree
+genisotree["thread"] = genISOTree()
 
 
 # Copy preseed to the ISO tree
@@ -93,7 +93,7 @@ class copyPreseed(threading.Thread):
         for i in configutils.getValue(configs[configutils.preseed]):
             logger.logVV(self.tn, _("Copying") + " " + i + " " + _("to the ISO tree"))
             copyFile(i, isotreel + "preseed/")
-copypreseed["thread"] = copyPreseed
+copypreseed["thread"] = copyPreseed()
 
 
 # Copy memtest to the ISO tree
@@ -106,7 +106,7 @@ class copyMemtest(threading.Thread):
         if configutils.parseBoolean(configutils.getValue(configs[configutils.memtest])):
             logger.logV(self.tn, _("Copying memtest to the ISO tree"))
             copyFile("/boot/memtest86+.bin", isotreel + "isolinux/memtest")
-copymemtest["thread"] = copyMemtest
+copymemtest["thread"] = copyMemtest()
 
 
 # Copy Syslinux to the ISO tree
@@ -129,7 +129,7 @@ class copySysLinux(threading.Thread):
                   ["TIMEOUT", configutils.getValue(configs[configutils.timeout])]]:
             fsutil.ife(fsutil.ife_getbuffers(isotreel + "isolinux/isolinux.cfg"),
                        lambda line: re.sub("\$" + i[0], i[1], line))
-copysyslinux["thread"] = copySysLinux
+copysyslinux["thread"] = copySysLinux()
 
 
 # Write disk definitions
@@ -152,7 +152,7 @@ class diskDefines(threading.Thread):
                                                       })
         # For some reason casper needs (or used to need) the diskdefines in its own directory
         copyFile(isotreel + "README.diskdefines", isotreel + "casper/README.diskdefines")
-diskdefines["thread"] = diskDefines
+diskdefines["thread"] = diskDefines()
 
 
 # Generate package manifests
@@ -180,7 +180,7 @@ class genPakManifest(threading.Thread):
         # We don't want any differences, so we'll just copy filesystem.manifest to filesystem.manifest-desktop
         logger.logVV(self.tn, _("Generating filesystem.manifest-desktop"))
         copyFile(isotreel + "casper/filesystem.manifest", isotreel + "casper/filesystem.manifest-desktop")
-pakmanifest["thread"] = genPakManifest
+pakmanifest["thread"] = genPakManifest()
 
 
 # Generate the ramdisk
@@ -193,7 +193,7 @@ class genRAMDisk(threading.Thread):
         logger.logV(self.tn, _("Generating ramdisk"))
         os.system("mkinitramfs -o " + isotreel + "casper/initrd.gz " + 
                   configutils.getKernel(configutils.getValue(configs[configutils.kernel])))
-genramdisk["thread"] = genRAMDisk
+genramdisk["thread"] = genRAMDisk()
 
 
 # Copy the kernel
@@ -206,7 +206,7 @@ class copyKernel(threading.Thread):
         logger.logI(self.tn, _("Copying the kernel to the ISO tree"))
         copyFile("/boot/vmlinuz-" + configutils.getKernel(configutils.getValue(configs[configutils.kernel])),
                  isotreel + "casper/vmlinuz")
-copykernel["thread"] = copyKernel
+copykernel["thread"] = copyKernel()
 
 
 # Generate WUBI
@@ -229,7 +229,7 @@ class genWUBI(threading.Thread):
             files.write("PictureFiles=false\n")
             files.write("VideoFiles=false\n")
             files.close()
-genwubi["thread"] = genWUBI
+genwubi["thread"] = genWUBI()
 
 
 # Make the LiveCD compatible with USB burners
@@ -256,7 +256,7 @@ class USBComp(threading.Thread):
         files = open(isotreel + ".disk/cd_type", "w")
         files.write("full_cd/single\n")
         files.close()
-usbcomp["thread"] = USBComp
+usbcomp["thread"] = USBComp()
 
 
 threads1 = [genisotree, copypreseed, copymemtest, copysyslinux, diskdefines, pakmanifest, genramdisk,
@@ -292,6 +292,7 @@ class genISO(threading.Thread):
         files = open(configs[configutils.isolocation] + ".md5", "w")
         files.write(fsutil.genFinalMD5(i))
         files.close()
+geniso["thread"] = genISO()
 
 threads = threads1
 threads.append(geniso)

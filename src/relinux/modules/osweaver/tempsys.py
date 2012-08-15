@@ -33,7 +33,7 @@ class genTempSysTree(threading.Thread):
                           tmpsys + "sys", tmpsys + "mnt",
                           tmpsys + "media/cdrom", tmpsys + "var", tmpsys + "home"], self.tn)
         fsutil.chmod(tmpsys + "tmp", "1777", self.tn)
-tmpsystree["thread"] = genTempSysTree
+tmpsystree["thread"] = genTempSysTree()
 
 
 # Copy the contents of /etc/ and /var/ to the tempsys
@@ -47,7 +47,7 @@ class copyEtcVar(threading.Thread):
         excludes = configutils.getValue(configs[configutils.excludes])
         fsutil.fscopy("etc", tmpsys + "etc", excludes, self.tn)
         fsutil.fscopy("var", tmpsys + "var", excludes, self.tn)
-cpetcvar["thread"] = copyEtcVar
+cpetcvar["thread"] = copyEtcVar()
 
 
 # Remove configuration files that can break the installed/live system
@@ -71,7 +71,7 @@ class remConfig(threading.Thread):
                         tmpsys + "etc/wicd/wired-settings.conf",
                         tmpsys + "etc/wicd/wireless-settings.conf", tmpsys + "etc/printcap",
                         tmpsys + "etc/cups/printers.conf"])
-remconfig["thread"] = remConfig
+remconfig["thread"] = remConfig()
 
 
 # Remove cached lists
@@ -85,7 +85,7 @@ class remCachedLists(threading.Thread):
         fsutil.adrm(tmpsys + "var/lib/apt/lists/",
                     {"excludes": True, "remdirs": False, "remsymlink": True, "remfullpath": False},
                     ["*.gpg", "*lock*", "*partial*"], self.tn)
-remcachedlists["thread"] = remCachedLists
+remcachedlists["thread"] = remCachedLists()
 
 
 # Remove temporary files in /var
@@ -102,7 +102,7 @@ class remTempVar(threading.Thread):
             fsutil.adrm(tmpsys + i,
                         {"excludes": False, "remdirs": False, "remsymlink": True, "remfullpath": False},
                         None, self.tn)
-remtempvar["thread"] = remTempVar
+remtempvar["thread"] = remTempVar()
 
 
 # Generate logs in /var/log
@@ -119,7 +119,7 @@ class genVarLogs(threading.Thread):
                           "bootstrap.log", "dmesg", "kern.log", "mail.info"]:
             logger.logVV(logger.MTab + _("Creating") + " " + i)
             fsutil.touch(tmpsys + "var/log/" + i)
-genvarlogs["thread"] = genVarLogs
+genvarlogs["thread"] = genVarLogs()
 
 
 # Edit passwd and shadow files to remove users
@@ -232,7 +232,7 @@ class remUsers(threading.Thread):
         logger.logVV(self.tn, _("Removing users in /etc/gshadow"))
         fsutil.ife(gbuffers, lambda line: self._parseGroup(line, usrs))
         logger.logI(self.tn, _("Applying permissions to casper scripts"))
-remusers["thread"] = remUsers
+remusers["thread"] = remUsers()
 
 
 # Edits casper.conf
@@ -293,7 +293,7 @@ class CasperConfEditor(threading.Thread):
                                     "DISTRIB_CODENAME": configutils.getValue(configs[configutils.codename]),
                                     "DISTRIB_DESCRIPTION":
         configutils.getValue(configs[configutils.description])})
-casperconf["thread"] = CasperConfEditor
+casperconf["thread"] = CasperConfEditor()
 
 
 # Sets up Ubiquity
@@ -320,7 +320,7 @@ class UbiquitySetup(threading.Thread):
             cdrom.write("#!/bin/sh\n")
             cdrom.write("exit\n")
             cdrom.close()
-ubiquitysetup["thread"] = UbiquitySetup
+ubiquitysetup["thread"] = UbiquitySetup()
 
 
 class TempSys(threading.Thread):
