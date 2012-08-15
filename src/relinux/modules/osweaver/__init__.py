@@ -30,8 +30,9 @@ def runThreads():
 def run(adict):
     global configs, aptcache, page, isotreel, tmpsys
     configs = adict["config"]["OSWeaver"]
-    isotreel = configs[configutils.isodir] + "/.ISO_STRUCTURE/"
-    tmpsys = configs[configutils.isodir] + "/.TMPSYS/"
+    isodir = configutils.getValue(configs[configutils.isodir])
+    isotreel = isodir + "/.ISO_STRUCTURE/"
+    tmpsys = isodir + "/.TMPSYS/"
     aptcache = adict["aptcache"]
     ourgui = adict["gui"]
     pagenum = ourgui.wizard.add_tab()
