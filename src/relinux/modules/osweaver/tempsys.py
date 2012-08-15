@@ -24,6 +24,7 @@ import threading
 tmpsystree = {"deps": [], "tn": "TempSysTree"}
 class genTempSysTree(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(tmpsystree["tn"])
 
     def run(self):
@@ -40,6 +41,7 @@ tmpsystree["thread"] = genTempSysTree()
 cpetcvar = {"deps": [tmpsystree], "tn": "EtcVar"}
 class copyEtcVar(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(cpetcvar["tn"])
 
     def run(self):
@@ -54,6 +56,7 @@ cpetcvar["thread"] = copyEtcVar()
 remconfig = {"deps": [cpetcvar], "tn": "RemConfig"}
 class remConfig(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(remconfig["tn"])
 
     def run(self):
@@ -78,6 +81,7 @@ remconfig["thread"] = remConfig()
 remcachedlists = {"deps": [cpetcvar], "tn": "RemCachedLists"}
 class remCachedLists(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(remcachedlists["tn"])
 
     def run(self):
@@ -92,6 +96,7 @@ remcachedlists["thread"] = remCachedLists()
 remtempvar = {"deps": [cpetcvar], "tn": "RemTempVar"}
 class remTempVar(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(remtempvar["tn"])
 
     def run(self):
@@ -109,6 +114,7 @@ remtempvar["thread"] = remTempVar()
 genvarlogs = {"deps": [cpetcvar], "tn": "GenVarLogs"}
 class genVarLogs(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(genvarlogs["tn"])
 
     def run(self):
@@ -126,6 +132,7 @@ genvarlogs["thread"] = genVarLogs()
 remusers = {"deps": [cpetcvar], "tn": "RemUsers"}
 class remUsers(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(remusers["tn"])
 
     # Helper function for changing the /etc/group file
@@ -239,6 +246,7 @@ remusers["thread"] = remUsers()
 casperconf = {"deps": [cpetcvar], "tn": "casper.conf"}
 class CasperConfEditor(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(casperconf["tn"])
 
     # Helper function
@@ -300,6 +308,7 @@ casperconf["thread"] = CasperConfEditor()
 ubiquitysetup = {"deps": [cpetcvar], "tn": "Ubiquity"}
 class UbiquitySetup(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(ubiquitysetup["tn"])
 
     def run(self):
@@ -325,6 +334,7 @@ ubiquitysetup["thread"] = UbiquitySetup()
 
 class TempSys(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.deps = [tmpsystree]
         self.threadname = "TempSys"
         self.tn = logger.genTN(self.threadname)

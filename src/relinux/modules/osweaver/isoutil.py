@@ -72,6 +72,7 @@ def defineWriter(files, lists):
 genisotree = {"deps": [], "tn": "ISOTree"}
 class genISOTree(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(genisotree["tn"])
 
     def run(self):
@@ -86,6 +87,7 @@ genisotree["thread"] = genISOTree()
 copypreseed = {"deps": [genisotree], "tn": "Preseed"}
 class copyPreseed(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(copypreseed["tn"])
 
     def run(self):
@@ -100,6 +102,7 @@ copypreseed["thread"] = copyPreseed()
 copymemtest = {"deps": [genisotree], "tn": "Memtest"}
 class copyMemtest(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(copymemtest["tn"])
 
     def run(self):
@@ -113,6 +116,7 @@ copymemtest["thread"] = copyMemtest()
 copysyslinux = {"deps": [genisotree], "tn": "SysLinux"}
 class copySysLinux(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(copysyslinux["tn"])
 
     def run(self):
@@ -136,6 +140,7 @@ copysyslinux["thread"] = copySysLinux()
 diskdefines = {"deps": [genisotree], "tn": "DiskDefines"}
 class diskDefines(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(diskdefines["tn"])
 
     def run(self):
@@ -159,6 +164,7 @@ diskdefines["thread"] = diskDefines()
 pakmanifest = {"deps": [genisotree], "tn": "Manifest"}
 class genPakManifest(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(pakmanifest["tn"])
 
     def run(self):
@@ -187,6 +193,7 @@ pakmanifest["thread"] = genPakManifest()
 genramdisk = {"deps": [genisotree], "tn": "RAMDisk"}
 class genRAMDisk(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(genramdisk["tn"])
 
     def run(self):
@@ -200,6 +207,7 @@ genramdisk["thread"] = genRAMDisk()
 copykernel = {"deps": [genisotree], "tn": "Kernel"}
 class copyKernel(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(copykernel["tn"])
 
     def run(self, configs):
@@ -213,6 +221,7 @@ copykernel["thread"] = copyKernel()
 genwubi = {"deps": [genisotree], "tn": "WUBI"}
 class genWUBI(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(genwubi["tn"])
 
     def run(self):
@@ -236,6 +245,7 @@ genwubi["thread"] = genWUBI()
 usbcomp = {"deps": [genisotree], "tn": "USB"}
 class USBComp(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(usbcomp["tn"])
 
     def run(self):
@@ -267,6 +277,7 @@ threads1 = [genisotree, copypreseed, copymemtest, copysyslinux, diskdefines, pak
 geniso = {"deps": threads1, "tn": "ISO"}
 class genISO(threading.Thread):
     def __init__(self):
+        threading.Thread.__init__(self)
         self.tn = logger.genTN(geniso["tn"])
 
     def run(self):
