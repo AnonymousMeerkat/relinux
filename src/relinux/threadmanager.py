@@ -15,11 +15,11 @@ def findRunnableThreads(threads, threadsdone, threadsrunning):
     cpumax = fsutil.getCPUCount()
     current = 0
     for i in threads:
-        if not i["id"] in threadsdone and current < cpumax:
+        if not i["tn"] in threadsdone and current < cpumax:
             deps = 0
             depsl = len(i["deps"])
             for x in i["deps"]:
-                if x["id"] in threadsdone:
+                if x["tn"] in threadsdone:
                     deps = deps + 1
             if deps >= depsl:
                 returnme.append(i)
@@ -31,25 +31,23 @@ def findRunnableThreads(threads, threadsdone, threadsrunning):
 
 # Run a thread
 def runThread(thread, threadsdone, threadsrunning):
-    if not thread["thread"].isAlive() and not thread["id"] in threadsdone:
-        threadsrunning.append(thread["id"])
+    if not thread["thread"].isAlive() and not thread["tn"] in threadsdone:
+        threadsrunning.append(thread["tn"])
         thread["thread"].start()
 
 
 # Check if a thread is alive
 def checkThread(thread, threadsdone, threadsrunning):
-    if thread["id"] in threadsrunning:
+    if thread["tn"] in threadsrunning:
         if not thread["thread"].isAlive():
-            threadsrunning.remove(thread["id"])
-            threadsdone.append(thread["id"])
+            threadsrunning.remove(thread["tn"])
+            threadsdone.append(thread["tn"])
 
 
 # Thread loop
 def threadLoop(threads):
     threadsdone = []
     threadsrunning = []
-    for x in range(len(threads)):
-        threads[x]["id"] = x
     while config.ThreadStop is False:
         # Clear old threads
         for x in threadsrunning:
