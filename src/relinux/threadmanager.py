@@ -34,13 +34,13 @@ def findRunnableThreads(threads):
 # Run a thread
 def runThread(thread):
     threadsrunning.append(thread)
-    thread.thread.start()
+    thread["thread"].start()
 
 
 # Check if a thread is alive
 def checkThread(thread):
     if thread in threadsrunning:
-        if not thread.thread.isAlive():
+        if not thread["thread"].isAlive():
             threadsrunning.remove(thread)
 
 
