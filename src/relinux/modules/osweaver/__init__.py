@@ -3,7 +3,7 @@ OSWeaver Module for relinux
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
-from relinux import threadmanager, config, gui
+from relinux import threadmanager, config, gui, configutils
 import Tkinter
 
 relinuxmodule = True
@@ -19,6 +19,7 @@ page = {}
 
 
 def runThreads():
+    from relinux.modules.osweaver import isoutil, squashfs, tempsys
     threads = []
     threads.extend(isoutil.threads)
     threads.extend(squashfs.threads)
@@ -27,8 +28,10 @@ def runThreads():
 
 
 def run(adict):
-    global configs, aptcache, page
+    global configs, aptcache, page, isotreel, tmpsys
     configs = adict["config"]["OSWeaver"]
+    isotreel = configs[configutils.isodir] + "/.ISO_STRUCTURE/"
+    tmpsys = configs[configutils.isodir] + "/.TMPSYS/"
     aptcache = adict["aptcache"]
     ourgui = adict["gui"]
     pagenum = ourgui.wizard.add_tab()
@@ -41,6 +44,3 @@ def run(adict):
     page.frame.pack(fill=Tkinter.BOTH, expand=True, anchor=Tkinter.CENTER)
     page.button = gui.Button(page.frame, text="Start!", command=runThreads)
     page.button.pack()
-
-
-from relinux.modules.osweaver import isoutil, squashfs, tempsys

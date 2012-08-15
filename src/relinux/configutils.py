@@ -37,6 +37,7 @@ isogenerator = "ISOGENERATOR"
 isolocation = "ISOLOCATION"
 unionfs = "UNIONFS"
 popcon = "POPCON"
+isodir = "ISODIR"
 # Property codes
 name = "Name"
 desc = "Description"
