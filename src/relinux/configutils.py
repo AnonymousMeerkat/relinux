@@ -278,7 +278,7 @@ def parseCompressedBuffer(buffers, filename):
         liness = getLinesWithinSection(buffers, i)
         for x in getOptions(liness):
             returnme[i][x] = getProperties(getLinesWithinOption(liness, x))
-            if returnme[i][x][type] == filename:
+            if returnme[i][x][types] == filename:
                 returnme[i][x][value] = os.path.join(os.path.dirname(os.path.abspath(filename)),
                                                      os.path.basename(returnme[i][x][value]))
     return returnme
