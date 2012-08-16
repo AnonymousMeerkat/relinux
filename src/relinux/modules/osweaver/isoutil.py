@@ -94,7 +94,7 @@ class copyPreseed(threading.Thread):
 
     def run(self):
         logger.logV(self.tn, _("Copying preseed files to the ISO tree"))
-        for i in configutils.getValue(configs[configutils.preseed]):
+        for i in os.listdir(configutils.getValue(configs[configutils.preseed])):
             logger.logVV(self.tn, _("Copying") + " " + i + " " + _("to the ISO tree"))
             copyFile(i, isotreel + "preseed/")
 copypreseed["thread"] = copyPreseed()
