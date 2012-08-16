@@ -27,7 +27,7 @@ def runThreads():
 
 
 def run(adict):
-    global configs, aptcache, page, isotreel, tmpsys
+    global aptcache, page
     configs = adict["config"]["OSWeaver"]
     isodir = configutils.getValue(configs[configutils.isodir])
     config.ISOTree = isodir + "/.ISO_STRUCTURE/"

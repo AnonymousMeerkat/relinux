@@ -6,7 +6,7 @@ ISO Utilities
 @author: Anonymous Meerkat
 '''
 
-from relinux.modules.osweaver import squashfs
+from relinux.modules.osweaver import squashfs, tempsys
 from relinux import logger, config, fsutil, configutils
 import shutil
 import os
@@ -17,7 +17,7 @@ import threading
 threadname = "ISOTree"
 #tn = logger.genTN(threadname)
 isotreel = config.ISOTree
-configs = config.Configuration
+configs = config.Configuration["OSWeaver"]
 # C True
 ct = "1"
 # C False
@@ -95,7 +95,6 @@ class copyPreseed(threading.Thread):
 
     def run(self):
         logger.logV(self.tn, _("Copying preseed files to the ISO tree"))
-        print(configs["PRESEED"])
         for i in fsutil.listdir(configutils.getValue(configs[configutils.preseed])):
             logger.logVV(self.tn, _("Copying") + " " + i + " " + _("to the ISO tree"))
             copyFile(i, isotreel + "preseed/")
@@ -275,10 +274,12 @@ usbcomp["thread"] = USBComp()
 
 threads1 = [genisotree, copypreseed, copymemtest, copysyslinux, diskdefines, pakmanifest, genramdisk,
             copykernel, genwubi, usbcomp]
+githreads = threads1
+githreads.extend(tempsys.threads)
 
 
 # Generates the ISO
-geniso = {"deps": threads1, "tn": "ISO"}
+geniso = {"deps": githreads, "tn": "ISO"}
 class genISO(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)

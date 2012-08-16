@@ -11,7 +11,7 @@ import re
 import threading
 
 tmpsys = config.TempSys
-configs = config.Configuration
+configs = config.Configuration["OSWeaver"]
 #tmpsystree = "TempSysTree"
 #cpetcvar = "EtcVar"
 #remconfig = "RemConfig"

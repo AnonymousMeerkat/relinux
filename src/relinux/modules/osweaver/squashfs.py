@@ -12,7 +12,7 @@ threadname = "SquashFS"
 tn = logger.genTN(threadname)
 isotreel = config.ISOTree
 tmpsys = config.TempSys
-configs = config.Configuration
+configs = config.Configuration["OSWeaver"]
 
 
 # Display a iso9660 error
