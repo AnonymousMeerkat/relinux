@@ -33,7 +33,7 @@ def findRunnableThreads(threadids, threadsdone, threadsrunning, threads):
 # Run a thread
 def runThread(threadid, threadsdone, threadsrunning, threads):
     thread = getThread(threadid, threads)
-    if not thread.isAlive() and not threadid in threadsdone:
+    if not thread["thread"].isAlive() and not threadid in threadsdone:
         threadsrunning.append(threadid)
         thread.start()
 
@@ -59,7 +59,6 @@ def threadLoop(threads):
     for i in range(len(threads)):
         threadids.append(i)
     for i in range(len(threads)):
-        print(str(threads[i]))
         for x in range(len(threads[i]["deps"])):
             if threads[i]["deps"][x] in threads:
                 val = 0
