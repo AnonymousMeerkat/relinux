@@ -4,13 +4,14 @@ Generates a temporary filesystem to hack on
 '''
 
 from relinux import logger, config, configutils, fsutil, pwdmanip, aptutil, numrange
-from relinux.modules.osweaver import configs, aptcache
+from relinux.modules.osweaver import aptcache
 import os
 import shutil
 import re
 import threading
 
 tmpsys = config.TempSys
+configs = config.Configuration
 #tmpsystree = "TempSysTree"
 #cpetcvar = "EtcVar"
 #remconfig = "RemConfig"

@@ -31,6 +31,7 @@ GUIStatus = True
 background = "lightgrey"
 
 # Generated
+Configuration = ""
 ISOTree = ""
 TempSys = ""
 SysVersion = ""  # Should be filled in by: os.popen("/usr/bin/lsb_release -rs").read().strip()

@@ -74,6 +74,7 @@ def main():
         buffer1 = configutils.getBuffer(open("../../relinux.conf"))
         buffer2 = configutils.compress(buffer1)
         cbuffer = configutils.parseCompressedBuffer(buffer2, "../../relinux.conf")
+        config.Configuration = cbuffer
         '''for i in configutils.beautify(buffer1):
             print(i)'''
         spprog += 1

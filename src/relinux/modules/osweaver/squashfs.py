@@ -4,7 +4,6 @@ SquashFS Generation
 '''
 
 from relinux import logger, fsutil, configutils, config
-from relinux.modules.osweaver import configs
 from relinux.modules.osweaver import tempsys
 import os
 import threading
@@ -13,6 +12,7 @@ threadname = "SquashFS"
 tn = logger.genTN(threadname)
 isotreel = config.ISOTree
 tmpsys = config.TempSys
+configs = config.Configuration
 
 
 # Display a iso9660 error

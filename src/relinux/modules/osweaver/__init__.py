@@ -13,7 +13,6 @@ modulename = "OSWeaver"
 # Just in case config.ISOTree doesn't include a /
 isotreel = config.ISOTree + "/"
 tmpsys = config.TempSys + "/"
-configs = {}
 aptcache = {}
 page = {}
 
@@ -30,7 +29,6 @@ def runThreads():
 def run(adict):
     global configs, aptcache, page, isotreel, tmpsys
     configs = adict["config"]["OSWeaver"]
-    print(fsutil.listdir(configutils.getValue(configs[configutils.preseed])))
     isodir = configutils.getValue(configs[configutils.isodir])
     config.ISOTree = isodir + "/.ISO_STRUCTURE/"
     print(config.ISOTree)
