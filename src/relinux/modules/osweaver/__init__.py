@@ -3,7 +3,7 @@ OSWeaver Module for relinux
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
-from relinux import threadmanager, config, gui, configutils
+from relinux import threadmanager, config, gui, configutils, fsutil
 import Tkinter
 
 relinuxmodule = True
@@ -30,7 +30,7 @@ def runThreads():
 def run(adict):
     global configs, aptcache, page, isotreel, tmpsys
     configs = adict["config"]["OSWeaver"]
-    print(configutils.getValue(configs[configutils.preseed]))
+    print(fsutil.listdir(configutils.getValue(configs[configutils.preseed])))
     isodir = configutils.getValue(configs[configutils.isodir])
     config.ISOTree = isodir + "/.ISO_STRUCTURE/"
     print(config.ISOTree)
