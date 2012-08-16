@@ -53,12 +53,12 @@ def showFileNotFound(files, dirs, tn):
 
 
 # Copy a file
-def copyFile(src, dst, critical=False):
+def copyFile(src, dst, tn, critical=False):
     if os.path.isfile(src):
         shutil.copy2(src, dst)
     elif critical is True:
         splitted = os.path.split(src)
-        showFileNotFound(splitted[1], splitted[0])
+        showFileNotFound(splitted[1], splitted[0], tn)
 
 
 # C precompiler definition writer
@@ -97,7 +97,7 @@ class copyPreseed(threading.Thread):
         logger.logV(self.tn, _("Copying preseed files to the ISO tree"))
         for i in fsutil.listdir(configutils.getValue(configs[configutils.preseed])):
             logger.logVV(self.tn, _("Copying") + " " + i + " " + _("to the ISO tree"))
-            copyFile(i, isotreel + "preseed/")
+            copyFile(i, isotreel + "preseed/", self.tn)
 copypreseed["thread"] = copyPreseed()
 
 
@@ -111,7 +111,7 @@ class copyMemtest(threading.Thread):
     def run(self):
         if configutils.parseBoolean(configutils.getValue(configs[configutils.memtest])):
             logger.logV(self.tn, _("Copying memtest to the ISO tree"))
-            copyFile("/boot/memtest86+.bin", isotreel + "isolinux/memtest")
+            copyFile("/boot/memtest86+.bin", isotreel + "isolinux/memtest", self.tn)
 copymemtest["thread"] = copyMemtest()
 
 
@@ -124,11 +124,11 @@ class copySysLinux(threading.Thread):
 
     def run(self):
         logger.logV(self.tn, _("Copying ISOLINUX to the ISO tree"))
-        copyFile("/usr/lib/syslinux/isolinux.bin", isotreel + "isolinux/", True)
-        copyFile("/usr/lib/syslinux/vesamenu.c32", isotreel + "isolinux/", True)
+        copyFile("/usr/lib/syslinux/isolinux.bin", isotreel + "isolinux/", self.tn, True)
+        copyFile("/usr/lib/syslinux/vesamenu.c32", isotreel + "isolinux/", self.tn, True)
         logger.logVV(self.tn, _("Copying isolinux.cfg to the ISO tree"))
         copyFile(configutils.getValue(configs[configutils.isolinuxfile], isotreel + 
-                                      "isolinux/isolinux.cfg", True))
+                                      "isolinux/isolinux.cfg", self.tn, True))
         # Edit the isolinux.cfg file to replace the variables
         logger.logV(_("Editing isolinux.cfg"))
         for i in [["LABEL", configutils.getValue(configs[configutils.label])],
@@ -159,7 +159,7 @@ class diskDefines(threading.Thread):
                                                       "TOTALNUM0": ct
                                                       })
         # For some reason casper needs (or used to need) the diskdefines in its own directory
-        copyFile(isotreel + "README.diskdefines", isotreel + "casper/README.diskdefines")
+        copyFile(isotreel + "README.diskdefines", isotreel + "casper/README.diskdefines", self.tn)
 diskdefines["thread"] = diskDefines()
 
 
@@ -188,7 +188,8 @@ class genPakManifest(threading.Thread):
         writer.close()
         # We don't want any differences, so we'll just copy filesystem.manifest to filesystem.manifest-desktop
         logger.logVV(self.tn, _("Generating filesystem.manifest-desktop"))
-        copyFile(isotreel + "casper/filesystem.manifest", isotreel + "casper/filesystem.manifest-desktop")
+        copyFile(isotreel + "casper/filesystem.manifest",
+                 isotreel + "casper/filesystem.manifest-desktop", self.tn)
 pakmanifest["thread"] = genPakManifest()
 
 
@@ -216,7 +217,7 @@ class copyKernel(threading.Thread):
     def run(self, configs):
         logger.logI(self.tn, _("Copying the kernel to the ISO tree"))
         copyFile("/boot/vmlinuz-" + configutils.getKernel(configutils.getValue(configs[configutils.kernel])),
-                 isotreel + "casper/vmlinuz")
+                 isotreel + "casper/vmlinuz", self.tn)
 copykernel["thread"] = copyKernel()
 
 
