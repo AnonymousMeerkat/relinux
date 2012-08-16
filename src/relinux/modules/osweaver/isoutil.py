@@ -18,6 +18,7 @@ threadname = "ISOTree"
 #tn = logger.genTN(threadname)
 isotreel = config.ISOTree
 configs = config.Configuration
+print(configs)
 # C True
 ct = "1"
 # C False
