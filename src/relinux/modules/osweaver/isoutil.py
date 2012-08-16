@@ -78,6 +78,7 @@ class genISOTree(threading.Thread):
     def run(self):
         logger.logI(self.tn, _("Generating ISO Tree"))
         # Make the tree
+        print(isotreel)
         fsutil.maketree([isotreel + "casper", isotreel + "preseed",
                           isotreel + "isolinux", isotreel + ".disk"])
 genisotree["thread"] = genISOTree()
