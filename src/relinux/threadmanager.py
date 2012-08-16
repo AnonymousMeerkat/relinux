@@ -67,6 +67,8 @@ def threadLoop(threads):
                         val = y
                 threads[i]["deps"][x] = val
     while config.ThreadStop is False:
+        print(threadsdone)
+        print(threadsrunning)
         # Clear old threads
         for x in threadsrunning:
             checkThread(x, threadsdone, threadsrunning, threads)
