@@ -32,6 +32,7 @@ def run(adict):
     configs = adict["config"]["OSWeaver"]
     isodir = configutils.getValue(configs[configutils.isodir])
     isotreel = isodir + "/.ISO_STRUCTURE/"
+    print(isotreel)
     tmpsys = isodir + "/.TMPSYS/"
     aptcache = adict["aptcache"]
     ourgui = adict["gui"]
