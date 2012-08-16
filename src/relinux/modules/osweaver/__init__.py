@@ -31,9 +31,9 @@ def run(adict):
     global configs, aptcache, page, isotreel, tmpsys
     configs = adict["config"]["OSWeaver"]
     isodir = configutils.getValue(configs[configutils.isodir])
-    isotreel = isodir + "/.ISO_STRUCTURE/"
-    print(isotreel)
-    tmpsys = isodir + "/.TMPSYS/"
+    config.ISOTree = isodir + "/.ISO_STRUCTURE/"
+    print(config.ISOTree)
+    config.TempSys = isodir + "/.TMPSYS/"
     aptcache = adict["aptcache"]
     ourgui = adict["gui"]
     pagenum = ourgui.wizard.add_tab()

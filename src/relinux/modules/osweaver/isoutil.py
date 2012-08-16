@@ -6,7 +6,7 @@ ISO Utilities
 @author: Anonymous Meerkat
 '''
 
-from relinux.modules.osweaver import isotreel, squashfs, configs
+from relinux.modules.osweaver import squashfs, configs
 from relinux import logger, config, fsutil, configutils
 import shutil
 import os
@@ -16,6 +16,7 @@ import threading
 
 threadname = "ISOTree"
 #tn = logger.genTN(threadname)
+isotreel = config.ISOTree
 # C True
 ct = "1"
 # C False
