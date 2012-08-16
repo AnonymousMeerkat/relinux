@@ -33,7 +33,7 @@ def findRunnableThreads(threadids, threadsdone, threadsrunning, threads):
 # Run a thread
 def runThread(threadid, threadsdone, threadsrunning, threads):
     thread = getThread(threadid, threads)
-    if not thread["thread"].isAlive() and not threadid in threadsdone:
+    if not thread["thread"].isAlive() and not threadid in threadsdone and not threadid in threadsrunning:
         threadsrunning.append(threadid)
         print(str(threadid) + " " + str(threadsrunning) + " " + str(threadsdone))
         thread["thread"].start()
