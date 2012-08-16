@@ -218,7 +218,7 @@ def chmod(file, mod, tn=""):
 #    recurse (True or False): If True, recurse into the directory
 #    dirs (True or False): If True, show directories too
 #    symlinks (True or False): If True, show symlinks too
-def listdir(dirs, options, tn=""):
+def listdir(dirs, options={"recurse": True, "dirs": True, "symlinks": True}, tn=""):
     logger.logV(tn, _("Gathering a list of files in") + " " + dirs)
     listed = os.listdir(dirs)
     returnme = []
