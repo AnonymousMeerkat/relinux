@@ -73,7 +73,7 @@ def main():
         splash.setProgress(calcPercent((spprog, spprogn)), "Parsing configuration...")
         buffer1 = configutils.getBuffer(open("../../relinux.conf"))
         buffer2 = configutils.compress(buffer1)
-        cbuffer = configutils.parseCompressedBuffer(buffer2)
+        cbuffer = configutils.parseCompressedBuffer(buffer2, "../../relinux.conf")
         '''for i in configutils.beautify(buffer1):
             print(i)'''
         spprog += 1

@@ -161,12 +161,12 @@ def getLinesWithinOption(buffers, option):
 
 # Returns the parsed properties in a dictionary (the buffer has to be compressed though)
 def getProperties(buffers):
-    patt = re.compile(r"^ *(.*?):(.*)")
+    patt = re.compile(r"^ *(.*?):.*")
     returnme = {}
     for i in buffers:
         m = patt.match(i)
         if checkMatched(m):
-            returnme[m.group(1)] = m.group(2).strip()
+            returnme[m.group(1)] = getProperty(buffers, m.group(1))
     return returnme
 
 
@@ -271,13 +271,16 @@ def getBuffer(files, strip=True):
 # Dict3 = Properties
 # Notes: This will take a lot of RAM, and it will take a relatively long time (around 1-3 secs)
 #        Try to only use this function once, and distribute the result to the functions who need this
-def parseCompressedBuffer(buffers):
+def parseCompressedBuffer(buffers, filename):
     returnme = {}
     for i in getSections(buffers):
         returnme[i] = {}
         liness = getLinesWithinSection(buffers, i)
         for x in getOptions(liness):
             returnme[i][x] = getProperties(getLinesWithinOption(liness, x))
+            if returnme[i][x][type] == filename:
+                returnme[i][x][value] = os.path.join(os.path.dirname(os.path.abspath(filename)),
+                                                     os.path.basename(returnme[i][x][value]))
     return returnme
 
 
