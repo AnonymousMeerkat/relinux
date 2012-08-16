@@ -35,6 +35,7 @@ def runThread(threadid, threadsdone, threadsrunning, threads):
     thread = getThread(threadid, threads)
     if not thread["thread"].isAlive() and not threadid in threadsdone:
         threadsrunning.append(threadid)
+        print(threadid)
         thread["thread"].start()
 
 
