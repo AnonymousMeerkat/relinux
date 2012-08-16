@@ -24,7 +24,7 @@ def findRunnableThreads(threadids, threadsdone, threadsrunning, threads):
                     deps = deps + 1
             if deps >= depsl:
                 returnme.append(i)
-        current = current + 1
+            current = current + 1
         if current >= cpumax:
             break
     return returnme
@@ -67,8 +67,6 @@ def threadLoop(threads):
                         val = y
                 threads[i]["deps"][x] = val
     while config.ThreadStop is False:
-        print(threadsdone)
-        print(threadsrunning)
         # Clear old threads
         for x in threadsrunning:
             checkThread(x, threadsdone, threadsrunning, threads)
