@@ -70,4 +70,4 @@ class genSFS(threading.Thread):
         # Could prevent problems, but might also prevent the user from editing
 gensfs["thread"] = genSFS()
 
-threads = [genSFS]
+threads = [gensfs]

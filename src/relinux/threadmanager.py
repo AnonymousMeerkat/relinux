@@ -59,6 +59,7 @@ def threadLoop(threads):
     for i in range(len(threads)):
         threadids.append(i)
     for i in range(len(threads)):
+        print(str(threads[i]))
         for x in range(len(threads[i]["deps"])):
             if threads[i]["deps"][x] in threads:
                 val = 0
