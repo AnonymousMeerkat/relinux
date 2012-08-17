@@ -178,7 +178,8 @@ class genPakManifest(threading.Thread):
         writer = open(isotreel + "casper/filesystem.manifest", "w")
         for i in pkglistu:
             splitted = i.split()
-            if not splitted[1].strip() in configutils.getValue(configs[configutils.remafterinst]):
+            if (not splitted[1].strip() in 
+                configutils.parseMultipleValues(configutils.getValue(configs[configutils.remafterinst]))):
                 writer.write(splitted[1].strip() + " " + splitted[2].strip() + "\n")
         writer.close()
         logger.logVV(self.tn, _("Generating filesytem.manifest-remove"))

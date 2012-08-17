@@ -327,6 +327,11 @@ def parseBoolean(option):
         return None
 
 
+# Returns a list from a Multiple Value value
+def parseMultipleValues(option):
+    return option.split(" ")
+
+
 # Returns a parsed choice list (None if not a choice list, buffer must be the value of the Type option)
 def getChoices(buffers):
     returnme = []
