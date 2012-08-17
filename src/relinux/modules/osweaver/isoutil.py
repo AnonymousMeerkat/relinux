@@ -48,7 +48,7 @@ def getDiskName():
 
 # Shows a file not found error
 def showFileNotFound(files, dirs, tn):
-    logger.logE(tn, files + " " + _("not found") + "." + _("Copy") + " " + files + 
+    logger.logE(tn, files + " " + _("not found") + ". " + _("Copy") + " " + files + 
                 " " + _("to") + " " + dirs)
 
 
@@ -178,12 +178,12 @@ class genPakManifest(threading.Thread):
         writer = open(isotreel + "casper/filesystem.manifest", "w")
         for i in pkglistu:
             splitted = i.split()
-            if not splitted[1].strip() in config[configutils.remafterinst]:
+            if not splitted[1].strip() in configutils.getValue(configs[configutils.remafterinst]):
                 writer.write(splitted[1].strip() + " " + splitted[2].strip() + "\n")
         writer.close()
         logger.logVV(self.tn, _("Generating filesytem.manifest-remove"))
         writer = open(isotreel + "casper/filesystem.manifest-remove", "w")
-        for i in config[configutils.remafterinst]:
+        for i in configs[configutils.remafterinst]:
             writer.write(i.strip() + "\n")
         writer.close()
         # We don't want any differences, so we'll just copy filesystem.manifest to filesystem.manifest-desktop
@@ -214,7 +214,7 @@ class copyKernel(threading.Thread):
         threading.Thread.__init__(self)
         self.tn = logger.genTN(copykernel["tn"])
 
-    def run(self, configs):
+    def run(self):
         logger.logI(self.tn, _("Copying the kernel to the ISO tree"))
         copyFile("/boot/vmlinuz-" + configutils.getKernel(configutils.getValue(configs[configutils.kernel])),
                  isotreel + "casper/vmlinuz", self.tn)
@@ -259,7 +259,7 @@ class USBComp(threading.Thread):
         files.write(getDiskName())
         files.close()
         logger.logV(self.tn, _("Making symlink pointing to the ISO root dir"))
-        os.symlink(isotreel + "ubuntu", isotreel)
+        os.symlink(isotreel, isotreel + "ubuntu")
         logger.logVV(self.tn, _("Writing release notes URL"))
         files = open(isotreel + ".disk/release_notes_url", "w")
         files.write(configutils.getValue(configs[configutils.url]) + "\n")
