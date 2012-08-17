@@ -127,8 +127,8 @@ class copySysLinux(threading.Thread):
         copyFile("/usr/lib/syslinux/isolinux.bin", isotreel + "isolinux/", self.tn, True)
         copyFile("/usr/lib/syslinux/vesamenu.c32", isotreel + "isolinux/", self.tn, True)
         logger.logVV(self.tn, _("Copying isolinux.cfg to the ISO tree"))
-        copyFile(configutils.getValue(configs[configutils.isolinuxfile], isotreel + 
-                                      "isolinux/isolinux.cfg", self.tn, True))
+        copyFile(configutils.getValue(configs[configutils.isolinuxfile]), isotreel + 
+                                      "isolinux/isolinux.cfg", self.tn, True)
         # Edit the isolinux.cfg file to replace the variables
         logger.logV(_("Editing isolinux.cfg"))
         for i in [["LABEL", configutils.getValue(configs[configutils.label])],
