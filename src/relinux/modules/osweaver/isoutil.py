@@ -130,7 +130,7 @@ class copySysLinux(threading.Thread):
         copyFile(configutils.getValue(configs[configutils.isolinuxfile]), isotreel + 
                                       "isolinux/isolinux.cfg", self.tn, True)
         # Edit the isolinux.cfg file to replace the variables
-        logger.logV(_("Editing isolinux.cfg"))
+        logger.logV(self.tn, _("Editing isolinux.cfg"))
         for i in [["LABEL", configutils.getValue(configs[configutils.label])],
                   ["SPLASH", configutils.getValue(configs[configutils.splash])],
                   ["TIMEOUT", configutils.getValue(configs[configutils.timeout])]]:
