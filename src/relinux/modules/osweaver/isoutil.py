@@ -178,6 +178,7 @@ class genPakManifest(threading.Thread):
         writer = open(isotreel + "casper/filesystem.manifest", "w")
         for i in pkglistu:
             splitted = i.split()
+            print("SPLIT" + str(splitted))
             if (not splitted[1].strip() in 
                 configutils.parseMultipleValues(configutils.getValue(configs[configutils.remafterinst]))):
                 writer.write(splitted[1].strip() + " " + splitted[2].strip() + "\n")
