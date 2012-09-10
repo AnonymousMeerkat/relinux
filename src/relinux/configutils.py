@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 '''
 Utilities to manage configuration files
-@author: Anonymous Meerkat
+@author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
 import re
-from relinux import versionsort, config
+from relinux import versionsort, config, utilities, fsutil
 import os
 import glob
 
@@ -19,22 +20,22 @@ splash = "SPLASHIMAGE"
 timeout = "TIMEOUT"
 remafterinst = "REMOVEAFTERINSTALL"
 username = "USERNAME"
-userfullname = "USERFULLNAME"
-host = "HOST"
+userfullname = "USERSNAME"
+host = "HOSTNAME"
 casperquiet = "CASPERQUIET"
 flavour = "FLAVOUR"
 sysname = "SYSNAME"
-version = "VERSION"
-codename = "CODENAME"
-description = "DESCRIPTION"
+sysversion = "SYSVERSION"
+codename = "SYSCODE"
+description = "SYSDESC"
 aptlistchange = "ALLOWAPTLISTCHANGE"
 kernel = "KERNELVERSION"
-sfscomp = "SQUASHFSCOMPRESSION"
-sfsopts = "SQUASHFSOPTS"
+sfscomp = "SFSCOMPRESSION"
+sfsopts = "SFSOPTIONS"
 isolevel = "ISOLEVEL"
 enablewubi = "ENABLEWUBI"
 isogenerator = "ISOGENERATOR"
-isolocation = "ISOLOCATION"
+isolocation = "ISOFILENAME"
 unionfs = "UNIONFS"
 popcon = "POPCON"
 isodir = "ISODIR"
@@ -54,21 +55,13 @@ choice = "Choice"
 custom = "Custom"
 
 
-# Checks if something matched
-def checkMatched(m):
-    if m is not None and m.group(0) is not None:
-        return True
-    else:
-        return False
-
-
 # Returns an empty-line-cleaned version of the buffer
 def cleanEmptyLines(buffers):
     patt = re.compile("^ *$")
     returnme = []
     for i in buffers:
         m = patt.match(i)
-        if not checkMatched(m):
+        if not utilities.checkMatched(m):
             returnme.append(i)
     return returnme
 
@@ -87,7 +80,7 @@ def cleanComments(buffers):
     returnme = []
     for i in buffers:
         m = patt.match(i)
-        if not checkMatched(m):
+        if not utilities.checkMatched(m):
             returnme.append(i)
     return returnme
 
@@ -105,7 +98,7 @@ def getSections(buffers):
     returnme = []
     for i in buffers:
         m = patt.match(i)
-        if checkMatched(m):
+        if utilities.checkMatched(m):
             returnme.append(i.split()[1].strip())
     return returnme
 
@@ -116,7 +109,7 @@ def getOptions(buffers):
     returnme = []
     for i in buffers:
         m = patt.match(i)
-        if checkMatched(m):
+        if utilities.checkMatched(m):
             returnme.append(i.split()[1].strip())
     return returnme
 
@@ -129,7 +122,7 @@ def getLinesWithinSection(buffers, section):
     x = 0
     for i in buffers:
         m = patt.match(i)
-        if checkMatched(m):
+        if utilities.checkMatched(m):
             if x == 1:
                 break
             x = 1
@@ -148,7 +141,7 @@ def getLinesWithinOption(buffers, option):
     x = 0
     for i in buffers:
         m = patt.match(i)
-        if checkMatched(m):
+        if utilities.checkMatched(m):
             if x == 1:
                 break
             x = 1
@@ -165,7 +158,7 @@ def getProperties(buffers):
     returnme = {}
     for i in buffers:
         m = patt.match(i)
-        if checkMatched(m):
+        if utilities.checkMatched(m):
             returnme[m.group(1)] = getProperty(buffers, m.group(1))
     return returnme
 
@@ -175,7 +168,7 @@ def getProperty(buffers, option):
     patt = re.compile("^ *" + option + " *:(.*)")
     for i in buffers:
         m = patt.match(i)
-        if checkMatched(m):
+        if utilities.checkMatched(m):
             return m.group(1).strip()
     return ""
 
@@ -251,19 +244,6 @@ def beautify(buffers):
     return returnme
 
 
-# Returns a buffer from a configuration file
-def getBuffer(files, strip=True):
-    returnme = []
-    for line in files:
-        if not line or line is None:
-            break
-        if strip is True:
-            line = line.rstrip()
-        returnme.append(line)
-    print(len(returnme))
-    return returnme
-
-
 # Parses a complete compressed configuration file
 # Returns a dictionary of dictionaries of dictionaries
 # Dict1 = Sections
@@ -271,7 +251,7 @@ def getBuffer(files, strip=True):
 # Dict3 = Properties
 # Notes: This will take a lot of RAM, and it will take a relatively long time (around 1-3 secs)
 #        Try to only use this function once, and distribute the result to the functions who need this
-def parseCompressedBuffer(buffers, filename):
+def parseCompressedBuffer(buffers, filenames):
     returnme = {}
     for i in getSections(buffers):
         returnme[i] = {}
@@ -279,8 +259,10 @@ def parseCompressedBuffer(buffers, filename):
         for x in getOptions(liness):
             returnme[i][x] = getProperties(getLinesWithinOption(liness, x))
             if returnme[i][x][types] == filename:
-                returnme[i][x][value] = os.path.join(os.path.dirname(os.path.abspath(filename)),
-                                                     os.path.basename(returnme[i][x][value]))
+                returnme[i][x][value] = os.path.abspath(
+                                                os.path.join(
+                                                    os.path.dirname(os.path.abspath(filenames)),
+                                                        fsutil.relpath(returnme[i][x][value])))
     return returnme
 
 
@@ -329,7 +311,6 @@ def parseBoolean(option):
 
 # Returns a list from a Multiple Value value
 def parseMultipleValues(option):
-    print(option)
     return option.split(" ")
 
 
@@ -338,7 +319,7 @@ def getChoices(buffers):
     returnme = []
     patt = re.compile("^ *" + choice + " *: *(.*)")
     m = patt.match(buffers.strip())
-    if checkMatched(m):
+    if utilities.checkMatched(m):
         for i in m.group(1).split(","):
             si = i.strip()
             returnme.append(si)
@@ -352,7 +333,7 @@ def getMultipleValues(buffers):
     returnme = []
     patt = re.compile("^ *(.*)")
     m = patt.match(buffers.strip())
-    if checkMatched(m):
+    if utilities.checkMatched(m):
         for i in m.group(1).split():
             si = i.strip()
             returnme.append(si)

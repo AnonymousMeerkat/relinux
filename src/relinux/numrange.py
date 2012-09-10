@@ -32,7 +32,9 @@ def _strip_left_repeated_digit(num, digit):
 def generate_to_bound(num, bound):
     if bound not in ["upper", "lower"]:
         raise ValueError("bound not in ['upper', 'lower']")
-
+    if isinstance(num, int):
+        num_ = str(num)
+        num = num_
     if num == "":
         return ""
     no_range_exit = "0" if bound == "lower" else "9"
@@ -104,6 +106,12 @@ def _generate_for_same_len_nr(min_, max_):
     return "|".join([starting, middle, ending])
 
 def gen_num_range(min_, max_, capturing=False):
+    if isinstance(min_, int):
+        min__ = str(min_)
+        min_ = min__
+    if isinstance(max_, int):
+        max__ = str(max_)
+        max_ = max__
     template = r"\b(?:%s)\b"
     if capturing:
         template = r"\b(%s)\b"
@@ -111,9 +119,9 @@ def gen_num_range(min_, max_, capturing=False):
     nr_dig_max = len(str(max_))
     if nr_dig_min != nr_dig_max:
         middle = ""
-        for i in xrange(nr_dig_min, nr_dig_max - 1):
+        for i in range(nr_dig_min, nr_dig_max - 1):
             middle += "|[1-9]"
-            for x in xrange(i):
+            for x in range(i):
                 middle += "[0-9]"
         starting = generate_to_bound(min_, "upper")
         ending = _generate_for_same_len_nr("1" + "0" * (len(max_) - 1), max_)

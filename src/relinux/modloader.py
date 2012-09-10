@@ -5,6 +5,7 @@ Module Loader
 
 import imp
 import os
+import collections
 from relinux import config, logger
 
 
@@ -13,7 +14,9 @@ tn = logger.genTN("ModLoader")
 
 # Checks if a folder is a module
 def isModule(module):
-    if hasattr(module, "relinuxmodule") and hasattr(module, "relinuxmoduleapi") and module.relinuxmodule is True and hasattr(module, "run") and callable(getattr(module, "run")):
+    if (hasattr(module, "relinuxmodule") and hasattr(module, "relinuxmoduleapi") and
+        module.relinuxmodule is True and hasattr(module, "run") and
+        isinstance(getattr(module, "run"), collections.Callable)):
         return True
     return False
 
@@ -21,7 +24,7 @@ def isModule(module):
 # Checks if a module is compatible with this version of relinux
 def isCompatible(module):
     if module.relinuxmoduleapi != config.version:
-        logger.logW(tn, _("Module") + " " + module.modulename + " " +
+        logger.logI(tn, logger.W, _("Module") + " " + module.modulename + " " +
                     _("is incompatible with this relinux version") + " (" + _("relinux version:") + " " +
                     config.version + ", " + _("required version:") + " " + module.relinuxmoduleapi + ")")
         return False
@@ -46,7 +49,7 @@ def getModules():
         if loadme:
             returnme.append({"name": i, "file": file, "path": pathname, "desc": desc})
         else:
-            logger.logW(tn, _("Module") + " " + module.modulename + " " + _("will not be loaded"))
+            logger.logI(tn, logger.W, _("Module") + " " + module.modulename + " " + _("will not be loaded"))
     return returnme
 
 

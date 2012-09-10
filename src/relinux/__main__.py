@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Main relinux script
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>
@@ -6,19 +7,18 @@ Main relinux script
 # TODO: Clean this mess up!
 
 import sys
-# Just in case, we will append both this directory and the directory higher than us
-sys.path.append("..")
-sys.path.append(".")
+import os
+mainsrcdir = sys.path[0]
+srcdir = os.path.abspath(os.path.join(mainsrcdir, os.pardir))
+relinuxdir = os.path.abspath(os.path.join(srcdir, os.pardir))
+sys.path.append(srcdir)
 from relinux import config
 import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
-from argparse import ArgumentParser
-import Tkinter
-import time
 
 
-def exitprog():
-    sys.exit()
+def exitprog(exitcode=0):
+    sys.exit(exitcode)
 
 def version():
     print((config.version_string))
@@ -29,8 +29,45 @@ captop = 0
 minis = 0.0
 
 def main():
+    def parsePyHex(string1):
+        string = "%x" % string1
+        count = 0
+        result = ""
+        for char in string:
+            if count == 0 or count == 2 or count == 4:
+                result += char
+                if count != 4:
+                    result += "."
+            elif count == 5:
+                if char.lower() == "f":
+                    break
+                else:
+                    result += char.lower()
+            elif count == 6:
+                result += char
+            count += 1
+        return result
+    if not config.python_ok:
+        print(_("Relinux only supports python ") + parsePyHex(config.min_python_version) + "-" + 
+              parsePyHex(config.max_python_version) + ", " + _("but python ") +
+              parsePyHex(sys.hexversion) + " " + _("was used."))
+        exitprog(1)
+    from argparse import ArgumentParser
+    tkname = "Tkinter"
+    if config.python3:
+        tkname = "tkinter"
+    Tkinter = __import__(tkname)
+    import time
+    from relinux import gui, configutils, logger, aptutil, modloader, utilities, fsutil
+    config.Arch = fsutil.getArch()
     logger.normal()
-    parser = ArgumentParser()
+    config.GUIStream = utilities.eventStringIO()
+    config.EFiles.append(config.GUIStream)
+    config.IFiles.append(config.GUIStream)
+    config.VFiles.append(config.GUIStream)
+    #config.VVFiles.append(config.GUIStream)
+    logger.logI(logger.genTN("Main"), logger.I, "Test")
+    parser = ArgumentParser(prog="relinux", usage="%(prog)s [options]")
     parser.add_argument("-V", "--version", action="store_true",
                       dest="showversion",
                       help="show version info")
@@ -61,19 +98,15 @@ def main():
         global modules, aptcache, cbuffer, App
         spprogn = 6
         spprog = 0
-        def calcSubPercent(p, p1):
-            ans = float(float(p) / p1)
-            return ans
         def calcPercent(def2=(spprog, spprogn)):
-            ans = float(float(calcSubPercent(*def2)) * float(100))
-            return ans
+            return utilities.calcPercent(*def2)
         splash.setProgress(calcPercent((spprog, spprogn)), "Loading modules...")
         modules = modloader.getModules()
         spprog += 1
         splash.setProgress(calcPercent((spprog, spprogn)), "Parsing configuration...")
-        buffer1 = configutils.getBuffer(open("../../relinux.conf"))
+        buffer1 = utilities.getBuffer(open(relinuxdir + "/relinux.conf"))
         buffer2 = configutils.compress(buffer1)
-        cbuffer = configutils.parseCompressedBuffer(buffer2, "../../relinux.conf")
+        cbuffer = configutils.parseCompressedBuffer(buffer2, relinuxdir + "/relinux.conf")
         config.Configuration = cbuffer
         '''for i in configutils.beautify(buffer1):
             print(i)'''
@@ -82,14 +115,15 @@ def main():
         def aptupdate(op, percent):
             global minis
             if percent != None:
-                minis += calcSubPercent(percent, 100)
-            splash.setProgress(calcPercent((calcSubPercent(minis + captop, aptops) + spprog, spprogn)),
+                minis += utilities.floatDivision(percent, 100)
+            splash.setProgress(calcPercent((utilities.floatDivision(minis + captop, aptops) + spprog, spprogn)),
                                "Reading APT Cache... (" + op + ")")
         def aptdone(op):
             global minis, captop
             minis = 0.0
             captop += 1
         aptcache = aptutil.getCache(aptutil.OpProgress(aptupdate, aptdone))
+        config.AptCache = aptcache
         spprog += 1
         splash.setProgress(calcPercent((spprog, spprogn)), "Loading the GUI...")
         App = gui.GUI(root)
@@ -106,7 +140,7 @@ def main():
     splash = gui.Splash(root, startProg)
     #root.overrideredirect(Tkinter.TRUE) # Coming soon!
     root.mainloop()
+    config.ThreadStop = True
 
 if __name__ == '__main__':
-    from relinux import gui, configutils, logger, aptutil, modloader
     main()

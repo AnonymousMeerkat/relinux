@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 '''
 Various APT Utilities
-@author: Anonymous Meerkat
+@author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
 import apt

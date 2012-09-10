@@ -3,75 +3,154 @@ Thread Managing Class
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
-from relinux import config, fsutil
+from relinux import config, fsutil, logger, utilities
 import time
+import threading
+import copy
 
-#threads = []
+
+tn = logger.genTN("TheadManager")
+
+
+# Custom thread class
+class Thread(threading.Thread):
+    def __init__(self, **kw):
+        threading.Thread.__init__(self)
+        for i in kw.keys():
+            self.__dict__[i] = kw[i]
+
+    def run(self):
+        self.runthread()
 
 
 # Finds threads that can currently run (and have not already run)
-def findRunnableThreads(threadids, threadsdone, threadsrunning, threads):
+def findRunnableThreads(threadids, threadsdone, threadsrunning, threads, **options):
     returnme = []
-    cpumax = fsutil.getCPUCount()
+    cpumax = fsutil.getCPUCount() * 2
     current = 0
     for i in threadids:
-        if not i in threadsdone and current < cpumax:
-            thread = getThread(i, threads)
+        thread = getThread(i, threads)
+        #print(utilities.utf8all(thread["threadspan"], " ", current))
+        if (thread["enabled"] and not i in threadsdone and current < cpumax and not
+            ((thread["threadspan"] < 0 and current > 0) or
+             (thread["threadspan"] > (cpumax - current)))):
             deps = 0
             depsl = len(thread["deps"])
-            for x in thread["deps"]:
-                if x in threadsdone:
-                    deps = deps + 1
+            if "deps" in options and options["deps"]:
+                deps = depsl
+            else:
+                for x in thread["deps"]:
+                    if x in threadsdone or x == i:
+                        deps += 1
             if deps >= depsl:
                 returnme.append(i)
-            current = current + 1
+                if thread["threadspan"] < 0:
+                    current = cpumax
+                else:
+                    current += thread["threadspan"]
+            elif False:
+                if thread["tn"] == "ISO" or True:
+                    ls = []
+                    for x in thread["deps"]:
+                        if not x in threadsdone:
+                            ls.append(str(getThread(x, threads)["tn"]) + " " + str(x))
+                    print(thread["tn"] + " " + str(i) + " " + str(ls))
         if current >= cpumax:
             break
     return returnme
 
 
 # Run a thread
-def runThread(threadid, threadsdone, threadsrunning, threads):
+def runThread(threadid, threadsdone, threadsrunning, threads, lock, **options):
     thread = getThread(threadid, threads)
-    if not thread["thread"].isAlive() and not threadid in threadsdone and not threadid in threadsrunning:
+    if not thread["thread"].is_alive() and not threadid in threadsdone and not threadid in threadsrunning:
         threadsrunning.append(threadid)
-        print(str(threadid) + " " + str(threadsrunning) + " " + str(threadsdone))
+        logger.logV(tn, logger.I, _("Starting") + " " + getThread(threadid, threads)["tn"] + "...")
         thread["thread"].start()
+        if options.get("poststart") != None and lock != None:
+            with lock:
+                options["poststart"](threadid, threadsrunning, threads)
 
 
 # Check if a thread is alive
-def checkThread(threadid, threadsdone, threadsrunning, threads):
+def checkThread(threadid, threadsdone, threadsrunning, threads, lock, **options):
     if threadid in threadsrunning:
-        if not getThread(threadid, threads)["thread"].isAlive():
+        if not getThread(threadid, threads)["thread"].is_alive():
             threadsrunning.remove(threadid)
             threadsdone.append(threadid)
+            logger.logV(tn, logger.I, getThread(threadid, threads)["tn"] + " " +
+                        _("has finished. Number of threads running: ") + str(len(threadsrunning)))
+            if options.get("postend") != None and lock != None:
+                with lock:
+                    options["postend"](threadid, threadsrunning, threads)
 
 
-# Get a thread from an ID
+# Returns a thread from an ID
 def getThread(threadid, threads):
     return threads[threadid]
 
 
 # Thread loop
-def threadLoop(threads):
+def threadLoop(threads1_, **options):
+    # Remove pointers
+    threads1 = copy.deepcopy(threads1_)
+    # Initialization
     threadsdone = []
     threadsrunning = []
     threadids = []
+    threads = []
+    pslock = None
+    pelock = None
+    if "poststart" in options:
+        pslock = threading.RLock()
+        if "postend" in options and options["postend"] == options["poststart"]:
+            pelock = pslock
+    if "postend" in options and pelock == None:
+        pelock = threading.RLock()
+    # Remove duplicates
+    for i in threads1:
+        if not i in threads:
+            threads.append(i)
+    # Make sure all threads have these attributes (which are "optional")
+    for i in range(len(threads)):
+        if not "threadspan" in threads[i]:
+            threads[i]["threadspan"] = 1
+        if not "enabled" in threads[i]:
+            threads[i]["enabled"] = True
+    # Generate the threads
+    for i in range(len(threads)):
+        temp_ = threads[i]["thread"]
+        kw = {"tn": logger.genTN(threads[i]["tn"])}
+        if "threadargs" in options:
+            for x in options["threadargs"].keys():
+                kw[x] = options["threadargs"][x]
+        temp = temp_(**kw)
+        threads[i]["thread"] = temp
+    # Generate the thread IDS
     for i in range(len(threads)):
         threadids.append(i)
+    # Make sure thread dependencies are made as IDs, and not actual thread dictionaries
     for i in range(len(threads)):
         for x in range(len(threads[i]["deps"])):
             if threads[i]["deps"][x] in threads:
-                val = 0
                 for y in range(len(threads)):
                     if threads[i]["deps"][x] == threads[y]:
-                        val = y
-                threads[i]["deps"][x] = val
-    while config.ThreadStop is False:
-        # Clear old threads
-        for x in threadsrunning:
-            checkThread(x, threadsdone, threadsrunning, threads)
-        # Run runnable threads
-        for x in findRunnableThreads(threadids, threadsdone, threadsrunning, threads):
-            runThread(x, threadsdone, threadsrunning, threads)
-        time.sleep(float(1.0 / config.ThreadRPS))
+                        threads[i]["deps"][x] = y
+                        break
+    # Actual loop
+    def _ActualLoop(threads, threadsdone, threadsrunning, threadids):
+        #global threads, threadsdone, threadsrunning, threadids
+        while config.ThreadStop is False:
+            # Clear old threads
+            for x in threadsrunning:
+                checkThread(x, threadsdone, threadsrunning, threads, pelock, **options)
+            # End if all threads are done
+            if len(threadsdone) >= len(threads):
+                break
+            # Run runnable threads
+            for x in findRunnableThreads(threadids, threadsdone, threadsrunning, threads, **options):
+                runThread(x, threadsdone, threadsrunning, threads, pslock, **options)
+            time.sleep(float(1.0 / config.ThreadRPS))
+    # Make a new thread (so that the user can continue on using relinux)
+    t = threading.Thread(target=_ActualLoop, args=(threads, threadsdone, threadsrunning, threadids))
+    t.start()

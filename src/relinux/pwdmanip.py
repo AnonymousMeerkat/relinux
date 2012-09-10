@@ -1,20 +1,20 @@
 '''
 Password and group file manipulation
-@author: Anonymous Meerkat
+@author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
-from relinux import configutils
+from relinux import configutils, utilities
 import re
 
 
 # Checks if something matched (shorthand way of writing configutils.checkMatched(m))
 def checkMatched(m):
-    return configutils.checkMatched(m)
+    return utilities.checkMatched(m)
 
 
 # Returns a parsed list of /etc/passwd entries (i.e. PP Entry)
 def parsePasswdEntries(buffers):
-    patt = re.compile("^(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?).*")
+    patt = re.compile("^(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?)$")
     returnme = []
     for i in buffers:
         m = patt.match(i)
@@ -33,7 +33,7 @@ def parsePasswdEntries(buffers):
 
 # Returns a parsed list of /etc/group entries (i.e. PG Entry)
 def parseGroupEntries(buffers):
-    patt = re.compile("^(.*?):(.*?):(.*?):(.*?)")
+    patt = re.compile("^(.*?):(.*?):(.*?):(.*?)$")
     returnme = []
     for i in buffers:
         m = patt.match(i)
@@ -50,7 +50,7 @@ def parseGroupEntries(buffers):
 
 # Returns a parsed list of /etc/shadow entries (i.e. PS Entry)
 def parseShadowEntries(buffers):
-    patt = re.compile("^(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?).*")
+    patt = re.compile("^(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?)$")
     returnme = []
     for i in buffers:
         m = patt.match(i)
@@ -65,64 +65,31 @@ def parseShadowEntries(buffers):
             buff["inactive"] = m.group(7)
             buff["expire"] = m.group(8)
             buff["reserved"] = m.group(9)
-    return returnme
-
-
-# Helper function that joins sections together with a custom character
-def _join(arr, char):
-    returnme = ""
-    c = 0
-    l = arr.length - 1
-    for i in arr:
-        if c < l:
-            returnme = returnme + i + char
-        else:
-            returnme = returnme + i
-        c = c + 1
-    returnme = returnme + "\n"
+            returnme.append(buff)
     return returnme
 
 
 # The function opposite to parsePasswdEntries
-def PPtoEntry(buffers):
-    returnme = []
-    for i in buffers:
-        returnme.append(_join([i["user"], i["passwd"], i["uid"], i["gid"], i["name"], i["home"],
-                               i["shell"]], ":"))
-    return returnme
+def PPtoEntry(i):
+    return utilities.join([i["user"], i["passwd"], i["uid"], i["gid"], i["name"], i["home"],
+                            i["shell"]], ":") + "\n"
 
 
 # The function opposite to parseGroupEntries
-def PGtoEntry(buffers):
-    returnme = []
-    for i in buffers:
-        # Sort of hard to read (at least for me) so I'll split it up
-        # returnme.append(
-        #     _join([
-        #         i["group"],
-        #         i["passwd"],
-        #         i["gid"],
-        #         _join([
-        #             i["users"]
-        #         ], ",")
-        #     ], ":")
-        # )
-        returnme.append(_join([i["group"], i["passwd"], i["gid"], _join([i["users"]], ",")]))
+def PGtoEntry(i):
+    return utilities.join([i["group"], i["passwd"], i["gid"], utilities.join(i["users"], ",")], ":") + "\n"
 
 
 # The function opposite to parseShadowEntries
-def PStoEntry(buffers):
-    returnme = []
-    for i in buffers:
-        returnme.append(_join([i["user"], i["passwd"], i["lastpwdchange"], i["minpwdchange"],
+def PStoEntry(i):
+    return utilities.join([i["user"], i["passwd"], i["lastpwdchange"], i["minpwdchange"],
                                i["maxpwdchange"], i["warnperiod"], i["inactive"], i["expire"],
-                               i["reserved"]], ":"))
-    return returnme
+                               i["reserved"]], ":") + "\n"
 
 
 # Returns a list of entries from a user ID regex (buffer must contain PP entries)
 def getPPByUID(regex, buffers):
-    patt = re.compile("^.*" + regex + ".*$")
+    patt = re.compile("^" + regex + "$")
     returnme = []
     for i in buffers:
         m = patt.match(i["uid"])

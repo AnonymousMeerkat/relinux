@@ -19,7 +19,7 @@ class setupInst(threading.Thread):
         self.ip = aptutil.getInstallProgress()
 
     def run(self):
-        logger.logV(self.tn, "Setting up Ubiquity")
+        logger.logV(self.tn, logger.I, "Setting up Ubiquity")
         if os.getenv("KDE_FULL_SESSION") != None:
             aptutil.instPkg(aptutil.getPkg("ubiquity-frontend-kde", aptcache), self.depcache)
             aptutil.remPkg(aptutil.getPkg("ubiquity-frontend-gtk", aptcache), self.depcache, True)
@@ -27,7 +27,7 @@ class setupInst(threading.Thread):
             aptutil.remPkg(aptutil.getPkg("ubiquity-frontend-kde", aptcache), self.depcache, True)
             aptutil.instPkg(aptutil.getPkg("ubiquity-frontend-gtk", aptcache), self.depcache)
         if configutils.parseBoolean(config[configutils.popcon]):
-            logger.logV(self.tn, "Setting up Popularity Contest")
+            logger.logV(self.tn, logger.I, "Setting up Popularity Contest")
             aptutil.instPkg(aptutil.getPkg("popularity-contest"), self.depcache)
         else:
             aptutil.remPkg(aptutil.getPkg("popularity-contest"), self.depcache, True)

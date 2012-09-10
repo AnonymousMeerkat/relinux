@@ -1,18 +1,18 @@
+# -*- coding: utf-8 -*-
 """
 Contains streams for logging information
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 """
 
 from relinux import config
-import sys
+import copy
 #from threading import RLock
 
 
 # Remove console output from a certain stream
 def remConsoleOutput(stream):
-    consolestreams = [sys.stderr, sys.stdout]
     for i in stream:
-        if i in consolestreams:
+        if i in config.TermStreams:
             stream.remove(i)
 
 
@@ -61,14 +61,51 @@ VVBuffer = ""'''
 # Logging presets
 MError = "Error! "
 MWarning = "Warning! "
+MDebug = "Debug: "
 MTab = "    "
 MNewline = "\n"
+E = "E"
+W = "W"
+I = "I"
+D = "D"
 
 
-# Writes in all files in list
-def writeAll(lists, text):
+# Writes in all files in list (plus formats the text)
+def writeAll(status, lists, tn, importance, text, **options):
+    if tn == "" or tn == None or not status:
+        return
+    text_ = tn
+    if importance == E:
+        text_ += MError
+    elif importance == W:
+        text_ += MWarning
+    elif importance == D:
+        text_ += MDebug
+    else:
+        text_ += ""
+    text__ = text_ + text
+    text = text__
     for i in lists:
-        i.write(text)
+        if i in config.TermStreams and "noterm" in options and options["noterm"]:
+            continue
+        if i == config.GUIStream and "nogui" in options and options["nogui"]:
+            continue
+        text_ = copy.copy(text)
+        if i in config.TermStreams:
+            if hasattr(i, "writefunc"):
+                print(True)
+            text__ = "\033["
+            if importance == E:
+                text__ += str(config.TermRed)
+            elif importance == W:
+                text__ += str(config.TermYellow)
+            elif importance == D:
+                text__ += str(config.TermGreen)
+            '''elif importance == I:
+                text__ += config.TermBlue'''
+            text__ += "m" + text_ + "\033[" + str(config.TermReset) + "m"
+            text_ = text__
+        i.write(text_ + MNewline)
 
 
 # Generates a thread name string
@@ -76,46 +113,21 @@ def genTN(tn):
     return "[" + tn + "] "
 
 
-# Log to error stream
-def logE(tn, text):
-    if config.EStatus is True and not tn == "":
-        #RLock.acquire()
-        text = tn + MError + text
-        writeAll(config.EFiles, text + MNewline)
-        #RLock.release()
+# Log to essential stream
+def logE(tn, importance, text, **options):
+    writeAll(config.EStatus, config.EFiles, tn, importance, text, **options)
 
 
 # Log to info stream
-def logI(tn, text):
-    if config.IStatus is True and not tn == "":
-        #RLock.acquire()
-        text = tn + text
-        writeAll(config.IFiles, text + MNewline)
-        #RLock.release()
-
-
-# Log to warning stream
-def logW(tn, text):
-    if config.IStatus is True and not tn == "":
-        #RLock.acquire()
-        text = tn + MWarning + text
-        writeAll(config.WFiles, text + MNewline)
-        #RLock.release()
+def logI(tn, importance, text, **options):
+    writeAll(config.IStatus, config.IFiles, tn, importance, text, **options)
 
 
 # Log to verbose stream
-def logV(tn, text):
-    if config.VStatus is True and not tn == "":
-        #RLock.acquire()
-        text = tn + text
-        writeAll(config.VFiles, text + MNewline)
-        #RLock.release()
+def logV(tn, importance, text, **options):
+    writeAll(config.VStatus, config.VFiles, tn, importance, text, **options)
 
 
 # Log to very-verbose stream
-def logVV(tn, text):
-    if config.VVStatus is True and not tn == "":
-        #RLock.acquire()
-        text = tn + text
-        writeAll(config.VVFiles, text + MNewline)
-        #RLock.release()
+def logVV(tn, importance, text, **options):
+    writeAll(config.VVStatus, config.VVFiles, tn, importance, text, **options)
