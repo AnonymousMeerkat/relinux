@@ -162,11 +162,6 @@ class genPakManifest(threadmanager.Thread):
         writer = open(isotreel + "casper/filesystem.manifest", "w")
         writer_desktop = open(isotreel + "casper/filesystem.manifest-desktop", "w")
         for i in pkglistu:
-<<<<<<< HEAD
-            splitted = i.split()
-            print("SPLIT" + str(splitted))
-            if (not splitted[1].strip() in 
-=======
             if i.current_ver == None:
                 continue
             name = i.get_fullname(True).strip()
@@ -174,7 +169,6 @@ class genPakManifest(threadmanager.Thread):
             strs = name + " " + ver + "\n"
             writer.write(strs)
             if (not name in 
->>>>>>> testing
                 configutils.parseMultipleValues(configutils.getValue(configs[configutils.remafterinst]))):
                 writer_desktop.write(strs)
         writer.close()
