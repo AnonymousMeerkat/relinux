@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Module Loader
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Password and group file manipulation
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>

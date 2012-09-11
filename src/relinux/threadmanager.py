@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Thread Managing Class
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>

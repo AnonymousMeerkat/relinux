@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Anything GUI-related goes here
 @author: Anonymous Meerkat

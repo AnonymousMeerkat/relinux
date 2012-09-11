@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Number range generator
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>
