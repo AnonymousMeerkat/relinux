@@ -41,8 +41,12 @@ class copyEtcVar(threadmanager.Thread):
     def runthread(self):
         logger.logI(self.tn, logger.I, _("Copying files to the temporary filesystem"))
         excludes = configutils.getValue(configs[configutils.excludes])
+        varexcludes = excludes
+        # Exclude all log files (*.log *.log.*), PID files (to show that no daemons are running),
+        # backup and old files (for obvious reasons), and any .deb files that a person might have downloaded
+        varexcludes.extend(["*.log", "*.log.*", "*.pid", "*/pid", "*.bak", "*.[0-9].gz", "*.deb"])
         fsutil.fscopy("/etc", tmpsys + "etc", excludes, self.tn)
-        fsutil.fscopy("/var", tmpsys + "var", excludes, self.tn)
+        fsutil.fscopy("/var", tmpsys + "var", varexcludes, self.tn)
 cpetcvar["thread"] = copyEtcVar
 
 
@@ -89,7 +93,6 @@ class remTempVar(threadmanager.Thread):
             fsutil.adrm(tmpsys + i,
                         {"excludes": False, "remdirs": False, "remsymlink": True, "remfullpath": False},
                         None, self.tn)
-        fsutil.rm(tmpsys + "var/run/dbus/pid", False, self.tn)
 remtempvar["thread"] = remTempVar
 
 
