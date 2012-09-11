@@ -40,7 +40,7 @@ cpetcvar = {"deps": [tmpsystree], "tn": "EtcVar"}
 class copyEtcVar(threadmanager.Thread):
     def runthread(self):
         logger.logI(self.tn, logger.I, _("Copying files to the temporary filesystem"))
-        excludes = configutils.getValue(configs[configutils.excludes])
+        excludes = configutils.parseMultipleValues(configutils.getValue(configs[configutils.excludes]))
         varexcludes = excludes
         # Exclude all log files (*.log *.log.*), PID files (to show that no daemons are running),
         # backup and old files (for obvious reasons), and any .deb files that a person might have downloaded
