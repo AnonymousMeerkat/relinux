@@ -318,17 +318,6 @@ class UbiquitySetup(threadmanager.Thread):
 ubiquitysetup["thread"] = UbiquitySetup
 
 
-class TempSys(threadmanager.Thread):
-    def runthread(self):
-        logger.logI(self.tn, logger.I, _("Removing unneeded files"))
-        '''cbs = "/usr/share/initramfs-tools/scripts/casper-bottom/"
-        # This pattern should do the trick
-        execme = glob.glob(os.path.join(cbs, "[0-9][0-9]*"))
-        for i in execme:
-            logger.logVV(self.tn, "chmod 755 " + i)
-            fsutil.chmod(i, "755")'''
-
-
 # Thread list
 threads = [tmpsystree, cpetcvar, remconfig, remcachedlists, remtempvar, genvarlogs, remusers,
            casperconf, ubiquitysetup]

@@ -34,7 +34,7 @@ def exclude(names, files, tn=""):
     excludes = []
     for i in files:
         excludes.extend(fnmatch.filter(names, i))
-    logger.logV(tn, logger.I, _("Created exclude list") + " " + "(" + str(len(excludes)) + " " + 
+    logger.logV(tn, logger.I, _("Created exclude list") + " " + "(" + str(len(excludes)) + " " +
                 str(gettext.ngettext("entry", "entries", len(excludes))) + " " + _("allocated") + ")")
     return excludes
 
@@ -291,6 +291,12 @@ def fscopy(src, dst, excludes1, tn=""):
         #print(dst + " " + file__[len(src):])
         temp = re.sub(r"^/+", "", file__[len(src):])
         newpath = utilities.utf8(os.path.join(dst, temp))
+        # Save some valuable time
+        if os.path.exists(newpath):
+            fpmd5 = genMD5(fullpath)
+            npmd5 = genMD5(newpath)
+            if fpmd5 == npmd5:
+                continue
         dfile = delink(fullpath)
         if dfile is not None:
             logger.logVV(tn, logger.I, utilities.utf8all(file_, " ",
@@ -298,12 +304,12 @@ def fscopy(src, dst, excludes1, tn=""):
                                             newpath))
             symlink(dfile, newpath)
         elif os.path.isdir(fullpath):
-            logger.logVV(tn, logger.I, utilities.utf8all( _("Creating directory"), " ", file_))
+            logger.logVV(tn, logger.I, utilities.utf8all(_("Creating directory"), " ", file_))
             makedir(newpath)
             logger.logVV(tn, logger.I, _("Setting permissions"))
             copystat(fullpath, newpath)
         else:
-            logger.logVV(tn, logger.I, utilities.utf8all( _("Copying"), " ", fullpath, " ", _("to"), " ", newpath))
+            logger.logVV(tn, logger.I, utilities.utf8all(_("Copying"), " ", fullpath, " ", _("to"), " ", newpath))
             shutil.copy2(fullpath, newpath)
     logger.logVV(tn, logger.I, _("Setting permissions"))
     copystat(src, dst)

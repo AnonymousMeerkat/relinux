@@ -41,7 +41,7 @@ cf = "0"
 # -o file                Output image
 # -input-charset utf-8   Use the UTF-8 input charset
 # -iso-level isolevel    ISO Level
-isogenopts = ("-r -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot " + 
+isogenopts = ("-r -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot " +
               "-boot-load-size 4 -boot-info-table -input-charset utf-8 -iso-level " +
               configutils.getValue(configs[configutils.isolevel]))
 
@@ -53,7 +53,7 @@ def getDiskName():
 
 # Shows a file not found error
 def showFileNotFound(files, dirs, tn):
-    logger.logE(tn, logger.E, files + " " + _("not found") + ". " + _("Copy") + " " + files + 
+    logger.logE(tn, logger.E, files + " " + _("not found") + ". " + _("Copy") + " " + files +
                 " " + _("to") + " " + dirs)
 
 
@@ -116,7 +116,7 @@ class copySysLinux(threadmanager.Thread):
         copyFile("/usr/lib/syslinux/isolinux.bin", isotreel + "isolinux/", self.tn, True)
         copyFile("/usr/lib/syslinux/vesamenu.c32", isotreel + "isolinux/", self.tn, True)
         logger.logVV(self.tn, logger.I, _("Copying isolinux.cfg to the ISO tree"))
-        copyFile(configutils.getValue(configs[configutils.isolinuxfile]), isotreel + 
+        copyFile(configutils.getValue(configs[configutils.isolinuxfile]), isotreel +
                                       "isolinux/isolinux.cfg", self.tn, True)
         # Edit the isolinux.cfg file to replace the variables
         logger.logV(self.tn, logger.I, _("Editing isolinux.cfg"))
@@ -168,7 +168,7 @@ class genPakManifest(threadmanager.Thread):
             ver = i.current_ver.ver_str.strip()
             strs = name + " " + ver + "\n"
             writer.write(strs)
-            if (not name in 
+            if (not name in
                 configutils.parseMultipleValues(configutils.getValue(configs[configutils.remafterinst]))):
                 writer_desktop.write(strs)
         writer.close()
@@ -186,10 +186,10 @@ genramfs = {"deps": [genisotree], "tn": "RAMFS"}
 class genRAMFS(threadmanager.Thread):
     def runthread(self):
         logger.logV(self.tn, logger.I, _("Generating RAMFS"))
-        '''os.system("mkinitramfs -o " + isotreel + "casper/initrd.gz " + 
-                  configutils.getKernel(configutils.getValue(configs[configutils.kernel])))'''
-        copyFile("/boot/initrd.img-" + configutils.getKernel(configutils.getValue(configs[configutils.kernel])),
-                 isotreel + "casper/initrd.gz", self.tn)
+        os.system("mkinitramfs -o " + isotreel + "casper/initrd.gz " +
+                  configutils.getKernel(configutils.getValue(configs[configutils.kernel])))
+        '''copyFile("/boot/initrd.img-" + configutils.getKernel(configutils.getValue(configs[configutils.kernel])),
+                 isotreel + "casper/initrd.gz", self.tn)'''
 genramfs["thread"] = genRAMFS
 
 
@@ -258,7 +258,7 @@ githreads.extend(squashfs.threads)
 
 
 # Generates the ISO
-geniso = {"deps": githreads, "tn": "ISO", "threadspan": -1}
+geniso = {"deps": githreads, "tn": "ISO", "threadspan":-1}
 class genISO(threadmanager.Thread):
     def runthread(self):
         logger.logI(self.tn, logger.I, _("Starting generation of the ISO image"))

@@ -47,7 +47,7 @@ tmpthreads = []
 tmpthreads.extend(tempsys.threads)
 tmpthreads.append(genisotree)
 tmpthreads.append(genramfs)
-gensfs = {"deps": tmpthreads, "tn": threadname, "threadspan": -1}
+gensfs = {"deps": tmpthreads, "tn": threadname, "threadspan":-1}
 class genSFS(threadmanager.Thread):
     def runthread(self):
         logger.logI(tn, logger.I, _("Generating compressed filesystem"))
@@ -70,6 +70,7 @@ class genSFS(threadmanager.Thread):
         appnd = "32"
         if sys.maxsize > 2 ** 32:
             appnd = "64"
+        # Hack to make sure all output is given
         os.environ["LD_PRELOAD"] = os.path.split(os.path.realpath(__file__))[0] + "/isatty" + appnd + ".so"
         logger.logI(tn, logger.I, _("Adding the edited /etc and /var to the filesystem"))
         sfscmd = subprocess.Popen(shlex.split("mksquashfs " + tmpsys + " " + sfspath + " " + opts),

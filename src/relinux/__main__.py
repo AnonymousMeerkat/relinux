@@ -21,7 +21,7 @@ def exitprog(exitcode=0):
     sys.exit(exitcode)
 
 def version():
-    print((config.version_string))
+    print(config.version_string)
     sys.exit()
 
 aptops = 4
@@ -48,7 +48,7 @@ def main():
             count += 1
         return result
     if not config.python_ok:
-        print(_("Relinux only supports python ") + parsePyHex(config.min_python_version) + "-" + 
+        print(_("Relinux only supports python ") + parsePyHex(config.min_python_version) + "-" +
               parsePyHex(config.max_python_version) + ", " + _("but python ") +
               parsePyHex(sys.hexversion) + " " + _("was used."))
         exitprog(1)
@@ -85,9 +85,9 @@ def main():
         version()
     if args.quiet is True:
         logger.quiet()
-    if args.verbose is True:
+    if args.verbose is True or True:
         logger.verbose()
-    if args.veryverbose is True or True:
+    if args.veryverbose is True:
         logger.veryverbose()
     modules = []
     aptcache = []
