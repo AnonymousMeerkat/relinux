@@ -61,7 +61,7 @@ class genSFS(threadmanager.Thread):
         opts = "-b 1M -no-recovery -no-duplicates -always-use-fragments"
         opts = opts + " -comp " + configutils.getValue(configs[configutils.sfscomp])
         opts = opts + " " + configutils.getValue(configs[configutils.sfsopts])
-        sfsex = "dev etc home media mnt proc sys var usr/lib/ubiquity/apt-setup/generators/40cdrom tmp"
+        sfsex = "dev etc home media mnt proc sys var run usr/lib/ubiquity/apt-setup/generators/40cdrom tmp"
         sfspath = isotreel + "casper/filesystem.squashfs"
         if os.path.exists(sfspath):
             fsutil.rm(sfspath)
@@ -74,7 +74,7 @@ class genSFS(threadmanager.Thread):
         os.environ["LD_PRELOAD"] = os.path.split(os.path.realpath(__file__))[0] + "/isatty" + appnd + ".so"
         logger.logI(tn, logger.I, _("Adding the edited /etc and /var to the filesystem"))
         sfscmd = subprocess.Popen(shlex.split("mksquashfs " + tmpsys + " " + sfspath + " " + opts),
-                                   stdout=subprocess.PIPE, universal_newlines=True)
+                                   stdout = subprocess.PIPE, universal_newlines = True)
         oldprogress = 0
         while sfscmd.poll() is None:
             output = sfscmd.stdout.readline()
@@ -87,11 +87,11 @@ class genSFS(threadmanager.Thread):
                     self.setProgress(tn, int(utilities.floatDivision(progress, 2)))
                     oldprogress = progress
             else:
-                logger.logI(tn, logger.I, output.rstrip(), noterm=True, nogui=True)
+                logger.logI(tn, logger.I, output.rstrip(), noterm = True, nogui = True)
         sys.stdout.write("\n")
         logger.logI(tn, logger.I, _("Adding the rest of the system"))
         sfscmd = subprocess.Popen(shlex.split("mksquashfs / " + sfspath + " " + opts + " -e " + sfsex),
-                                   stdout=subprocess.PIPE, universal_newlines=True)
+                                   stdout = subprocess.PIPE, universal_newlines = True)
         oldprogress = 0
         while sfscmd.poll() is None:
             output = sfscmd.stdout.readline()
@@ -104,7 +104,7 @@ class genSFS(threadmanager.Thread):
                     self.setProgress(tn, 50 + int(utilities.floatDivision(progress, 2)))
                     oldprogress = progress
             else:
-                logger.logI(tn, logger.I, output.rstrip(), noterm=True, nogui=True)
+                logger.logI(tn, logger.I, output.rstrip(), noterm = True, nogui = True)
         sys.stdout.write("\n")
         os.environ["LD_PRELOAD"] = ""
         # Make sure the SquashFS file is OK
