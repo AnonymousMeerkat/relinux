@@ -552,7 +552,6 @@ class Combobox(Tkinter.OptionMenu):
 
     def bind(self, *args):
         if args[0] == "<<ComboboxSelected>>":
-            print(args[1])
             self.current.trace("w", args[1])
         else:
             Tkinter.OptionMenu.bind(self, *args)
