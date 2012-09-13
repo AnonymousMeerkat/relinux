@@ -30,7 +30,7 @@ def delink(files):
 
 
 # Lengthener for files to exclude
-def exclude(names, files, tn=""):
+def exclude(names, files, tn = ""):
     excludes = []
     for i in files:
         excludes.extend(fnmatch.filter(names, i))
@@ -65,8 +65,8 @@ def getSize(path):
 # htom = Human to Machine (i.e. 4KB to 4096B). If not True, it accepts these values:
 #         T = Bytes-to-Terabytes
 #         etc...
-def sizeTrans(size, htom=True):
-    utilities.setDefault(size, T=0, G=0, M=0, K=0, B=0)
+def sizeTrans(size, htom = True):
+    utilities.setDefault(size, T = 0, G = 0, M = 0, K = 0, B = 0)
     KB = 1024
     MB = 1048576
     GB = 1073741824
@@ -98,7 +98,7 @@ def sizeTrans(size, htom=True):
 
 
 # Makes a directory
-def makedir(dirs1, tn=""):
+def makedir(dirs1, tn = ""):
     dirs = dirs1
     mode = 0o777
     if isinstance(dirs1, list):
@@ -110,13 +110,13 @@ def makedir(dirs1, tn=""):
 
 
 # Makes a directory tree
-def maketree(arr, tn=""):
+def maketree(arr, tn = ""):
     for i in arr:
         makedir(i, tn)
 
 
 # Simple implementation of the touch utility
-def touch(files, tn=""):
+def touch(files, tn = ""):
     if os.path.exists(files):
         logger.logVV(tn, logger.I, _("Touching file") + " " + str(files))
         os.utime(files, None)
@@ -126,13 +126,13 @@ def touch(files, tn=""):
 
 
 # Same as maketree, but for files instead
-def makefiles(arr, tn=""):
+def makefiles(arr, tn = ""):
     for i in arr:
         touch(i, tn)
 
 
 # Creates a symlink
-def symlink(files, dst, tn=""):
+def symlink(files, dst, tn = ""):
     if not os.path.lexists(dst) and not os.path.exists(dst):
         logger.logVV(tn, logger.I, utilities.utf8all(_("Creating symlink"), " ", dst))
         os.symlink(files, dst)
@@ -140,7 +140,7 @@ def symlink(files, dst, tn=""):
 
 # Removes a file
 # If followlink is True, then it will remove both the link and the origin
-def rm(files, followlink=False, tn=""):
+def rm(files, followlink = False, tn = ""):
     rfile = files
     dfile = delink(files)
     rmstring = "Removing "
@@ -166,7 +166,7 @@ def rm(files, followlink=False, tn=""):
 
 
 # Removes a list of files
-def rmfiles(arr, tn=""):
+def rmfiles(arr, tn = ""):
     for i in arr:
         rm(i, tn)
 
@@ -218,7 +218,7 @@ def _chmod(c, mi):
 
 
 # Simple implementation of the chmod utility
-def chmod(files, mod, tn=""):
+def chmod(files, mod, tn = ""):
     '''val = 0x00
     c = 0
     logger.logVV(tn, logger.I, utilities.utf8all(_("Calculating permissions of"), " ", files))
@@ -246,8 +246,8 @@ def chmod(files, mod, tn=""):
 #    recurse (True or False): If True, recurse into the directory
 #    dirs (True or False): If True, show directories too
 #    symlinks (True or False): If True and recurse is True, recurse into symlink directories
-def listdir(dirs, options={}, tn=""):
-    utilities.setDefault(options, recurse=True, dirs=True, symlinks=False)
+def listdir(dirs, options = {}, tn = ""):
+    utilities.setDefault(options, recurse = True, dirs = True, symlinks = False)
     logger.logV(tn, logger.I, utilities.utf8all(_("Gathering a list of files in"), " ", dirs))
     listed = []
     if options["recurse"]:
@@ -270,7 +270,7 @@ def listdir(dirs, options={}, tn=""):
 
 
 # Filesystem copier (like rsync --exclude... -a SRC DST)
-def fscopy(src, dst, excludes1, tn=""):
+def fscopy(src, dst, excludes1, tn = ""):
     src1 = re.sub(r"/+$", "", src)
     src = src1
     # Get a list of all files
@@ -322,7 +322,7 @@ def fscopy(src, dst, excludes1, tn=""):
 #     remsymlink (True or False): If True, remove symlinks too
 #     remfullpath (True or False): If True, symlinks will have both their symlink and the file
 #                                  referenced removed
-def adrm(dirs, options, excludes1=[], tn=""):
+def adrm(dirs, options, excludes1 = [], tn = ""):
     # Get a list of all files inside the directory
     files = listdir(dirs, {"recurse": True, "dirs": True, "symlinks": False}, tn)
     excludes = []
@@ -335,7 +335,8 @@ def adrm(dirs, options, excludes1=[], tn=""):
         file_ = utilities.utf8(os.path.basename(file__))
         # Make sure we don't remove files that are listed to exclude from removal
         if file__ in excludes:
-            logger.logVV(tn, logger.I, utilities.utf8all(file_, " ", _("is to be excluded. Skipping a CPU cycle")))
+            logger.logVV(tn, logger.I, utilities.utf8all(file_, " ",
+                                                         _("is to be excluded. Skipping a CPU cycle")))
             continue
         fullpath = file__
         dfile = delink(fullpath)
@@ -415,7 +416,7 @@ def ife(buffers, func):
 # Finds the system architecture
 def getArch():
     archcmd = subprocess.Popen(["perl", config.mainsrcdir + "/getarch.pl"],
-                               stdout=subprocess.PIPE, universal_newlines=True)
+                               stdout = subprocess.PIPE, universal_newlines = True)
     arch = archcmd.communicate()[0].strip()
     archcmd.wait()
     exitcode = archcmd.returncode
@@ -451,7 +452,7 @@ def getSFSInstSize(files):
 
 
 # Generate an MD5 checksum from a file
-def genMD5(file_, blocksize=65536):
+def genMD5(file_, blocksize = 65536):
     if not os.path.isfile(file_):
         return
     files = open(file_, "r")
