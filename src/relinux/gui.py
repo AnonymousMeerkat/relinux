@@ -950,20 +950,19 @@ class Multiple(Frame):
         self.save()
 
     def save(self, *args):
+        if not hasattr(self, "savevar") or not hasattr(self, "savefunc") or self.dontsave:
+            return
         changeme = False
         if len(args) > 1 and hasattr(args[0], "char") and hasattr(args[0], "widget") and args[1]:
             changeme = True
             str_ = args[0].widget.get()
             args[0].widget.set(str_ + args[0].char)
-        if not hasattr(self, "savevar") or not hasattr(self, "savefunc") or self.dontsave:
-            return
         arr = []
         for i in self.entries:
             if i.get() != "":
                 arr.append(i.get())
         str_ = " ".join(arr)
         self.savefunc(self.savevar, str_)
-        print(config.Configuration["OSWeaver"][configutils.remafterinst])
         if changeme:
             str_ = args[0].widget.get()
             args[0].widget.set(str_[:len(str_) - 1])
