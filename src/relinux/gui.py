@@ -462,14 +462,26 @@ class Button(Tkinter.Label):
 # Temporary Entry Box
 class Entry(Tkinter.Entry):
     def __init__(self, parent, *args, **kw):
+        if "savevar" in kw:
+            self.savevar = kw.pop("savevar")
+        if "savefunc" in kw:
+            self.savefunc = kw.pop("savefunc")
+        self.value = Tkinter.StringVar()
         utilities.setDefault(kw, background = bg, foreground = fg, selectbackground = fg,
                     selectforeground = bg, borderwidth = 0, highlightbackground = _rgbtohex(normalc),
-                    highlightcolor = _rgbtohex(clickc))
+                    highlightcolor = _rgbtohex(clickc), textvariable = self.value)
         self.lastcolor = normalc
         self.renderthread = None
         Tkinter.Entry.__init__(self, parent, *args, **kw)
         self.bind("<Enter>", self.hoveringtrue)
         self.bind("<Leave>", self.hoveringfalse)
+        self.value.trace("w", self.save)
+
+    def bind(self, *args):
+        if args[0] == "<<TextChanged>>":
+            self.value.trace("w", args[1])
+        else:
+            Tkinter.OptionMenu.bind(self, *args)
 
     def set(self, value):
         self.delete(0, Tkinter.END)
@@ -492,6 +504,11 @@ class Entry(Tkinter.Entry):
         self.renderthread = glowyFade(self._setHB, copy.copy(self.lastcolor), normalc)
         self.renderthread.start()
         #self.config(highlightbackground=_rgbtohex(normalc))
+
+    def save(self, *args):
+        if not hasattr(self, "savevar") or not hasattr(self, "savefunc"):
+            return
+        self.savefunc(self.savevar, self.get())
 
 
 # Temporary Label
@@ -801,17 +818,32 @@ class Wizard(Notebook):
 
 class FileSelector(Frame):
     def __init__(self, *args, **kw):
+        if "savevar" in kw:
+            self.savevar = kw.pop("savevar")
+        if "savefunc" in kw:
+            self.savefunc = kw.pop("savefunc")
         Frame.__init__(self, *args, **kw)
         self.entry = Entry(self)
         self.button = Button(self, text = "...", command = self._on_button)
         self.button.grid(row = 0, column = 1)
         self.entry.grid(row = 0, column = 0)
 
+    def set(self, value):
+        self.entry.set(value)
+        self.save()
+
+    def get(self):
+        return self.entry.get()
+
     def _on_button(self):
         s = tkFileDialog.askopenfilename()
         if s != "":
-            self.entry.delete(0, "end")
-            self.entry.insert(0, s)
+            self.set(s)
+
+    def save(self, *args):
+        if not hasattr(self, "savevar") or not hasattr(self, "savefunc"):
+            return
+        self.savefunc(self.savevar, self.get())
 
 
 class YesNo(Frame):
@@ -1118,18 +1150,16 @@ class GUI:
                     cb.grid(row = c1, column = 1)
                     cb.cb.set(value)
                 elif types == configutils.filename:
-                    e = FileSelector(curr)
+                    e = FileSelector(curr, savevar = (i, x), savefunc = self.savefunc)
                     e.grid(row = c1, column = 1)
-                    e.entry.delete(0, "end")
-                    e.entry.insert(0, value)
+                    e.set(value)
                 elif types == configutils.multiple:
                     e = Multiple(curr, savevar = (i, x), savefunc = self.savefunc)
                     e.grid(row = c1, column = 1)
                     e.set(multiple)
                 else:
-                    e = Entry(curr)
+                    e = Entry(curr, savevar = (i, x), savefunc = self.savefunc)
                     e.grid(row = c1, column = 1)
-                    e.delete(0, "end")
-                    e.insert(0, value)
+                    e.set(value)
                 c1 = c1 + 1
             c = c + 1
