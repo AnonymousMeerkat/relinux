@@ -471,6 +471,10 @@ class Entry(Tkinter.Entry):
         self.bind("<Enter>", self.hoveringtrue)
         self.bind("<Leave>", self.hoveringfalse)
 
+    def set(self, value):
+        self.delete(0, Tkinter.END)
+        self.insert(0, value)
+
     def _setHB(self, value):
         self.lastcolor = value
         self.config(highlightbackground = _rgbtohex(value))
@@ -882,10 +886,15 @@ class Choice(Frame):
 
 class Multiple(Frame):
     def __init__(self, *args, **kw):
+        if "savevar" in kw:
+            self.savevar = kw.pop("savevar")
+        if "savefunc" in kw:
+            self.savefunc = kw.pop("savefunc")
         Frame.__init__(self, *args, **kw)
         self.entries = []
         self.pluses = []
         self.minuses = []
+        self.dontsave = False
         self.addEntry(0)
 
     def addEntry(self, row):
@@ -895,6 +904,8 @@ class Multiple(Frame):
         self.entries[row].grid(row = row, column = 0)
         self.minuses[row].grid(row = row, column = 1)
         self.pluses[row].grid(row = row, column = 2)
+        self.entries[row].bind("<Key>", lambda event: self.save(event, True))
+        self.entries[row].bind("<FocusOut>", self.save)
         self._rePack()
 
     def remEntry(self, row):
@@ -907,6 +918,7 @@ class Multiple(Frame):
         self._rePack()
 
     def set(self, arr):
+        self.dontsave = True
         for i in list(range(len(self.entries))):
             self.remEntry(i)
         if len(arr) > 0:
@@ -916,6 +928,8 @@ class Multiple(Frame):
                 self.entries[i].insert(0, arr[i])
         else:
             self.addEntry(0)
+        self.dontsave = False
+        self._rePack()
 
     def _plus(self, row):
         self.addEntry(row + 1)
@@ -933,6 +947,26 @@ class Multiple(Frame):
     def _rePack(self):
         for c in list(range(len(self.entries))):
             self.__rePack(c)
+        self.save()
+
+    def save(self, *args):
+        changeme = False
+        if len(args) > 1 and hasattr(args[0], "char") and hasattr(args[0], "widget") and args[1]:
+            changeme = True
+            str_ = args[0].widget.get()
+            args[0].widget.set(str_ + args[0].char)
+        if not hasattr(self, "savevar") or not hasattr(self, "savefunc") or self.dontsave:
+            return
+        arr = []
+        for i in self.entries:
+            if i.get() != "":
+                arr.append(i.get())
+        str_ = " ".join(arr)
+        self.savefunc(self.savevar, str_)
+        print(config.Configuration["OSWeaver"][configutils.remafterinst])
+        if changeme:
+            str_ = args[0].widget.get()
+            args[0].widget.set(str_[:len(str_) - 1])
 
 
 class Progressbar(Tkinter.Canvas):
@@ -1090,7 +1124,7 @@ class GUI:
                     e.entry.delete(0, "end")
                     e.entry.insert(0, value)
                 elif types == configutils.multiple:
-                    e = Multiple(curr)
+                    e = Multiple(curr, savevar = (i, x), savefunc = self.savefunc)
                     e.grid(row = c1, column = 1)
                     e.set(multiple)
                 else:
