@@ -460,7 +460,10 @@ def genMD5(file_, blocksize = 65536):
     m = hashlib.md5()
     while len(buffers) > 0:
         m.update(buffers)
-        buffers = files.read(blocksize)
+        if config.python3:
+            buffers = bytes(files.read(blocksize), "utf-8")
+        else:
+            buffers = bytes(files.read(blocksize))
     return m.hexdigest()
 
 

@@ -22,8 +22,12 @@ def utf8(string):
         if isinstance(string, unicode):
             return string.encode("utf-8")
     if not isinstance(string, str):
-        string_ = str(string)
-        string = string_
+        if config.python3 and isinstance(string, bytes):
+            string_ = string.decode("utf-8")
+            string = string_
+        else:
+            string_ = str(string)
+            string = string_
     if not is_ascii(string):
         if config.python3:
             return string
@@ -95,7 +99,7 @@ def checkMatched(m):
 
 
 # Returns a buffer from a file
-def getBuffer(files, strip=True):
+def getBuffer(files, strip = True):
     returnme = []
     for line in files:
         if not line or line is None:
