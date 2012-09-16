@@ -8,6 +8,7 @@ import re
 from relinux import versionsort, config, utilities, fsutil
 import os
 import glob
+import copy
 
 # Codes
 excludes = "EXCLUDES"
@@ -311,7 +312,8 @@ def compressParsedBuffer(buffers):
     return returnme
 
 
-def saveBuffer(buffers):
+def saveBuffer(buffers_):
+    buffers = copy.deepcopy(buffers_)
     # First step: Sort the items into the files
     files_ = {}
     for i in buffers.keys():
@@ -323,6 +325,11 @@ def saveBuffer(buffers):
                     files_[f][i] = {}
                 if not x in files_[f][i]:
                     files_[f][i][x] = {}
+            lastfile = os.path.dirname(os.path.abspath(buffers[i][x][files][len(buffers[i][x][files]) - 1]))
+            if buffers[i][x][types] == filename and buffers[i][x][value].startswith(lastfile):
+                temp = os.curdir + "/" + buffers[i][x][value][len(lastfile):]
+                buffers[i][x][value] = temp
+                print(buffers[i][x][value])
             for y in buffers[i][x].keys():
                 if y == files:
                     continue
