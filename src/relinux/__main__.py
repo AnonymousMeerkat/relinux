@@ -17,7 +17,7 @@ import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
 
 
-def exitprog(exitcode=0):
+def exitprog(exitcode = 0):
     sys.exit(exitcode)
 
 def version():
@@ -67,19 +67,19 @@ def main():
     config.VFiles.append(config.GUIStream)
     #config.VVFiles.append(config.GUIStream)
     logger.logI(logger.genTN("Main"), logger.I, "Test")
-    parser = ArgumentParser(prog="relinux", usage="%(prog)s [options]")
-    parser.add_argument("-V", "--version", action="store_true",
-                      dest="showversion",
-                      help="show version info")
+    parser = ArgumentParser(prog = "relinux", usage = "%(prog)s [options]")
+    parser.add_argument("-V", "--version", action = "store_true",
+                      dest = "showversion",
+                      help = "show version info")
     parser.add_argument("-q", "--quiet",
-                  action="store_true", dest="quiet", default=False,
-                  help="log as little as possible to stdout")
+                  action = "store_true", dest = "quiet", default = False,
+                  help = "log as little as possible to stdout")
     parser.add_argument("-v", "--verbose",
-                  action="store_true", dest="verbose", default=False,
-                  help="log more to stdout")
+                  action = "store_true", dest = "verbose", default = False,
+                  help = "log more to stdout")
     parser.add_argument("-vv", "--veryverbose",
-                  action="store_true", dest="veryverbose", default=False,
-                  help="log even more to stdout")
+                  action = "store_true", dest = "veryverbose", default = False,
+                  help = "log even more to stdout")
     args = parser.parse_args()
     if args.showversion is True:
         version()
@@ -98,15 +98,16 @@ def main():
         global modules, aptcache, cbuffer, App
         spprogn = 6
         spprog = 0
-        def calcPercent(def2=(spprog, spprogn)):
+        def calcPercent(def2 = (spprog, spprogn)):
             return utilities.calcPercent(*def2)
         splash.setProgress(calcPercent((spprog, spprogn)), "Loading modules...")
         modules = modloader.getModules()
         spprog += 1
         splash.setProgress(calcPercent((spprog, spprogn)), "Parsing configuration...")
-        buffer1 = utilities.getBuffer(open(relinuxdir + "/relinux.conf"))
-        buffer2 = configutils.compress(buffer1)
-        cbuffer = configutils.parseCompressedBuffer(buffer2, relinuxdir + "/relinux.conf")
+        #buffer1 = utilities.getBuffer(open(relinuxdir + "/relinux.conf"))
+        #buffer2 = configutils.compress(buffer1)
+        #cbuffer = configutils.parseCompressedBuffer(buffer2, relinuxdir + "/relinux.conf")
+        cbuffer = configutils.parseFiles([relinuxdir + "/relinux.conf"])
         config.Configuration = cbuffer
         '''for i in configutils.beautify(buffer1):
             print(i)'''

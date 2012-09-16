@@ -45,6 +45,7 @@ desc = "Description"
 category = "Category"
 types = "Type"
 value = "Value"
+files = "__files__"
 
 filename = "Filename"
 yesno = "Yes/No"
@@ -191,7 +192,7 @@ def getKernelList():
 #    1 - newest kernel
 #    2 - oldest kernel (don't ask me why anyone would want this lol)
 #    3 - current kernel
-def _getKernel(t, kernelVersion=None):
+def _getKernel(t, kernelVersion = None):
     files = getKernelList()
     if t == 0:
         for i in files:
@@ -251,7 +252,7 @@ def beautify(buffers):
 # Dict3 = Properties
 # Notes: This will take a lot of RAM, and it will take a relatively long time (around 1-3 secs)
 #        Try to only use this function once, and distribute the result to the functions who need this
-def parseCompressedBuffer(buffers, filenames):
+def parseCompressedBuffer(buffers, filename_):
     returnme = {}
     for i in getSections(buffers):
         returnme[i] = {}
@@ -261,9 +262,38 @@ def parseCompressedBuffer(buffers, filenames):
             if returnme[i][x][types] == filename:
                 returnme[i][x][value] = os.path.abspath(
                                                 os.path.join(
-                                                    os.path.dirname(os.path.abspath(filenames)),
+                                                    os.path.dirname(os.path.abspath(filename_)),
                                                         fsutil.relpath(returnme[i][x][value])))
     return returnme
+
+
+def parseCompressedBuffers(buffers, filenames):
+    returnme = {}
+    for i_ in range(len(filenames)):
+        temp = parseCompressedBuffer(buffers[i_], filenames[i_])
+        fn = filenames[i_]
+        for i in temp.keys():
+            if not i in returnme:
+                returnme[i] = {}
+            for x in temp[i].keys():
+                if not x in returnme[i]:
+                    temp[i][x][files] = [os.path.abspath(fn)]
+                    returnme[i][x] = temp[i][x]
+                    continue
+                for y in temp[i][x].keys():
+                    returnme[i][x][y] = temp[i][x][y]
+                if not files in returnme[i][x]:
+                    returnme[i][x][files] = [os.path.abspath(fn)]
+                else:
+                    returnme[i][x][files].append(os.path.abspath(fn))
+    return returnme
+
+
+def parseFiles(filenames):
+    buffers = []
+    for i in filenames:
+        buffers.append(compress(utilities.getBuffer(open(i))))
+    return parseCompressedBuffers(buffers, filenames)
 
 
 # Returns a compressed buffer from a parsed buffer
