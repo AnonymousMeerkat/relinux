@@ -221,7 +221,7 @@ def getKernel(buffer1):
 # Returns a human-readable version of a compressed buffer (if it isn't compressed, it will look weird)
 def beautify(buffers):
     returnme = []
-    returnme.append("# " + config.product + " Configuration File")
+    #returnme.append("# " + config.product + " Configuration File")
     returnme.append("")
     returnme.append("")
     for i in getSections(buffers):
@@ -310,6 +310,38 @@ def compressParsedBuffer(buffers):
         returnme.append("EndSection")
     return returnme
 
+
+def saveBuffer(buffers):
+    # First step: Sort the items into the files
+    files_ = {}
+    for i in buffers.keys():
+        for x in buffers[i].keys():
+            for f in buffers[i][x][files]:
+                if not f in files_:
+                    files_[f] = {}
+                if not i in files_[f]:
+                    files_[f][i] = {}
+                if not x in files_[f][i]:
+                    files_[f][i][x] = {}
+            for y in buffers[i][x].keys():
+                if y == files:
+                    continue
+                for f in buffers[i][x][files]:
+                    files_[f][i][x][y] = buffers[i][x][y]
+    # Second step: Compress it into a non-beautified configuration file
+    for i in files_.keys():
+        temp = compressParsedBuffer(files_[i])
+        files_[i] = temp
+    # Third step: Beautify it
+    for i in files_.keys():
+        temp = beautify(files_[i])
+        files_[i] = temp
+    # Fourth step: Save it
+    for i in files_.keys():
+        fh = open(i, "w")
+        for i in files_[i]:
+            fh.write(i + "\n")
+        fh.close()
 
 # Option parsing
 #################

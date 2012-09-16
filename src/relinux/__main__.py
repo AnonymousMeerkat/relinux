@@ -116,7 +116,7 @@ def main():
                 configfiles.append(os.path.join(os.path.dirname(modulemetas[i]["path"]), x))
         cbuffer = configutils.parseFiles(configfiles)
         config.Configuration = cbuffer
-        print(config.Configuration)
+        configutils.saveBuffer(config.Configuration)
         '''for i in configutils.beautify(buffer1):
             print(i)'''
         spprog += 1
