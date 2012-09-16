@@ -101,14 +101,22 @@ def main():
         def calcPercent(def2 = (spprog, spprogn)):
             return utilities.calcPercent(*def2)
         splash.setProgress(calcPercent((spprog, spprogn)), "Loading modules...")
-        modules = modloader.getModules()
+        modules = []
+        modulemetas = modloader.getModules()
+        for i in modulemetas:
+            modules.append(modloader.loadModule(i))
         spprog += 1
         splash.setProgress(calcPercent((spprog, spprogn)), "Parsing configuration...")
         #buffer1 = utilities.getBuffer(open(relinuxdir + "/relinux.conf"))
         #buffer2 = configutils.compress(buffer1)
         #cbuffer = configutils.parseCompressedBuffer(buffer2, relinuxdir + "/relinux.conf")
-        cbuffer = configutils.parseFiles([relinuxdir + "/relinux.conf"])
+        configfiles = [relinuxdir + "/relinux.conf"]
+        for i in range(len(modulemetas)):
+            for x in modules[i].moduleconfig:
+                configfiles.append(os.path.join(os.path.dirname(modulemetas[i]["path"]), x))
+        cbuffer = configutils.parseFiles(configfiles)
         config.Configuration = cbuffer
+        print(config.Configuration)
         '''for i in configutils.beautify(buffer1):
             print(i)'''
         spprog += 1
@@ -134,7 +142,7 @@ def main():
         spprog += 1
         splash.setProgress(calcPercent((spprog, spprogn)), "Running modules...")
         for i in modules:
-            modloader.runModule(modloader.loadModule(i),
+            modloader.runModule(i,
                                 {"gui": App, "config": cbuffer, "aptcache": aptcache})
         spprog += 1
         splash.setProgress(calcPercent((spprog, spprogn)), "Launching relinux")

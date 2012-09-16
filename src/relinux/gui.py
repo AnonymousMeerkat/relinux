@@ -1102,8 +1102,8 @@ class GUI:
     def fillConfiguration(self, configs):
         c = 0
         for i in configs.keys():
-            cur = Frame(self.page1)
             ids = self.page1.add_tab()
+            cur = Frame(self.page1.page(ids))
             self.page1.add_page_body(ids, i, cur)
             #self.page1.add(cur)
             #self.page1.tab(c, text=i)

@@ -15,6 +15,7 @@ import copy
 relinuxmodule = True
 relinuxmoduleapi = "0.4a1"
 modulename = "OSWeaver"
+moduleconfig = ["osweaver.conf"]
 
 # Just in case config.ISOTree doesn't include a /
 isotreel = config.ISOTree + "/"
@@ -47,14 +48,14 @@ def run(adict):
     page = gui.Frame(ourgui.wizard.page(pagenum))
     ourgui.wizard.add_page_body(pagenum, _("OSWeaver"), page)
     page.frame = gui.Frame(page)
-    page.details = gui.VerticalScrolledFrame(page, borderwidth=1, relief=Tkinter.SOLID)
-    page.details.output = gui.Label(page.details.interior, text=config.GUIStream.getvalue(), anchor=Tkinter.NW, justify=Tkinter.LEFT)
+    page.details = gui.VerticalScrolledFrame(page, borderwidth = 1, relief = Tkinter.SOLID)
+    page.details.output = gui.Label(page.details.interior, text = config.GUIStream.getvalue(), anchor = Tkinter.NW, justify = Tkinter.LEFT)
     def onWrite():
-        page.details.output.config(text=config.GUIStream.getvalue())
+        page.details.output.config(text = config.GUIStream.getvalue())
         page.details.canvas.yview_moveto(1.0)
     config.GUIStream.writefunc.append(onWrite)
-    page.details.output.pack(fill=Tkinter.BOTH, expand=True, anchor=Tkinter.NW, side=Tkinter.LEFT)
-    page.details.pack(fill=Tkinter.BOTH, expand=True, side=Tkinter.BOTTOM, anchor=Tkinter.SW)
+    page.details.output.pack(fill = Tkinter.BOTH, expand = True, anchor = Tkinter.NW, side = Tkinter.LEFT)
+    page.details.pack(fill = Tkinter.BOTH, expand = True, side = Tkinter.BOTTOM, anchor = Tkinter.SW)
     '''page.details.buttonstate = True
     def showDetails():
         if page.details.buttonstate:
@@ -68,20 +69,20 @@ def run(adict):
     page.showdetails = gui.Button(page, text="Show details >>", command=showDetails)
     page.showdetails.pack(side=Tkinter.BOTTOM, anchor=Tkinter.SW)'''
     page.progress = gui.Progressbar(page)
-    page.progress.pack(fill=Tkinter.X, expand=True, side=Tkinter.BOTTOM,
-                          anchor=Tkinter.S)
-    page.frame.pack(fill=Tkinter.BOTH, expand=True, anchor=Tkinter.CENTER)
+    page.progress.pack(fill = Tkinter.X, expand = True, side = Tkinter.BOTTOM,
+                          anchor = Tkinter.S)
+    page.frame.pack(fill = Tkinter.BOTH, expand = True, anchor = Tkinter.CENTER)
     page.chframe = gui.VerticalScrolledFrame(page.frame)
-    page.chframe.pack(fill=Tkinter.BOTH, expand=True, anchor=Tkinter.N)
+    page.chframe.pack(fill = Tkinter.BOTH, expand = True, anchor = Tkinter.N)
     page.chframe.boxes = []
     page.chframe.dispthreads = []
     x = 0
     y = 0
-    usedeps = gui.Checkbutton(page.chframe.interior, text="Ignore dependencies")
-    usedeps.grid(row=y, column=x)
+    usedeps = gui.Checkbutton(page.chframe.interior, text = "Ignore dependencies")
+    usedeps.grid(row = y, column = x)
     y += 1
-    label = gui.Label(page.chframe.interior, text="Select threads to run:")
-    label.grid(row=y, column=x)
+    label = gui.Label(page.chframe.interior, text = "Select threads to run:")
+    label.grid(row = y, column = x)
     y += 1
     class customCheck(gui.Checkbutton):
         def __init__(self, parent, *args, **kw):
@@ -106,9 +107,9 @@ def run(adict):
                 if threads[i]["tn"] in tns:
                     page.chframe.boxes[i].value.set(1)
     for i in threads:
-        temp = customCheck(page.chframe.interior, text=i["tn"])
+        temp = customCheck(page.chframe.interior, text = i["tn"])
         temp.value.set(1)
-        temp.grid(row=y, column=x, sticky=Tkinter.NW)
+        temp.grid(row = y, column = x, sticky = Tkinter.NW)
         page.chframe.boxes.append(temp)
         x += 1
         if x >= 3:
@@ -131,24 +132,24 @@ def run(adict):
         for i in range(len(threads)):
             page.chframe.boxes[i].ignoreauto = True
             page.chframe.boxes[i].value.set(val)
-    selall = gui.Button(page.chframe.interior, text="Select all", command=lambda: selBoxes(True))
-    selall.grid(row=y, column=x)
+    selall = gui.Button(page.chframe.interior, text = "Select all", command = lambda: selBoxes(True))
+    selall.grid(row = y, column = x)
     x += 1
-    selnone = gui.Button(page.chframe.interior, text="Select none", command=lambda: selBoxes(False))
-    selnone.grid(row=y, column=x)
+    selnone = gui.Button(page.chframe.interior, text = "Select none", command = lambda: selBoxes(False))
+    selnone.grid(row = y, column = x)
     x += 1
-    togglesel = gui.Button(page.chframe.interior, text="Toggle", command=lambda: selBoxes(None))
-    togglesel.grid(row=y, column=x)
+    togglesel = gui.Button(page.chframe.interior, text = "Toggle", command = lambda: selBoxes(None))
+    togglesel.grid(row = y, column = x)
     y += 1
     x = 0
-    threadsrunninglabel = gui.Label(page.chframe.interior, text="Threads running:")
-    threadsrunninglabel.grid(row=y, column=x, columnspan=3)
+    threadsrunninglabel = gui.Label(page.chframe.interior, text = "Threads running:")
+    threadsrunninglabel.grid(row = y, column = x, columnspan = 3)
     y += 1
     page.progress.threads = {}
     def startThreads():
         if os.getuid() != 0:
             page.isnotroot.pack_forget()
-            page.isnotroot.pack(fill=Tkinter.X)
+            page.isnotroot.pack(fill = Tkinter.X)
             return
         numthreads = 0
         for i in range(len(page.chframe.boxes)):
@@ -175,7 +176,7 @@ def run(adict):
                     txt = tn
                 else:
                     txt += ", " + tn
-            threadsrunninglabel.config(text="Threads running: " + txt)
+            threadsrunninglabel.config(text = "Threads running: " + txt)
         def setProgress(tn, progress):
             page.progress.threads[tn] = progress
             totprogress = 0
@@ -186,8 +187,8 @@ def run(adict):
             tn = threadmanager.getThread(threadid, threads)["tn"]
             setProgress(tn, 100)
             postStart(threadid, threadsrunning, threads)
-        runThreads(threads, deps=tfdeps, poststart=postStart, postend=postEnd, threadargs={"setProgress": setProgress})
+        runThreads(threads, deps = tfdeps, poststart = postStart, postend = postEnd, threadargs = {"setProgress": setProgress})
         # lambda: runThreads(threads)
-    page.button = gui.Button(page.frame, text="Start!", command=startThreads)
+    page.button = gui.Button(page.frame, text = "Start!", command = startThreads)
     page.button.pack()
-    page.isnotroot = gui.Label(page.frame, text="You are not root!")
+    page.isnotroot = gui.Label(page.frame, text = "You are not root!")

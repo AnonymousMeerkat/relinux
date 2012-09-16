@@ -19,7 +19,7 @@ import re
 
 # Generates a relative path from an absolute one
 def relpath(files):
-    return os.path.join(os.curdir, os.path.relpath(files, os.curdir))
+        return os.path.join(os.curdir, os.path.relpath(files, os.curdir))
 
 
 # Reads the link location of a file or returns None
