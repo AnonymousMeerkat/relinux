@@ -1098,6 +1098,7 @@ class GUI:
 
     def savefunc(self, var, val):
         config.Configuration[var[0]][var[1]][configutils.value] = val
+        configutils.saveBuffer(config.Configuration)
 
     def fillConfiguration(self, configs):
         c = 0
