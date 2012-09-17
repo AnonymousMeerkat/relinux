@@ -5,7 +5,7 @@ Utilities to manage configuration files
 '''
 
 import re
-from relinux import versionsort, config, utilities, fsutil
+from relinux import config, utilities, fsutil
 import os
 import glob
 import copy
@@ -178,7 +178,7 @@ def getProperty(buffers, option):
 # Returns the kernel list
 def getKernelList():
     files = glob.glob(os.path.join("/boot/", "initrd.img*"))
-    versionsort.sort_nicely(files)
+    utilities.sort(files)
     returnme = []
     for i in files:
         # Sample kernel version: /boot/initrd.img-3.4.0-3-generic
@@ -301,11 +301,11 @@ def parseFiles(filenames):
 # This is the opposite of parseCompressedBuffer
 def compressParsedBuffer(buffers):
     returnme = []
-    for i in buffers.keys():
+    for i in utilities.sort(list(buffers.keys())):
         returnme.append("Section " + i)
-        for x in buffers[i].keys():
+        for x in utilities.sort(list(buffers[i].keys())):
             returnme.append("Option " + x)
-            for y in buffers[i][x].keys():
+            for y in utilities.sort(list(buffers[i][x].keys())):
                 returnme.append(y + ": " + buffers[i][x][y])
             returnme.append("EndOption")
         returnme.append("EndSection")
@@ -327,9 +327,8 @@ def saveBuffer(buffers_):
                     files_[f][i][x] = {}
             lastfile = os.path.dirname(os.path.abspath(buffers[i][x][files][len(buffers[i][x][files]) - 1]))
             if buffers[i][x][types] == filename and buffers[i][x][value].startswith(lastfile):
-                temp = os.curdir + "/" + buffers[i][x][value][len(lastfile):]
+                temp = fsutil.beautifypath(os.curdir + "/" + buffers[i][x][value][len(lastfile):])
                 buffers[i][x][value] = temp
-                print(buffers[i][x][value])
             for y in buffers[i][x].keys():
                 if y == files:
                     continue

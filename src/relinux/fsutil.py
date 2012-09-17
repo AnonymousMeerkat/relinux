@@ -17,6 +17,18 @@ import multiprocessing
 import re
 
 
+# "Beautifies" a path
+def beautifypath(path):
+    lastchar = ""
+    returnme = ""
+    for i in path:
+        if i == "/" and lastchar == "/":
+            continue
+        returnme += i
+        lastchar = i
+    return returnme
+
+
 # Generates a relative path from an absolute one
 def relpath(files):
         return os.path.join(os.curdir, os.path.relpath(files, os.curdir))

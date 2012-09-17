@@ -1,5 +1,6 @@
 '''
 sort -V for python (translated from sort.c)
+This file is probably unused now
 @author: Anonymous Meerkat
 '''
 
@@ -78,9 +79,3 @@ def VersionSortKey():
         def __ne__(self, other):
             return VersionSortCmp(self.obj, other.obj) != 0
     return K
-
-
-def sort_nicely(l):
-    convert = lambda text: int(text) if text.isdigit() else text
-    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
-    l.sort(key=alphanum_key)
