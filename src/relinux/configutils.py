@@ -219,22 +219,38 @@ def getKernel(buffer1):
     return _getKernel(0, buffers)
 
 
+# Temporary key for saving
+def saveSort(l):
+        if l == name:
+            return "a"
+        elif l == desc:
+            return "b"
+        elif l == types:
+            return "c"
+        elif l == category:
+            return "d"
+        elif l == value:
+            return "e"
+        else:
+            return l
+
+
 # Returns a human-readable version of a compressed buffer (if it isn't compressed, it will look weird)
 def beautify(buffers):
     returnme = []
     #returnme.append("# " + config.product + " Configuration File")
     returnme.append("")
     returnme.append("")
-    for i in getSections(buffers):
+    for i in utilities.sort(getSections(buffers)):
         returnme.append("Section " + i)
         returnme.append("")
         returnme.append("")
         buffer1 = getLinesWithinSection(buffers, i)
-        for x in getOptions(buffer1):
+        for x in utilities.sort(getOptions(buffer1)):
             returnme.append("  Option " + x)
             returnme.append("")
             opts = getProperties(getLinesWithinOption(buffer1, x))
-            for y in opts.keys():
+            for y in sorted(list(opts.keys()), key = saveSort):
                 returnme.append("    " + y + ": " + opts[y])
             returnme.append("")
             returnme.append("  EndOption")
@@ -305,7 +321,7 @@ def compressParsedBuffer(buffers):
         returnme.append("Section " + i)
         for x in utilities.sort(list(buffers[i].keys())):
             returnme.append("Option " + x)
-            for y in utilities.sort(list(buffers[i][x].keys())):
+            for y in sorted(list(buffers[i][x].keys()), key = saveSort):
                 returnme.append(y + ": " + buffers[i][x][y])
             returnme.append("EndOption")
         returnme.append("EndSection")

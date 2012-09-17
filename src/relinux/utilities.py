@@ -157,3 +157,6 @@ def sort(l):
     l.sort(key = alphanum_key)
     return l
 
+def normal_sort(l):
+    l.sort()
+    return l
