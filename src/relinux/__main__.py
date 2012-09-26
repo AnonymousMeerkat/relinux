@@ -8,6 +8,8 @@ Main relinux script
 
 import sys
 import os
+import PyQt4
+from PyQt4 import QtGui
 mainsrcdir = sys.path[0]
 srcdir = os.path.abspath(os.path.join(mainsrcdir, os.pardir))
 relinuxdir = os.path.abspath(os.path.join(srcdir, os.pardir))
@@ -92,7 +94,7 @@ def main():
     modules = []
     aptcache = []
     cbuffer = {}
-    root = Tkinter.Tk()
+    '''root = Tkinter.Tk()
     App = None
     def startProg(splash):
         global modules, aptcache, cbuffer, App
@@ -117,8 +119,8 @@ def main():
         cbuffer = configutils.parseFiles(configfiles)
         config.Configuration = cbuffer
         configutils.saveBuffer(config.Configuration)
-        '''for i in configutils.beautify(buffer1):
-            print(i)'''
+        \'''for i in configutils.beautify(buffer1):
+            print(i)\'''
         spprog += 1
         splash.setProgress(calcPercent((spprog, spprogn)), "Reading APT Cache...")
         def aptupdate(op, percent):
@@ -148,7 +150,9 @@ def main():
         splash.setProgress(calcPercent((spprog, spprogn)), "Launching relinux")
     splash = gui.Splash(root, startProg)
     #root.overrideredirect(Tkinter.TRUE) # Coming soon!
-    root.mainloop()
+    root.mainloop()'''
+    App = QtGui.QApplication(sys.argv)
+
     config.ThreadStop = True
 
 if __name__ == '__main__':

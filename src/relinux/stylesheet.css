@@ -1,0 +1,90 @@
+#MainWindow, #centralwidget, QWidget {
+	background-color: white;
+	background: white;
+	color: black;
+}
+
+QTabWidget::pane {
+	border: 1px solid #aaa;
+	border-radius: 2px;
+	border-top-color: #eee;
+}
+
+QScrollBar, QScrollArea {
+	border: 0px;
+	border-radius: 0px;
+	background: transparent;
+}
+
+QScrollBar {
+	margin: 20px 0 20px 0;
+	width: 20px;
+}
+
+QScrollBar::handle {
+	min-height: 20px;
+	margin: 20px 0 20px 0;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+	height: 20px;
+	color: #bbb;
+	content: "h"
+}
+
+QScrollBar::up-arrow, QScrollBar::down-arrow {
+	color: #bbb;
+}
+
+QPushButton, QTabBar::tab, QLineEdit, QScrollBar::handle, QScrollBar, QScrollBar::add-line,
+QScrollBar::sub-line {
+	border: 1px solid #aaa;
+	border-radius: 5px;
+}
+
+QPushButton, QTabBar::tab, QLineEdit {
+	padding: 2px 7px;
+}
+
+QPushButton:disabled, QLineEdit:read-only {
+	color: #bbb;
+}
+
+QPushButton:hover, QTabBar::tab:hover, QMenuBar::item:selected,
+QMenu:selected, QMenu::item:selected, QLineEdit:hover, QLineEdit:focus, QScrollBar::handle:hover,
+QScrollBar::add-line:hover, QScrollBar::sub-line:hover {
+	border-color: #008ffe;
+}
+
+QPushButton:pressed, QTabBar::tab:selected, QScrollBar::handle:pressed, QScrollBar::add-line:pressed,
+QScrollBar::sub-line:pressed {
+	border-color: #f00;
+}
+
+QTabBar::tab {
+	border-bottom: 0px;
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
+}
+
+QTabBar::tab:!selected {
+	margin-top: 1px;
+}
+
+QMenuBar::item, QMenu {
+	spacing: 4px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	padding: 2px 7px;
+}
+
+QMenu {
+	border-color: #aaa;
+}
+
+QMenu::item {
+	border: 1px solid transparent;
+	border-radius: 4px;
+	padding: 2px 8px;
+	margin: 2px;
+}
