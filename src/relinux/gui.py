@@ -65,16 +65,18 @@ class GUI(QtGui.QMainWindow):
         configs = config.Configuration
         self.configTab = QtGui.QWidget()
         self.configTab.vlayout = QtGui.QVBoxLayout(self.configTab)
+        # Master notebook (stores the sections)
         self.configTab.notebook1 = QtGui.QTabWidget(self.configTab)
         self.configTab.vlayout.addWidget(self.configTab.notebook1)
         self.fillConfiguration(configs, self.configTab)
         self.ui.moduleNotebook.addTab(self.configTab, "Configuration")
 
     def fillConfiguration(self, configs, widget):
-        # TODO: Clean this mess
+        # TODO: Clean this mess, or at least comment it
         l = chr(108)
         v = chr(118)
         for i in configs.keys():
+            # If the section is not in the notebook, add it
             if not i in self.configTab.notebook1.__dict__:
                 self.configTab.notebook1.__dict__[i] = QtGui.QWidget()
                 self.configTab.notebook1.__dict__[i].vlayout = QtGui.QVBoxLayout(
@@ -89,6 +91,8 @@ class GUI(QtGui.QMainWindow):
                 n = configutils.getValueP(configs[i][x], configutils.name)
                 t = configutils.getValueP(configs[i][x], configutils.types)
                 v_ = configutils.getValue(configs[i][x])
+                c_ = configutils.getChoices(t)
+                # If the category is not in the section's notebook, add it
                 if not c in self.configTab.notebook1.__dict__[i].nbook.__dict__:
                     fw = QtGui.QWidget(self.configTab.notebook1.__dict__[i].nbook)
                     vb = QtGui.QVBoxLayout(fw)
@@ -112,6 +116,11 @@ class GUI(QtGui.QMainWindow):
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = QtGui.QCheckBox()
                     if configutils.parseBoolean(v_):
                         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].setChecked(True)
+                elif c_ is not None and len(c_) > 0:
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = QtGui.QComboBox()
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].clear()
+                    for y in c_:
+                        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].addItem(y)
                 else:
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = QtGui.QLineEdit()
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.addRow(
