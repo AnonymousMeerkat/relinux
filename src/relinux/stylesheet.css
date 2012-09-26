@@ -36,8 +36,12 @@ QScrollBar::up-arrow, QScrollBar::down-arrow {
 	color: #bbb;
 }
 
+QCheckBox::indicator::checked {
+	background: #aaa;
+}
+
 QPushButton, QTabBar::tab, QLineEdit, QScrollBar::handle, QScrollBar, QScrollBar::add-line,
-QScrollBar::sub-line {
+QScrollBar::sub-line, QCheckBox::indicator {
 	border: 1px solid #aaa;
 	border-radius: 5px;
 }
@@ -52,12 +56,12 @@ QPushButton:disabled, QLineEdit:read-only {
 
 QPushButton:hover, QTabBar::tab:hover, QMenuBar::item:selected,
 QMenu:selected, QMenu::item:selected, QLineEdit:hover, QLineEdit:focus, QScrollBar::handle:hover,
-QScrollBar::add-line:hover, QScrollBar::sub-line:hover {
+QScrollBar::add-line:hover, QScrollBar::sub-line:hover, QCheckBox::indicator:hover {
 	border-color: #008ffe;
 }
 
 QPushButton:pressed, QTabBar::tab:selected, QScrollBar::handle:pressed, QScrollBar::add-line:pressed,
-QScrollBar::sub-line:pressed {
+QScrollBar::sub-line:pressed, QCheckBox::indicator:pressed {
 	border-color: #f00;
 }
 

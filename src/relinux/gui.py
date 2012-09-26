@@ -87,6 +87,8 @@ class GUI(QtGui.QMainWindow):
             for x in configs[i].keys():
                 c = configutils.getValueP(configs[i][x], configutils.category)
                 n = configutils.getValueP(configs[i][x], configutils.name)
+                t = configutils.getValueP(configs[i][x], configutils.types)
+                v_ = configutils.getValue(configs[i][x])
                 if not c in self.configTab.notebook1.__dict__[i].nbook.__dict__:
                     fw = QtGui.QWidget(self.configTab.notebook1.__dict__[i].nbook)
                     vb = QtGui.QVBoxLayout(fw)
@@ -97,7 +99,8 @@ class GUI(QtGui.QMainWindow):
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC = QtGui.QWidget()
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC.setLayout(
                             self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout)
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setSizeConstraint(QtGui.QLayout.SetFixedSize);
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setSizeConstraint(
+                                                                QtGui.QLayout.SetFixedSize)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].setWidget(
                             self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC)
                     self.configTab.notebook1.__dict__[i].nbook.addTab(
@@ -105,7 +108,12 @@ class GUI(QtGui.QMainWindow):
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n] = {}
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l] = QtGui.QLabel()
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l].setText(n)
-                self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = QtGui.QLineEdit()
+                if t == configutils.yesno:
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = QtGui.QCheckBox()
+                    if configutils.parseBoolean(v_):
+                        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].setChecked(True)
+                else:
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = QtGui.QLineEdit()
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.addRow(
                         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l],
                         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v])
@@ -113,6 +121,7 @@ class GUI(QtGui.QMainWindow):
     def quit(self, *args):
         quitProg(self.app)
 
+# For debug purposes
 if __name__ == "__main__":
     def _(t):
         return t
