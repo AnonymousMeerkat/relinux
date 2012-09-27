@@ -68,7 +68,7 @@ QComboBox QAbstractItemView {
 }
 
 QPushButton:pressed, QTabBar::tab:selected, QScrollBar::handle:pressed, QScrollBar::add-line:pressed,
-QScrollBar::sub-line:pressed, QCheckBox::indicator:pressed {
+QScrollBar::sub-line:pressed, QCheckBox::indicator:pressed, QMenu::item:pressed {
 	border-color: #f00;
 }
 

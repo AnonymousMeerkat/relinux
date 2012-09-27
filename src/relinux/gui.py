@@ -5,13 +5,32 @@ Everything GUI-related is here
 '''
 
 import sys
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from ui_mainwindow import Ui_MainWindow
 from ui_welcome import Ui_Welcome
-from relinux import config
+from relinux import config, configutils
 
 def quitProg(app):
     sys.exit(app.exec_())
+
+class RelinuxSplash(QtGui.QSplashScreen):
+    def __init__(self, *args):
+        QtGui.QSplashScreen.__init__(self, *args)
+        self.frameid = 0
+        self.imageviewer = QtCore.QImageReader()
+
+    def setAnimatedPixmap(self, file_):
+        self.imageviewer.setFilename(file_)
+
+    def paintEvent(self, event):
+        if not self.imageviewer.canRead():
+            return
+        painter = QtGui.QPainter(self)
+        if self.frameid >= self.imageviewer.imageCount():
+            self.frameid = 0
+        self.imageviewer.jumpToImage(self.frameid)
+        painter.drawImage(self.imageviewer.read())
+        self.frameid += 1
 
 class GUI(QtGui.QMainWindow):
     def __init__(self, app):
@@ -100,11 +119,15 @@ class GUI(QtGui.QMainWindow):
                     vb.addWidget(self.configTab.notebook1.__dict__[i].nbook.__dict__[c])
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].setWidgetResizable(False)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout = QtGui.QFormLayout()
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setSizeConstraint(
+                                                                QtGui.QLayout.SetFixedSize)
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setFieldGrowthPolicy(
+                                                        QtGui.QFormLayout.AllNonFixedFieldsGrow)
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setLabelAlignment(
+                                                                        QtCore.Qt.AlignLeft)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC = QtGui.QWidget()
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC.setLayout(
                             self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout)
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setSizeConstraint(
-                                                                QtGui.QLayout.SetFixedSize)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].setWidget(
                             self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC)
                     self.configTab.notebook1.__dict__[i].nbook.addTab(
@@ -123,6 +146,8 @@ class GUI(QtGui.QMainWindow):
                         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].addItem(y)
                 else:
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = QtGui.QLineEdit()
+                self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].setSizePolicy(
+                                    QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding))
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.addRow(
                         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l],
                         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v])
@@ -134,10 +159,17 @@ class GUI(QtGui.QMainWindow):
 if __name__ == "__main__":
     def _(t):
         return t
-    from relinux import modloader, configutils
+    from relinux import modloader
     import os
+    import time
     app = QtGui.QApplication([])
     app.setStyleSheet(open("./stylesheet.css", "r").read())
+    splash = QtGui.QSplashScreen(QtGui.QPixmap("../../splash_light.png"))
+    splash.show()
+    app.processEvents()
+    splash.showMessage("Loading...", QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+    app.processEvents()
+    time.sleep(3)
     modules = []
     modulemetas = modloader.getModules()
     for i in modulemetas:
@@ -151,4 +183,5 @@ if __name__ == "__main__":
     configutils.saveBuffer(config.Configuration)
     gui = GUI(app)
     gui.show()
+    splash.finish(gui)
     quitProg(app)

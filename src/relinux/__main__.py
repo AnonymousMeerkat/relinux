@@ -9,7 +9,7 @@ Main relinux script
 import sys
 import os
 import PyQt4
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 mainsrcdir = sys.path[0]
 srcdir = os.path.abspath(os.path.join(mainsrcdir, os.pardir))
 relinuxdir = os.path.abspath(os.path.join(srcdir, os.pardir))
@@ -152,8 +152,33 @@ def main():
     #root.overrideredirect(Tkinter.TRUE) # Coming soon!
     root.mainloop()'''
     App = QtGui.QApplication(sys.argv)
-
+    splash = QtGui.QSplashScreen(QtGui.QPixmap("../../splash_light.png"))
+    splash.show()
+    App.processEvents()
+    def showMessage(str_):
+        splash.showMessage(str_, QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+        App.processEvents()
+    showMessage("Loading modules...")
+    modules = []
+    modulemetas = modloader.getModules()
+    for i in modulemetas:
+        modules.append(modloader.loadModule(i))
+    showMessage("Loading configuration files...")
+    configfiles = [config.relinuxdir + "/relinux.conf"]
+    for i in range(len(modulemetas)):
+        for x in modules[i].moduleconfig:
+            configfiles.append(os.path.join(os.path.dirname(modulemetas[i]["path"]), x))
+    cbuffer = configutils.parseFiles(configfiles)
+    config.Configuration = cbuffer
+    configutils.saveBuffer(config.Configuration)
+    showMessage("Loading stylesheet...")
+    App.setStyleSheet(open("./stylesheet.css", "r").read())
+    showMessage("Loading GUI...")
+    gui_ = gui.GUI(App)
+    gui_.show()
+    splash.finish(gui_)
     config.ThreadStop = True
+    sys.exit(App.exec_())
 
 if __name__ == '__main__':
     main()
