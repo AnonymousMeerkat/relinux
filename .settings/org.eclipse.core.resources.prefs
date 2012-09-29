@@ -13,6 +13,7 @@ encoding//src/relinux/modules/osweaver/__init__.py=utf-8
 encoding//src/relinux/modules/osweaver/isoutil.py=utf-8
 encoding//src/relinux/modules/osweaver/squashfs.py=utf-8
 encoding//src/relinux/modules/osweaver/tempsys.py=utf-8
+encoding//src/relinux/modules/osweaver/ui_osweaver.py=utf-8
 encoding//src/relinux/numrange.py=utf-8
 encoding//src/relinux/pwdmanip.py=utf-8
 encoding//src/relinux/threadmanager.py=utf-8

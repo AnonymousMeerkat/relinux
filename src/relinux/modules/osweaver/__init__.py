@@ -9,6 +9,7 @@ if config.python3:
     import tkinter as Tkinter
 else:
     import Tkinter
+from PyQt4 import QtGui, QtCore
 import os
 import copy
 
@@ -37,14 +38,14 @@ def run(adict):
     config.TempSys = isodir + "/.TMPSYS/"
     aptcache = adict["aptcache"]
     ourgui = adict["gui"]
-    from relinux.modules.osweaver import isoutil, squashfs, tempsys
+    from relinux.modules.osweaver import isoutil, squashfs, tempsys, ui_osweaver
     threads = []
     threads.extend(tempsys.threads)
     threads.extend(squashfs.threads)
     threads.extend(isoutil.threads)
     threads_ = utilities.remDuplicates(threads)
     threads = threads_
-    pagenum = ourgui.wizard.add_tab()
+    '''pagenum = ourgui.wizard.add_tab()
     page = gui.Frame(ourgui.wizard.page(pagenum))
     ourgui.wizard.add_page_body(pagenum, _("OSWeaver"), page)
     page.frame = gui.Frame(page)
@@ -56,7 +57,7 @@ def run(adict):
     config.GUIStream.writefunc.append(onWrite)
     page.details.output.pack(fill = Tkinter.BOTH, expand = True, anchor = Tkinter.NW, side = Tkinter.LEFT)
     page.details.pack(fill = Tkinter.BOTH, expand = True, side = Tkinter.BOTTOM, anchor = Tkinter.SW)
-    '''page.details.buttonstate = True
+    \'''page.details.buttonstate = True
     def showDetails():
         if page.details.buttonstate:
             page.details.output.pack(fill=Tkinter.BOTH, expand=True, anchor=Tkinter.NW, side=Tkinter.LEFT)
@@ -67,7 +68,7 @@ def run(adict):
             page.showdetails.config(text="Show details >>")
             page.details.buttonstate = True
     page.showdetails = gui.Button(page, text="Show details >>", command=showDetails)
-    page.showdetails.pack(side=Tkinter.BOTTOM, anchor=Tkinter.SW)'''
+    page.showdetails.pack(side=Tkinter.BOTTOM, anchor=Tkinter.SW)\'''
     page.progress = gui.Progressbar(page)
     page.progress.pack(fill = Tkinter.X, expand = True, side = Tkinter.BOTTOM,
                           anchor = Tkinter.S)
@@ -191,4 +192,10 @@ def run(adict):
         # lambda: runThreads(threads)
     page.button = gui.Button(page.frame, text = "Start!", command = startThreads)
     page.button.pack()
-    page.isnotroot = gui.Label(page.frame, text = "You are not root!")
+    page.isnotroot = gui.Label(page.frame, text = "You are not root!")'''
+    ui_container = QtGui.QWidget()
+    ui = ui_osweaver.Ui_OSWeaver()
+    ui.setupUi(ui_container)
+    ui.notroot.hide()
+    ui.terminal.hide()
+    ourgui.addTab(ui_container, "OSWeaver")

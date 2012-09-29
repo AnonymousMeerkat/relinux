@@ -152,6 +152,10 @@ class GUI(QtGui.QMainWindow):
                         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l],
                         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v])
 
+    def addTab(self, *args):
+        self.ui.moduleNotebook.addTab(*args)
+        self.updateWizButtons()
+
     def quit(self, *args):
         quitProg(self.app)
 

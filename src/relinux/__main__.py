@@ -175,6 +175,10 @@ def main():
     App.setStyleSheet(open("./stylesheet.css", "r").read())
     showMessage("Loading GUI...")
     gui_ = gui.GUI(App)
+    showMessage("Running modules...")
+    for i in modules:
+            modloader.runModule(i,
+                                {"gui": gui_, "config": cbuffer, "aptcache": aptcache})
     gui_.show()
     splash.finish(gui_)
     config.ThreadStop = True
