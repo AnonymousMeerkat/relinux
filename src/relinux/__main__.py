@@ -156,14 +156,14 @@ def main():
     splash.show()
     App.processEvents()
     def showMessage(str_):
-        splash.showMessage(str_, QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+        splash.showMessage(str_ + "...", QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         App.processEvents()
-    showMessage("Loading modules...")
+    showMessage("Loading modules")
     modules = []
     modulemetas = modloader.getModules()
     for i in modulemetas:
         modules.append(modloader.loadModule(i))
-    showMessage("Loading configuration files...")
+    showMessage("Loading configuration files")
     configfiles = [config.relinuxdir + "/relinux.conf"]
     for i in range(len(modulemetas)):
         for x in modules[i].moduleconfig:
@@ -171,11 +171,11 @@ def main():
     cbuffer = configutils.parseFiles(configfiles)
     config.Configuration = cbuffer
     configutils.saveBuffer(config.Configuration)
-    showMessage("Loading stylesheet...")
+    showMessage("Loading stylesheet")
     App.setStyleSheet(open("./stylesheet.css", "r").read())
     showMessage("Loading GUI...")
     gui_ = gui.GUI(App)
-    showMessage("Running modules...")
+    showMessage("Running modules")
     for i in modules:
             modloader.runModule(i,
                                 {"gui": gui_, "config": cbuffer, "aptcache": aptcache})
