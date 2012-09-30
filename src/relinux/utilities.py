@@ -150,13 +150,39 @@ def calcPercent(first, second):
     return float(float(floatDivision(first, second)) * float(100))
 
 
-# Sorting
+# Alphabetical Sorting
 def sort(l):
     convert = lambda text: int(text) if text.isdigit() else text
     alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
     l.sort(key = alphanum_key)
     return l
 
+# ASCIIbetical Sorting
 def normal_sort(l):
     l.sort()
     return l
+
+# Event-based variable (based on Tkinter's {String,Int}Var)
+class eventVar():
+    def __init__(self, **kw):
+        self.__value__ = None  # NEVER access this variable unless get() doesn't work
+        self.writenotify = []
+        self.readnotify = []
+        if "value" in kw:
+            self.set(kw["value"])
+
+    def set(self, newvalue):
+        self.__value__ = newvalue
+        for i in self.writenotify:
+            i(newvalue)
+
+    def get(self):
+        for i in self.readnotify:
+            i()
+        return self.__value__
+
+    def trace(self, rw, func):
+        if rw.lower() == "r":
+            self.readnotify.append(func)
+        elif rw.lower() == "w":
+            self.writenotify.append(func)

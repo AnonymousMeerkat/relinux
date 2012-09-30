@@ -193,9 +193,80 @@ def run(adict):
     page.button = gui.Button(page.frame, text = "Start!", command = startThreads)
     page.button.pack()
     page.isnotroot = gui.Label(page.frame, text = "You are not root!")'''
-    ui_container = QtGui.QWidget()
+    page = {}
+    page["boxes"] = []
+    page_container = QtGui.QWidget()
     ui = ui_osweaver.Ui_OSWeaver()
-    ui.setupUi(ui_container)
+    ui.setupUi(page_container)
     ui.notroot.hide()
     ui.terminal.hide()
-    ourgui.addTab(ui_container, "OSWeaver")
+    class customCheck(QtGui.QCheckBox):
+        def __init__(self, *args):
+            QtGui.QCheckBox.__init__(self, *args)
+            self.ignoreauto = False
+            self.id = len(page["boxes"])
+            self.value = utilities.eventVar(value = False)
+            self.value.trace("w", self.set)
+            self.clicked.connect(self.toggled_)
+
+        def toggled_(self, *args):
+            self.setChecked(not self.get())  # Toggle checked state
+            self.value.set(not self.get())  # Set the state that was wanted (not not)
+
+        def set(self, newvalue):
+            if newvalue == self.get():
+                return
+            self.setChecked(newvalue)
+            if self.ignoreauto:
+                self.ignoreauto = False
+            elif newvalue:
+                self.autoSelect()
+
+        def get(self):
+            return self.isChecked()
+
+        def autoSelect(self):
+            if len(threads[self.id]["deps"]) < 0 or ui.nodepends.isChecked():
+                return
+            tns = [i["tn"] for i in threads[self.id]["deps"]]
+            for i in range(len(threads)):
+                if threads[i]["tn"] in tns:
+                    page["boxes"][i].set(True)
+    x = 0
+    y = 0
+    for i in threads:
+        ch = customCheck(i["tn"], ui.threadstorun)
+        ui.gridLayout_2.addWidget(ch, y, x)  # No idea why Qt wants Y before X
+        page["boxes"].append(ch)
+        x += 1
+        if x >= 3:
+            x = 0
+            y += 1
+    # Terrible name, but it's just a function that selects/deselects values from "threevalues"
+    # Possible values of "threevalues":
+    #   True  - Select All
+    #   False - Select None
+    #   None  - Toggle Selected
+    def tripleSel(threevalues):
+        val = False
+        tog = False
+        if threevalues:  # Select All
+            val = True
+        elif threevalues is None:
+            tog = True
+        for i in range(len(page["boxes"])):
+            page["boxes"][i].ignoreauto = True
+            if tog:
+                page["boxes"][i].set(not page["boxes"][i].get())
+            else:
+                page["boxes"][i].set(val)
+    # Run when ui.nodepends is unchecked
+    def ignoreDepends():
+        for i in range(len(page["boxes"])):
+            if page["boxes"][i].get():
+                page["boxes"][i].autoSelect()
+    ui.selall.clicked.connect(lambda *args: tripleSel(True))
+    ui.selnone.clicked.connect(lambda *args: tripleSel(False))
+    ui.togsel.clicked.connect(lambda *args: tripleSel(None))
+    ui.nodepends.clicked.connect(lambda *args: ignoreDepends() if not ui.nodepends.isChecked() else None)
+    ourgui.addTab(page_container, "OSWeaver")

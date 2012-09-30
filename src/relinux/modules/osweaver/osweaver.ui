@@ -14,25 +14,17 @@
    <string>OSWeaver</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0" colspan="2">
-    <widget class="QGroupBox" name="threadstorun">
-     <property name="title">
-      <string>Threads to run:</string>
+   <item row="2" column="0">
+    <widget class="QPushButton" name="selall">
+     <property name="text">
+      <string>Select All</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2"/>
     </widget>
    </item>
    <item row="0" column="0">
     <widget class="QLabel" name="nodependslabel">
      <property name="text">
       <string>Ignore dependencies</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="QProgressBar" name="progress">
-     <property name="value">
-      <number>0</number>
      </property>
     </widget>
    </item>
@@ -43,25 +35,54 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item row="2" column="1">
+    <widget class="QPushButton" name="selnone">
+     <property name="text">
+      <string>Select None</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="togsel">
+     <property name="text">
+      <string>Toggle All</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="3">
     <widget class="QPushButton" name="startbutton">
      <property name="text">
       <string>Start!</string>
      </property>
     </widget>
    </item>
-   <item row="8" column="0" colspan="2">
+   <item row="5" column="0" colspan="3">
+    <widget class="QLabel" name="notroot">
+     <property name="text">
+      <string>You are not root!</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0" colspan="3">
+    <widget class="QProgressBar" name="progress">
+     <property name="value">
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0" colspan="3">
     <widget class="QLabel" name="terminal">
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
-   <item row="5" column="0" colspan="2">
-    <widget class="QLabel" name="notroot">
-     <property name="text">
-      <string>You are not root!</string>
+   <item row="1" column="0" colspan="3">
+    <widget class="QGroupBox" name="threadstorun">
+     <property name="title">
+      <string>Threads to run:</string>
      </property>
+     <layout class="QGridLayout" name="gridLayout_2"/>
     </widget>
    </item>
   </layout>
