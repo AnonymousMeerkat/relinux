@@ -177,8 +177,7 @@ def main():
     gui_ = gui.GUI(App)
     showMessage("Running modules")
     for i in modules:
-            modloader.runModule(i,
-                                {"gui": gui_, "config": cbuffer, "aptcache": aptcache})
+            modloader.runModule(i, {"gui": gui_, "config": cbuffer, "aptcache": aptcache})
     gui_.show()
     splash.finish(gui_)
     config.ThreadStop = True

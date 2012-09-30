@@ -14,7 +14,7 @@ import os
 import copy
 
 relinuxmodule = True
-relinuxmoduleapi = "0.4a1"
+relinuxmoduleapi = 1
 modulename = "OSWeaver"
 moduleconfig = ["osweaver.conf"]
 

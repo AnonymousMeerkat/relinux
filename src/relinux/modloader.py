@@ -24,7 +24,7 @@ def isModule(module):
 
 # Checks if a module is compatible with this version of relinux
 def isCompatible(module):
-    if module.relinuxmoduleapi != config.version:
+    if module.relinuxmoduleapi != config.ModAPIVersion:
         logger.logI(tn, logger.W, _("Module") + " " + module.modulename + " " +
                     _("is incompatible with this relinux version") + " (" + _("relinux version:") + " " +
                     config.version + ", " + _("required version:") + " " + module.relinuxmoduleapi + ")")
