@@ -8,7 +8,6 @@ Main relinux script
 
 import sys
 import os
-import PyQt4
 from PyQt4 import QtGui, QtCore
 mainsrcdir = sys.path[0]
 srcdir = os.path.abspath(os.path.join(mainsrcdir, os.pardir))
