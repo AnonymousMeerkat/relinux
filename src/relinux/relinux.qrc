@@ -1,5 +1,0 @@
-<RCC>
-  <qresource prefix="relinux">
-    <file>stylesheet.qss</file>
-  </qresource>
-</RCC>
