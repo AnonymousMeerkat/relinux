@@ -64,7 +64,6 @@ def findRunnableThreads(threadids, threadsdone, threadsrunning, threads, **optio
 # Run a thread
 def runThread(threadid, threadsdone, threadsrunning, threads, lock, **options):
     thread = getThread(threadid, threads)
-    print(thread["tn"])
     if not thread["thread"].is_alive() and not threadid in threadsdone and not threadid in threadsrunning:
         threadsrunning.append(threadid)
         logger.logV(tn, logger.I, _("Starting") + " " + getThread(threadid, threads)["tn"] + "...")
@@ -153,7 +152,6 @@ def threadLoop(threads1_, **options):
         logger.logVV(tn, logger.D, "Check ActualLoop")
         #global threads, threadsdone, threadsrunning, threadids
         while config.ThreadStop is False:
-            logger.logVV(tn, logger.D, "Loop start")
             # Clear old threads
             for x in threadsrunning:
                 checkThread(x, threadsdone, threadsrunning, threads, pelock, **options)
@@ -164,7 +162,6 @@ def threadLoop(threads1_, **options):
             # Run runnable threads
             for x in findRunnableThreads(threadids, threadsdone, threadsrunning, threads, **options):
                 runThread(x, threadsdone, threadsrunning, threads, pslock, **options)
-            logger.logVV(tn, logger.D, "Loop end")
             time.sleep(float(1.0 / config.ThreadRPS))
     # Make a new thread (so that the user can continue on using relinux)
     t = threading.Thread(target = _ActualLoop, args = (threads, threadsdone, threadsrunning, threadids))

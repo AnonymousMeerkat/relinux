@@ -280,12 +280,11 @@ def run(adict):
         if ui.nodepends.isChecked():
             tfdeps = True
         def onThreadAdded(threadid, threadsrunning, threads):
-            print("RAN")
             rt = ""
             c = 0
             for i in range(len(threadsrunning)):
                 tn = threadmanager.getThread(threadsrunning[i], threads)["tn"]
-                rt += tn[i]
+                rt += tn
                 if c + 1 < len(threadsrunning) and len(threadsrunning) > 2:
                     rt += ", "
                 if c + 2 == len(threadsrunning):
