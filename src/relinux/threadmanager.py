@@ -109,22 +109,22 @@ def threadLoop(threads1_, **options):
         pslock = threading.RLock()
         if "postend" in options and options["postend"] == options["poststart"]:
             pelock = pslock
-    logger.logV(tn, logger.D, "Check poststart")
+    logger.logVV(tn, logger.D, "Check poststart")
     if "postend" in options and pelock == None:
         pelock = threading.RLock()
-    logger.logV(tn, logger.D, "Check postend")
+    logger.logVV(tn, logger.D, "Check postend")
     # Remove duplicates
     for i in threads1:
         if not i in threads:
             threads.append(i)
-    logger.logV(tn, logger.D, "Check remduplicates")
+    logger.logVV(tn, logger.D, "Check remduplicates")
     # Make sure all threads have these attributes (which are "optional")
     for i in range(len(threads)):
         if not "threadspan" in threads[i]:
             threads[i]["threadspan"] = 1
         if not "enabled" in threads[i]:
             threads[i]["enabled"] = True
-    logger.logV(tn, logger.D, "Check addoptional")
+    logger.logVV(tn, logger.D, "Check addoptional")
     # Generate the threads
     for i in range(len(threads)):
         temp_ = threads[i]["thread"]
@@ -134,11 +134,11 @@ def threadLoop(threads1_, **options):
                 kw[x] = options["threadargs"][x]
         temp = temp_(**kw)
         threads[i]["thread"] = temp
-    logger.logV(tn, logger.D, "Check genthreads")
+    logger.logVV(tn, logger.D, "Check genthreads")
     # Generate the thread IDS
     for i in range(len(threads)):
         threadids.append(i)
-    logger.logV(tn, logger.D, "Check genthreadids")
+    logger.logVV(tn, logger.D, "Check genthreadids")
     # Make sure thread dependencies are made as IDs, and not actual thread dictionaries
     for i in range(len(threads)):
         for x in range(len(threads[i]["deps"])):
@@ -147,21 +147,24 @@ def threadLoop(threads1_, **options):
                     if threads[i]["deps"][x] == threads[y]:
                         threads[i]["deps"][x] = y
                         break
-    logger.logV(tn, logger.D, "Check threaddeps")
+    logger.logVV(tn, logger.D, "Check threaddeps")
     # Actual loop
     def _ActualLoop(threads, threadsdone, threadsrunning, threadids):
-        logger.logV(tn, logger.D, "Check actualloop")
+        logger.logVV(tn, logger.D, "Check ActualLoop")
         #global threads, threadsdone, threadsrunning, threadids
         while config.ThreadStop is False:
+            logger.logVV(tn, logger.D, "Loop start")
             # Clear old threads
             for x in threadsrunning:
                 checkThread(x, threadsdone, threadsrunning, threads, pelock, **options)
             # End if all threads are done
             if len(threadsdone) >= len(threads):
+                logger.logVV(tn, logger.D, "Ending ActualLoop")
                 break
             # Run runnable threads
             for x in findRunnableThreads(threadids, threadsdone, threadsrunning, threads, **options):
                 runThread(x, threadsdone, threadsrunning, threads, pslock, **options)
+            logger.logVV(tn, logger.D, "Loop end")
             time.sleep(float(1.0 / config.ThreadRPS))
     # Make a new thread (so that the user can continue on using relinux)
     t = threading.Thread(target = _ActualLoop, args = (threads, threadsdone, threadsrunning, threadids))
