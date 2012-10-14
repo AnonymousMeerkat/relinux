@@ -202,10 +202,8 @@ if __name__ == "__main__":
     app.setStyleSheet(open("./stylesheet.css", "r").read())
     splash = QtGui.QSplashScreen(QtGui.QPixmap("../../splash_light.png"))
     splash.show()
-    app.processEvents()
     splash.showMessage("Loading...", QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
     app.processEvents()
-    time.sleep(3)
     modules = []
     modulemetas = modloader.getModules()
     for i in modulemetas:

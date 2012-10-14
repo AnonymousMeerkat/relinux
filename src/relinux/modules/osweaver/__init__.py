@@ -195,6 +195,7 @@ def run(adict):
     page.isnotroot = gui.Label(page.frame, text = "You are not root!")'''
     page = {}
     page["boxes"] = []
+    page["progress"] = {}
     page_container = QtGui.QWidget()
     ui = ui_osweaver.Ui_OSWeaver()
     ui.setupUi(page_container)
@@ -265,8 +266,54 @@ def run(adict):
         for i in range(len(page["boxes"])):
             if page["boxes"][i].get():
                 page["boxes"][i].autoSelect()
+    # Start running
+    def startThreads(*args):
+        if os.getuid() != 0:
+            ui.notroot.show()
+            return
+        numthreads = 0
+        for i in range(len(page["boxes"])):
+            threads[i]["enabled"] = page["boxes"][i].get()
+            if threads[i]["enabled"]:
+                numthreads += 1
+        tfdeps = False
+        if ui.nodepends.isChecked():
+            tfdeps = True
+        def onThreadAdded(threadid, threadsrunning, threads):
+            rt = ""
+            c = 0
+            for i in range(len(threadsrunning)):
+                tn = threadmanager.getThread(threadsrunning[i], threads)["tn"]
+                rt += tn[i]
+                if c + 1 < len(threadsrunning) and len(threadsrunning) > 2:
+                    rt += ", "
+                if c + 2 == len(threadsrunning):
+                    rt += "and "
+                c += 1
+            ui.notroot.setText(rt)
+            if ui.notroot.isHidden():
+                ui.notroot.show()
+        def setProgress(tn, progress):
+            # Do something here
+            if progress > 100:
+                progress = 100
+            elif progress < 0:
+                progress = 0
+            page["progress"][tn] = progress
+            totprogress = 0
+            for i in page["progress"]:
+                totprogress += utilities.floatDivision(float(page["progress"][i]), 100)
+            ui.progress.setValue(utilities.calcPercent(totprogress, numthreads))
+        def onThreadRemoved(threadid, threadsrunning, threads):
+            tn = threadmanager.getThread(threadid, threads)["tn"]
+            setProgress(tn, 100)
+            onThreadAdded(threadid, threadsrunning, threads)
+        for i in page["progress"]:
+            page["progress"][i] = 0
+        runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress})
     ui.selall.clicked.connect(lambda *args: tripleSel(True))
     ui.selnone.clicked.connect(lambda *args: tripleSel(False))
     ui.togsel.clicked.connect(lambda *args: tripleSel(None))
     ui.nodepends.clicked.connect(lambda *args: ignoreDepends() if not ui.nodepends.isChecked() else None)
+    ui.startbutton.clicked.connect(startThreads)
     ourgui.addTab(page_container, "OSWeaver")
