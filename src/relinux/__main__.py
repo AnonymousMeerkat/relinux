@@ -179,8 +179,8 @@ def main():
             modloader.runModule(i, {"gui": gui_, "config": cbuffer, "aptcache": aptcache})
     gui_.show()
     splash.finish(gui_)
-    config.ThreadStop = True
     sys.exit(App.exec_())
+    config.ThreadStop = True
 
 if __name__ == '__main__':
     main()
