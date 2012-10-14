@@ -167,6 +167,7 @@ def getProperties(buffers):
 
 # Returns the value for an property (it will only show the first result, so you have to run getLinesWithinOption)
 def getProperty(buffers, option):
+    print(str(type(option)) + " " + str(option))
     patt = re.compile("^ *" + option + " *:(.*)")
     for i in buffers:
         m = patt.match(i)
