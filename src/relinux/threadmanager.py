@@ -95,6 +95,7 @@ def getThread(threadid, threads):
 
 # Thread loop
 def threadLoop(threads1_, **options):
+    print("RUNNINGTHREADLOOP")
     # Remove pointers
     threads1 = copy.deepcopy(threads1_)
     # Initialization
