@@ -277,7 +277,8 @@ def parseCompressedBuffer(buffers, filename_):
         for x in getOptions(liness):
             returnme[i][x] = getProperties(getLinesWithinOption(liness, x))
             if returnme[i][x][types] == filename:
-                returnme[i][x][value] = os.path.abspath(
+                if not os.path.isabs(returnme[i][x][value]):
+                    returnme[i][x][value] = os.path.abspath(
                                                 os.path.join(
                                                     os.path.dirname(os.path.abspath(filename_)),
                                                         fsutil.relpath(returnme[i][x][value])))
@@ -342,9 +343,13 @@ def saveBuffer(buffers_):
                 if not x in files_[f][i]:
                     files_[f][i][x] = {}
             lastfile = os.path.dirname(os.path.abspath(buffers[i][x][files][len(buffers[i][x][files]) - 1]))
-            if buffers[i][x][types] == filename and buffers[i][x][value].startswith(lastfile):
+            print("H" + str(buffers[i][x][value]) + str(lastfile))
+            if buffers[i][x][types] == filename:
+                buffers[i][x][value] = os.path.relpath(buffers[i][x][value], lastfile)
+            '''print(lastfile + " " + os.path.dirname(buffers[i][x][value]))
+            if buffers[i][x][types] == filename and os.path.dirname(buffers[i][x][value]) == lastfile:
                 temp = fsutil.beautifypath(os.curdir + "/" + buffers[i][x][value][len(lastfile):])
-                buffers[i][x][value] = temp
+                buffers[i][x][value] = temp'''
             for y in buffers[i][x].keys():
                 if y == files:
                     continue
