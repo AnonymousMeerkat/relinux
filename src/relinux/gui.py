@@ -14,7 +14,7 @@ def quitProg(app):
     sys.exit(app.exec_())
 
 def saveFunc(var, val):
-    config.Configuration[var[0]][var[1]][configutils.value] = val
+    config.Configuration[str(var[0])][str(var[1])][configutils.value] = str(val)
     configutils.saveBuffer(config.Configuration)
 
 class RelinuxSplash(QtGui.QSplashScreen):
