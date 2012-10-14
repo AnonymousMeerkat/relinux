@@ -310,6 +310,7 @@ def run(adict):
             onThreadAdded(threadid, threadsrunning, threads)
         for i in page["progress"]:
             page["progress"][i] = 0
+        print(threads)
         runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress})
     ui.selall.clicked.connect(lambda *args: tripleSel(True))
     ui.selnone.clicked.connect(lambda *args: tripleSel(False))
