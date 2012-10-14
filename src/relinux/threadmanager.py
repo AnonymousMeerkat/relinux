@@ -150,6 +150,7 @@ def threadLoop(threads1_, **options):
     logger.logV(tn, logger.D, "Check threaddeps")
     # Actual loop
     def _ActualLoop(threads, threadsdone, threadsrunning, threadids):
+        logger.logV(tn, logger.D, "Check actualloop")
         #global threads, threadsdone, threadsrunning, threadids
         while config.ThreadStop is False:
             # Clear old threads
