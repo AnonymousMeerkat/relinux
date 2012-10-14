@@ -71,6 +71,7 @@ def runThread(threadid, threadsdone, threadsrunning, threads, lock, **options):
         if options.get("poststart") != None and lock != None:
             with lock:
                 options["poststart"](threadid, threadsrunning, threads)
+        print(threadid)
 
 
 # Check if a thread is alive
@@ -150,7 +151,6 @@ def threadLoop(threads1_, **options):
                 break
             # Run runnable threads
             for x in findRunnableThreads(threadids, threadsdone, threadsrunning, threads, **options):
-                print(x)
                 runThread(x, threadsdone, threadsrunning, threads, pslock, **options)
             time.sleep(float(1.0 / config.ThreadRPS))
     # Make a new thread (so that the user can continue on using relinux)
