@@ -64,6 +64,7 @@ def findRunnableThreads(threadids, threadsdone, threadsrunning, threads, **optio
 # Run a thread
 def runThread(threadid, threadsdone, threadsrunning, threads, lock, **options):
     thread = getThread(threadid, threads)
+    print(thread["tn"])
     if not thread["thread"].is_alive() and not threadid in threadsdone and not threadid in threadsrunning:
         threadsrunning.append(threadid)
         logger.logV(tn, logger.I, _("Starting") + " " + getThread(threadid, threads)["tn"] + "...")
