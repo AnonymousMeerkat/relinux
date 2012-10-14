@@ -314,7 +314,7 @@ def run(adict):
             page["progress"][i] = 0
         runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress})
     def onWrite():
-        QtCore.QMetaObject.invokeMethod(ui.progress, "setText", QtCore.Qt.QueuedConnection,
+        QtCore.QMetaObject.invokeMethod(ui.terminal, "setText", QtCore.Qt.QueuedConnection,
                             QtCore.Q_ARG("QString", config.GUIStream.getvalue()))
         #ui.terminal.setText(config.GUIStream.getvalue())
     config.GUIStream.writefunc.append(onWrite)
