@@ -150,8 +150,9 @@ def threadLoop(threads1_, **options):
                 break
             # Run runnable threads
             for x in findRunnableThreads(threadids, threadsdone, threadsrunning, threads, **options):
+                print(x)
                 runThread(x, threadsdone, threadsrunning, threads, pslock, **options)
             time.sleep(float(1.0 / config.ThreadRPS))
     # Make a new thread (so that the user can continue on using relinux)
-    t = threading.Thread(target=_ActualLoop, args=(threads, threadsdone, threadsrunning, threadids))
+    t = threading.Thread(target = _ActualLoop, args = (threads, threadsdone, threadsrunning, threadids))
     t.start()
