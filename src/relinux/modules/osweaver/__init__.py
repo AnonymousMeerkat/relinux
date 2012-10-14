@@ -280,7 +280,7 @@ def run(adict):
         if ui.nodepends.isChecked():
             tfdeps = True
         def onThreadAdded(threadid, threadsrunning, threads):
-            rt = ""
+            rt = "Threads running: "
             c = 0
             for i in range(len(threadsrunning)):
                 tn = threadmanager.getThread(threadsrunning[i], threads)["tn"]
