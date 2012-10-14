@@ -303,7 +303,9 @@ def run(adict):
             totprogress = 0
             for i in page["progress"]:
                 totprogress += utilities.floatDivision(float(page["progress"][i]), 100)
-            ui.progress.setValue(utilities.calcPercent(totprogress, numthreads))
+            QtCore.QMetaObject.invokeMethod(ui.progress, "setValue",
+                                            QtCore.Qt.QueuedConnection,
+                                QtCore.Q_ARG("int", utilities.calcPercent(totprogress, numthreads)))
         def onThreadRemoved(threadid, threadsrunning, threads):
             tn = threadmanager.getThread(threadid, threads)["tn"]
             setProgress(tn, 100)
@@ -312,7 +314,9 @@ def run(adict):
             page["progress"][i] = 0
         runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress})
     def onWrite():
-        ui.terminal.setText(config.GUIStream.getvalue())
+        QtCore.QMetaObject.invokeMethod(ui.progress, "setText", QtCore.Qt.QueuedConnection,
+                            QtCore.Q_ARG("QString", config.GUIStream.getvalue()))
+        #ui.terminal.setText(config.GUIStream.getvalue())
     config.GUIStream.writefunc.append(onWrite)
     ui.selall.clicked.connect(lambda *args: tripleSel(True))
     ui.selnone.clicked.connect(lambda *args: tripleSel(False))
