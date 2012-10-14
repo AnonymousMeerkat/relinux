@@ -280,6 +280,7 @@ def run(adict):
         if ui.nodepends.isChecked():
             tfdeps = True
         def onThreadAdded(threadid, threadsrunning, threads):
+            print("RAN")
             rt = ""
             c = 0
             for i in range(len(threadsrunning)):
