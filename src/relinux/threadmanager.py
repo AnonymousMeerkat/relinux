@@ -95,7 +95,7 @@ def getThread(threadid, threads):
 
 # Thread loop
 def threadLoop(threads1_, **options):
-    logger.logV(tn, "Running thread loop", logger.D)
+    logger.logV(tn, logger.D, "Running thread loop")
     # Remove pointers
     threads1 = copy.deepcopy(threads1_)
     # Initialization
@@ -109,22 +109,22 @@ def threadLoop(threads1_, **options):
         pslock = threading.RLock()
         if "postend" in options and options["postend"] == options["poststart"]:
             pelock = pslock
-    logger.logVV(tn, "Check poststart", logger.D)
+    logger.logV(tn, logger.D, "Check poststart")
     if "postend" in options and pelock == None:
         pelock = threading.RLock()
-    logger.logVV(tn, "Check postend", logger.D)
+    logger.logV(tn, logger.D, "Check postend")
     # Remove duplicates
     for i in threads1:
         if not i in threads:
             threads.append(i)
-    logger.logVV(tn, "Check remduplicates", logger.D)
+    logger.logV(tn, logger.D, "Check remduplicates")
     # Make sure all threads have these attributes (which are "optional")
     for i in range(len(threads)):
         if not "threadspan" in threads[i]:
             threads[i]["threadspan"] = 1
         if not "enabled" in threads[i]:
             threads[i]["enabled"] = True
-    logger.logVV(tn, "Check addoptional", logger.D)
+    logger.logV(tn, logger.D, "Check addoptional")
     # Generate the threads
     for i in range(len(threads)):
         temp_ = threads[i]["thread"]
@@ -134,11 +134,11 @@ def threadLoop(threads1_, **options):
                 kw[x] = options["threadargs"][x]
         temp = temp_(**kw)
         threads[i]["thread"] = temp
-    logger.logVV(tn, "Check genthreads", logger.D)
+    logger.logV(tn, logger.D, "Check genthreads")
     # Generate the thread IDS
     for i in range(len(threads)):
         threadids.append(i)
-    logger.logVV(tn, "Check genthreadids", logger.D)
+    logger.logV(tn, logger.D, "Check genthreadids")
     # Make sure thread dependencies are made as IDs, and not actual thread dictionaries
     for i in range(len(threads)):
         for x in range(len(threads[i]["deps"])):
@@ -147,7 +147,7 @@ def threadLoop(threads1_, **options):
                     if threads[i]["deps"][x] == threads[y]:
                         threads[i]["deps"][x] = y
                         break
-    logger.logVV(tn, "Check threaddeps", logger.D)
+    logger.logV(tn, logger.D, "Check threaddeps")
     # Actual loop
     def _ActualLoop(threads, threadsdone, threadsrunning, threadids):
         #global threads, threadsdone, threadsrunning, threadids
