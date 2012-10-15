@@ -151,7 +151,7 @@ def main():
     #root.overrideredirect(Tkinter.TRUE) # Coming soon!
     root.mainloop()'''
     App = QtGui.QApplication(sys.argv)
-    splash = QtGui.QSplashScreen(QtGui.QPixmap("../../splash_light.png"))
+    splash = QtGui.QSplashScreen(QtGui.QPixmap(relinuxdir + "/splash_light.png"))
     splash.show()
     App.processEvents()
     def showMessage(str_):
@@ -171,7 +171,7 @@ def main():
     config.Configuration = cbuffer
     configutils.saveBuffer(config.Configuration)
     showMessage("Loading stylesheet")
-    App.setStyleSheet(open("./stylesheet.css", "r").read())
+    App.setStyleSheet(open(mainsrcdir + "/stylesheet.css", "r").read())
     showMessage("Loading GUI...")
     gui_ = gui.GUI(App)
     showMessage("Running modules")

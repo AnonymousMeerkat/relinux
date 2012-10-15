@@ -5,6 +5,7 @@ Thread Managing Class
 '''
 
 from relinux import config, fsutil, logger, utilities
+from PyQt4 import QtCore
 import time
 import threading
 import copy
@@ -14,11 +15,17 @@ tn = logger.genTN("TheadManager")
 
 
 # Custom thread class
-class Thread(threading.Thread):
+class Thread(QtCore.QThread):
     def __init__(self, **kw):
-        threading.Thread.__init__(self)
-        for i in kw.keys():
+        QtCore.QThread.__init__(self)
+        for i in kw:
             self.__dict__[i] = kw[i]
+
+    def is_alive(self):
+        return self.isRunning()
+
+    def isAlive(self):
+        return self.is_alive()
 
     def run(self):
         self.runthread()

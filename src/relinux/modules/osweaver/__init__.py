@@ -4,7 +4,7 @@ OSWeaver Module for relinux
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
-from relinux import threadmanager, config, gui, configutils, fsutil, utilities
+from relinux import threadmanager, config, gui, configutils, fsutil, utilities, logger
 if config.python3:
     import tkinter as Tkinter
 else:
@@ -12,6 +12,7 @@ else:
 from PyQt4 import QtGui, QtCore
 import os
 import copy
+import threading
 
 relinuxmodule = True
 relinuxmoduleapi = 1
@@ -23,6 +24,7 @@ isotreel = config.ISOTree + "/"
 tmpsys = config.TempSys + "/"
 aptcache = {}
 page = {}
+tn = logger.genTN(modulename)
 
 
 def runThreads(threads, **options):
@@ -294,6 +296,7 @@ def run(adict):
             if ui.notroot.isHidden():
                 ui.notroot.show()
         def setProgress(tn, progress):
+            logger.logVV(tn, logger.D, "Setting progress to " + str(progress) + " (from thread " + threading.current_thread().name + ")")
             # Do something here
             if progress > 100:
                 progress = 100
@@ -314,6 +317,7 @@ def run(adict):
             page["progress"][i] = 0
         runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress})
     def onWrite():
+        logger.logVV(tn, logger.D, "Updating terminal (from thread " + threading.current_thread().name + ")")
         QtCore.QMetaObject.invokeMethod(ui.terminal, "setText", QtCore.Qt.QueuedConnection,
                             QtCore.Q_ARG("QString", config.GUIStream.getvalue()))
         #ui.terminal.setText(config.GUIStream.getvalue())
