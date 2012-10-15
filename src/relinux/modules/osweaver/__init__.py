@@ -325,9 +325,9 @@ def run(adict):
         logger.logVV(tn, logger.D, "Updating terminal (from thread " + threading.current_thread().name + ")")
         #return
         ui.terminal.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-        QtCore.QMetaObject.invokeMethod(ui.terminal, "appendPlainText",
+        QtCore.QMetaObject.invokeMethod(ui.terminal, "insertPlainText",
                                         QtCore.Qt.QueuedConnection,
-                            QtCore.Q_ARG("QString", msg))
+                            QtCore.Q_ARG("QString", msg.rstrip() + "\n"))
         #ui.terminal.setText(config.GUIStream.getvalue())
     config.GUIStream.writefunc.append(onWrite)
     ui.selall.clicked.connect(lambda *args: tripleSel(True))
