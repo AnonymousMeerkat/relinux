@@ -292,11 +292,16 @@ def run(adict):
                 if c + 2 == len(threadsrunning):
                     rt += "and "
                 c += 1
-            ui.notroot.setText(rt)
+            QtCore.QMetaObject.invokeMethod(ui.notroot, "setText",
+                                            QtCore.Qt.QueuedConnection,
+                                            QtCore.Q_ARG("QString", rt))
             if ui.notroot.isHidden():
-                ui.notroot.show()
+                QtCore.QMetaObject.invokeMethod(ui.notroot, "show",
+                                            QtCore.Qt.QueuedConnection
+                                            )
         def setProgress(tn, progress):
             logger.logVV(tn, logger.D, "Setting progress to " + str(progress) + " (from thread " + threading.current_thread().name + ")")
+            #return
             # Do something here
             if progress > 100:
                 progress = 100
@@ -316,10 +321,13 @@ def run(adict):
         for i in page["progress"]:
             page["progress"][i] = 0
         runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress})
-    def onWrite():
+    def onWrite(msg):
         logger.logVV(tn, logger.D, "Updating terminal (from thread " + threading.current_thread().name + ")")
-        QtCore.QMetaObject.invokeMethod(ui.terminal, "setPlainText", QtCore.Qt.QueuedConnection,
-                            QtCore.Q_ARG("QString", config.GUIStream.getvalue()))
+        #return
+        ui.terminal.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+        QtCore.QMetaObject.invokeMethod(ui.terminal, "appendPlainText",
+                                        QtCore.Qt.QueuedConnection,
+                            QtCore.Q_ARG("QString", msg))
         #ui.terminal.setText(config.GUIStream.getvalue())
     config.GUIStream.writefunc.append(onWrite)
     ui.selall.clicked.connect(lambda *args: tripleSel(True))

@@ -84,7 +84,8 @@ def runThread(threadid, threadsdone, threadsrunning, threads, lock, **options):
 # Check if a thread is alive
 def checkThread(threadid, threadsdone, threadsrunning, threads, lock, **options):
     if threadid in threadsrunning:
-        if not getThread(threadid, threads)["thread"].is_alive():
+        if (not getThread(threadid, threads)["thread"].is_alive()
+            or getThread(threadid, threads)["thread"].isFinished()):
             threadsrunning.remove(threadid)
             threadsdone.append(threadid)
             logger.logV(tn, logger.I, getThread(threadid, threads)["tn"] + " " +

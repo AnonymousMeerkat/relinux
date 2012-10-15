@@ -133,9 +133,9 @@ class eventStringIO(io.StringIO):
         if self.writefunc:
             if isinstance(self.writefunc, list):
                 for i in self.writefunc:
-                    i()
+                    i(msg)
             else:
-                self.writefunc()
+                self.writefunc(msg)
 
 # Float division for Python 2
 def floatDivision(p, p1):
