@@ -71,8 +71,14 @@
     </widget>
    </item>
    <item row="8" column="0" colspan="3">
-    <widget class="QLabel" name="terminal">
-     <property name="text">
+    <widget class="QPlainTextEdit" name="terminal">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="text" stdset="0">
       <string/>
      </property>
     </widget>

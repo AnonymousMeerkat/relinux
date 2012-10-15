@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'modules/osweaver/osweaver.ui'
 #
-# Created: Sat Sep 29 20:05:48 2012
+# Created: Mon Oct 15 16:31:41 2012
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -46,8 +46,10 @@ class Ui_OSWeaver(object):
         self.progress.setProperty("value", 0)
         self.progress.setObjectName(_fromUtf8("progress"))
         self.gridLayout.addWidget(self.progress, 6, 0, 1, 3)
-        self.terminal = QtGui.QLabel(OSWeaver)
-        self.terminal.setText(_fromUtf8(""))
+        self.terminal = QtGui.QPlainTextEdit(OSWeaver)
+        self.terminal.setEnabled(True)
+        self.terminal.setReadOnly(True)
+        self.terminal.setProperty("text", _fromUtf8(""))
         self.terminal.setObjectName(_fromUtf8("terminal"))
         self.gridLayout.addWidget(self.terminal, 8, 0, 1, 3)
         self.threadstorun = QtGui.QGroupBox(OSWeaver)

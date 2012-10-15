@@ -318,7 +318,7 @@ def run(adict):
         runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress})
     def onWrite():
         logger.logVV(tn, logger.D, "Updating terminal (from thread " + threading.current_thread().name + ")")
-        QtCore.QMetaObject.invokeMethod(ui.terminal, "setText", QtCore.Qt.QueuedConnection,
+        QtCore.QMetaObject.invokeMethod(ui.terminal, "setPlainText", QtCore.Qt.QueuedConnection,
                             QtCore.Q_ARG("QString", config.GUIStream.getvalue()))
         #ui.terminal.setText(config.GUIStream.getvalue())
     config.GUIStream.writefunc.append(onWrite)
