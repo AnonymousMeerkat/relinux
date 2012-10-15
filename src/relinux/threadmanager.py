@@ -100,6 +100,16 @@ def getThread(threadid, threads):
     return threads[threadid]
 
 
+# Make sure all threads have these attributes (which are "optional")
+def addOptional(threads):
+    for i in range(len(threads)):
+        if not "threadspan" in threads[i]:
+            threads[i]["threadspan"] = 1
+        if not "enabled" in threads[i]:
+            threads[i]["enabled"] = True
+    logger.logVV(tn, logger.D, "Check addoptional")
+
+
 # Thread loop
 def threadLoop(threads1_, **options):
     logger.logV(tn, logger.D, "Running thread loop")
@@ -125,13 +135,7 @@ def threadLoop(threads1_, **options):
         if not i in threads:
             threads.append(i)
     logger.logVV(tn, logger.D, "Check remduplicates")
-    # Make sure all threads have these attributes (which are "optional")
-    for i in range(len(threads)):
-        if not "threadspan" in threads[i]:
-            threads[i]["threadspan"] = 1
-        if not "enabled" in threads[i]:
-            threads[i]["enabled"] = True
-    logger.logVV(tn, logger.D, "Check addoptional")
+    addOptional(threads)
     # Generate the threads
     for i in range(len(threads)):
         temp_ = threads[i]["thread"]

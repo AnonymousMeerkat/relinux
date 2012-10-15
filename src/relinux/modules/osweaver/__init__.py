@@ -274,10 +274,13 @@ def run(adict):
             ui.notroot.show()
             return
         numthreads = 0
+        numthreads2 = 0
+        threadmanager.addOptional(threads)
         for i in range(len(page["boxes"])):
             threads[i]["enabled"] = page["boxes"][i].get()
             if threads[i]["enabled"]:
                 numthreads += 1
+                numthreads2 += threads[i]["threadspan"]
         tfdeps = False
         if ui.nodepends.isChecked():
             tfdeps = True
@@ -313,7 +316,7 @@ def run(adict):
                 totprogress += utilities.floatDivision(float(page["progress"][i]), 100)
             QtCore.QMetaObject.invokeMethod(ui.progress, "setValue",
                                             QtCore.Qt.QueuedConnection,
-                                QtCore.Q_ARG("int", utilities.calcPercent(totprogress, numthreads)))
+                                QtCore.Q_ARG("int", utilities.calcPercent(totprogress, numthreads2)))
         def onThreadRemoved(threadid, threadsrunning, threads):
             tn = threadmanager.getThread(threadid, threads)["tn"]
             setProgress(tn, 100)
