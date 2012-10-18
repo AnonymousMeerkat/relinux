@@ -15,7 +15,7 @@ QTabWidget::pane {
 	border-top-color: #eee;
 }
 
-QScrollBar, QScrollArea {
+QScrollBar, QScrollArea, QTextEdit {
 	border: 0px;
 	border-radius: 0px;
 	background: transparent;
@@ -45,7 +45,8 @@ QCheckBox::indicator::checked, QComboBox::drop-down, QProgressBar::chunk {
 }
 
 QPushButton, QTabBar::tab, QLineEdit, QScrollBar::handle, QScrollBar, QScrollBar::add-line,
-QScrollBar::sub-line, QCheckBox::indicator, QComboBox, QComboBox QAbstractItemView, QProgressBar {
+QScrollBar::sub-line, QCheckBox::indicator, QComboBox, QComboBox QAbstractItemView, QProgressBar,
+QPlainTextEdit {
 	border: 1px solid #aaa;
 	border-radius: 5px;
 }
