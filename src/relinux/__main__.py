@@ -54,10 +54,10 @@ def main():
               parsePyHex(sys.hexversion) + " " + _("was used."))
         exitprog(1)
     from argparse import ArgumentParser
-    tkname = "Tkinter"
+    '''tkname = "Tkinter"
     if config.python3:
         tkname = "tkinter"
-    Tkinter = __import__(tkname)
+    Tkinter = __import__(tkname)'''
     import time
     from relinux import gui, configutils, logger, aptutil, modloader, utilities, fsutil
     config.Arch = fsutil.getArch()

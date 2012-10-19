@@ -5,10 +5,10 @@ OSWeaver Module for relinux
 '''
 
 from relinux import threadmanager, config, gui, configutils, fsutil, utilities, logger
-if config.python3:
+'''if config.python3:
     import tkinter as Tkinter
 else:
-    import Tkinter
+    import Tkinter'''
 from PyQt4 import QtGui, QtCore
 import os
 import copy
