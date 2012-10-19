@@ -335,6 +335,7 @@ def run(adict):
                                         QtCore.Qt.QueuedConnection,
                             QtCore.Q_ARG("QString", msg.rstrip() + "\n"))
         #ui.terminal.setText(config.GUIStream.getvalue())
+    tripleSel(True)
     config.GUIStream.writefunc.append(onWrite)
     ui.selall.clicked.connect(lambda *args: tripleSel(True))
     ui.selnone.clicked.connect(lambda *args: tripleSel(False))
