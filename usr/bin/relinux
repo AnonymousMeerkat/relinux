@@ -368,7 +368,8 @@ lastitem()
 	l=`len $@`
 	if [ $l -lt 1 ]
 	then
-		return ""
+		echo ""
+		return $TRUE
 	fi
 	echo `fixarray $@` | cut -d" " -f$l
 	return $TRUE
@@ -453,6 +454,7 @@ parseboolean()
 # Switches to a new "workspace" (i.e. new directory)
 new_workspace() {
 	PREVWORKSPACE="$PREVWORKSPACE `pwd`"
+	ls
 	cd $1
 	return $TRUE
 }
