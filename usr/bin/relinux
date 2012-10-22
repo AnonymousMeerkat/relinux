@@ -366,6 +366,10 @@ len()
 lastitem()
 {
 	l=`len $@`
+	if [ $l -lt 1 ]
+	then
+		return ""
+	fi
 	echo `fixarray $@` | cut -d" " -f$l
 	return $TRUE
 }
