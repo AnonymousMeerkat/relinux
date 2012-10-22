@@ -51,7 +51,7 @@ echr() {
 }
 # Return the echo
 rete() {
-	return `$@`
+	return $1
 }
 # NOT operator
 not() {
