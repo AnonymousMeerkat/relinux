@@ -183,12 +183,14 @@ _helperPackageOp()
 # Installs a package
 installpackage()
 {
-	return echr _helperPackageOp "Installing  " install $@
+	_helperPackageOp "Installing  " install $@
+	return $?
 }
 # Removes a package
 removepackage()
 {
-	return echr _helperPackageOp "Removing    " purge $@
+	_helperPackageOp "Removing    " purge $@
+	return $?
 }
 #
 # Checks if a package is installed, and if not, install it.
@@ -319,7 +321,8 @@ makedir()
 {
 	if [ ! -d $1 ]
 	then
-		return echr mkdir -p $1
+		mkdir -p $1
+		return $?
 	else
 		return $FALSE
 	fi
