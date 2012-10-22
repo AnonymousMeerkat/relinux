@@ -622,8 +622,7 @@ cdfs() {
 	fi
 	if not parseboolean $KEEPWORKDIR
 	then
-		TEMP=`echo $WORKDIR | sed 's:^.::g'`
-		EXCLUDES="$EXCLUDES $TEMP"
+		EXCLUDES="$EXCLUDES $WORKDIR"
 	fi
 	# exclude-from patch by Hernan Foffani
 	# (https://answers.launchpad.net/relinux/+question/177918)
