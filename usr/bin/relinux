@@ -454,13 +454,16 @@ parseboolean()
 # Switches to a new "workspace" (i.e. new directory)
 new_workspace() {
 	PREVWORKSPACE="$PREVWORKSPACE `pwd`"
-	ls
+	echo -n "NW"
+	pwd
 	cd $1
 	return $TRUE
 }
 # Switches back to the old "workspace"
 prev_workspace() {
 	cd `lastitem $PREVWORKSPACE`
+	echo -n "PW"
+	pwd
 	PREVWORKSPACE_="`pop $PREVWORKSPACE`"
 	PREVWORKSPACE="$PREVWORKSPACE_"
 	return $TRUE
@@ -659,6 +662,7 @@ cdfs() {
 	new_workspace var
 	rm -f `find run log mail spool lock backups tmp crash lib/ubiquity -type f`
 	rm -f `find lib/apt/lists | grep -v ".gpg"` 2>$NULL
+	# Switch to $WORKDIR/dummysys/var/log
 	new_workspace log
 	touch dpkg.log lastlog mail.log syslog auth.log daemon.log
 	touch faillog lpr.log mail.warn user.log boot debug mail.err messages wtmp
