@@ -378,7 +378,7 @@ lastitem()
 pop()
 {
 	l_=`len $@`
-	l=$(($l-1))
+	l=$(($l_-1))
 	if [ $l -lt 1 ]
 	then
 		echo ""
