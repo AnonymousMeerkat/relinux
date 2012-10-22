@@ -1,0 +1,142 @@
+How to install
+==============
+
+Here is the tree of files included in this archive:
+
+.
+├── etc
+│   └── relinux
+│       ├── relinux
+│       │   ├── customisolinux
+│       │   ├── isolinux
+│       │   │   └── isolinux.cfg.vesamenu
+│       │   ├── preseed
+│       │   │   └── custom.seed
+│       │   ├── splash
+│       │   │   ├── 050817-N-3488C-028.png
+│       │   │   ├── 2006-02-15_Piping.png
+│       │   │   ├── Aesculus_hippocastanum_fruit.png
+│       │   │   ├── Apollo_17_The_Last_Moon_Shot_Edit1.png
+│       │   │   ├── B-1B_over_the_pacific_ocean.png
+│       │   │   ├── BonsaiTridentMaple.png
+│       │   │   ├── Flower_jtca001.png
+│       │   │   ├── Fly-Angel.png
+│       │   │   ├── Glasses_800_edit.png
+│       │   │   ├── Hortensia-1.png
+│       │   │   ├── Lake_mapourika_NZ.png
+│       │   │   ├── Moraine_Lake_17092005.png
+│       │   │   ├── Plasma-lamp.png
+│       │   │   ├── Sparkler.png
+│       │   │   ├── splash.png
+│       │   │   ├── TulipStair_QueensHouse_Greenwich.png
+│       │   │   └── Windbuchencom.png
+│       │   ├── version
+│       │   └── wubi
+│       │       └── wubi.exe
+│       └── relinux.conf
+├── INSTALL
+├── relinux_0.2.1b1.tar.gz
+├── tarit.sh
+├── usr
+│   ├── bin
+│   │   ├── relinux
+│   │   ├── relinux~
+│   │   └── remastersys
+│   └── share
+│       ├── doc
+│       │   └── relinux
+│       │       ├── changelog.Debian.gz
+│       │       ├── copyright
+│       │       └── README
+│       └── man
+│           └── man1
+│               └── relinux.1.gz
+├── WEBSITE
+│   ├── index.html
+│   └── index.html~
+└── wubick
+    ├── etc
+    │   └── relinux
+    │       ├── wubick
+    │       │   ├── images
+    │       │   │   ├── Custom-header.bmp
+    │       │   │   ├── Custom.ico
+    │       │   │   ├── Custom-vertical.bmp
+    │       │   │   └── Wubi.ico
+    │       │   └── settings
+    │       │       └── isolist.ini
+    │       └── wubick.conf
+    └── usr
+        └── bin
+            └── wubick
+
+24 directories, 41 files
+
+To install, simply type this into a Terminal window:
+
+  sudo cp -R usr etc wubick/etc wubick/usr /
+
+After you have installed it, look at /usr/share/doc/relinux/README
+It contains important information on how to customize the build.
+
+This is the tree once it is installed:
+
+.
+├── etc
+│   └── relinux
+│       ├── relinux
+│       │   ├── customisolinux
+│       │   ├── isolinux
+│       │   │   └── isolinux.cfg.vesamenu
+│       │   ├── preseed
+│       │   │   └── custom.seed
+│       │   ├── splash
+│       │   │   ├── 050817-N-3488C-028.png
+│       │   │   ├── 2006-02-15_Piping.png
+│       │   │   ├── Aesculus_hippocastanum_fruit.png
+│       │   │   ├── Apollo_17_The_Last_Moon_Shot_Edit1.png
+│       │   │   ├── B-1B_over_the_pacific_ocean.png
+│       │   │   ├── BonsaiTridentMaple.png
+│       │   │   ├── Flower_jtca001.png
+│       │   │   ├── Fly-Angel.png
+│       │   │   ├── Glasses_800_edit.png
+│       │   │   ├── Hortensia-1.png
+│       │   │   ├── Lake_mapourika_NZ.png
+│       │   │   ├── Moraine_Lake_17092005.png
+│       │   │   ├── Plasma-lamp.png
+│       │   │   ├── Sparkler.png
+│       │   │   ├── splash.png
+│       │   │   ├── TulipStair_QueensHouse_Greenwich.png
+│       │   │   └── Windbuchencom.png
+│       │   ├── version
+│       │   └── wubi
+│       │       └── wubi.exe
+│       ├── relinux.conf
+│       ├── wubick
+│       │   ├── images
+│       │   │   ├── Custom-header.bmp
+│       │   │   ├── Custom.ico
+│       │   │   ├── Custom-vertical.bmp
+│       │   │   └── Wubi.ico
+│       │   └── settings
+│       │       └── isolist.ini
+│       └── wubick.conf
+└── usr
+    ├── bin
+    │   ├── relinux
+    │   ├── relinux~
+    │   ├── remastersys
+    │   └── wubick
+    └── share
+        ├── doc
+        │   └── relinux
+        │       ├── changelog.Debian.gz
+        │       ├── copyright
+        │       └── README
+        └── man
+            └── man1
+                └── relinux.1.gz
+
+18 directories, 36 files
+
+- Joel Leclerc (lkjoel)
