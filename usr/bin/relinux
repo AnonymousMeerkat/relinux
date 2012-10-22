@@ -396,12 +396,25 @@ emptydir()
 # Checks if a variable is a number or not
 isnumber()
 {
-	return echr [ $1 -eq $1 ]
+	[ $1 -eq $1 ] &>$NULL
+	if [ $? -eq 0 ]
+	then
+		return $TRUE
+	else
+		return $FALSE
+	fi
+	return $WUT
 }
 # Simple uppercase conversion
 toupper()
 {
 	echo "$*" | tr '[:lower:]' '[:upper:]'
+	return $TRUE
+}
+# Simple lowercase conversion
+tolower()
+{
+	echo "$*" | tr '[:upper:]' '[:lower:]'
 	return $TRUE
 }
 # Returns the first character of a string
@@ -499,6 +512,27 @@ fi
 . $CONFIGFILE
 # Load the user configuration file
 . $USERCONFIGFILE
+# SquashFS checks
+do_squashfs_checks()
+{
+	# Make sure that the SquashFS file exists
+	if [ ! -f "$WORKDIR/ISOTMP/casper/filesystem.squashfs" ]; then
+		echo "The CD filesystem is missing.  Either there was a problem "\
+		"creating the compressed filesystem or you are trying to run "\
+		"sudo relinux onlyiso before sudo relinux squashfs"
+		return $FALSE
+	fi
+	# Make sure that the SquashFS file is under the iso9660 specification
+	SQUASHFSSIZE=`wc -c $WORKDIR/ISOTMP/casper/filesystem.squashfs | \
+	awk -F " " '{print $1}'`
+	if [ $SQUASHFSSIZE -ge $((4*(1024**3))) ]; then
+		echo " The compressed filesystem is larger than the iso9660 "\
+		"specification allows for a single file. You must try to reduce the "\
+		"amount of data you are making and try again."
+		return $FALSE
+	fi
+	return $TRUE
+}
 # Generate the SquashFS file
 cdfs() {
 	############
@@ -528,7 +562,7 @@ cdfs() {
 	# Create CD tree in $WORKDIR
 	box 'STEP 2 of SquashFS'
 	echo 'Creating CD tree in '"$WORKDIR"''
-	if [ -d "$WORKDIR" ]
+	if [ -d $WORKDIR ]
 	then
 		rm -rf $WORKDIR/ISOTMP/grub  # TODO: Is this actually needed?
 		emptydir $WORKDIR/ISOTMP/isolinux
@@ -773,12 +807,9 @@ EOF
 	# Switch to /usr/lib/ubiquity/user-setup
 	new_workspace /usr/lib/ubiquity/user-setup
 	# Make sure user-setup-apply is present
-	if [ -f user-setup-apply.orig ]
+	if [ -f user-setup-apply.orig -a ! -f user-setup-apply ]
 	then
-		if [ ! -f user-setup-apply ]
-		then
-			cp user-setup-apply.orig user-setup-apply
-		fi
+		cp user-setup-apply.orig user-setup-apply
 	fi
 	# Switch back to the directory relinux was run in
 	prev_workspace
@@ -811,10 +842,12 @@ EOF
 	# Switch to $WORKDIR/ISOTMP/casper
 	new_workspace $WORKDIR/ISOTMP/casper
 	echo "Copying your kernel and initrd to the livecd"
+	# Set the kernel version to the current kernel
+	KERNVERSION=`uname -r`
 	# Make a new initial ramdisk
-	mkinitramfs -o initrd.gz `uname -r`
-	# Copy kernel to casper
-	cp /boot/vmlinuz-`uname -r` vmlinuz
+	mkinitramfs -o initrd.gz $KERNVERSION
+	# Copy linux kernel to casper
+	cp /boot/vmlinuz-$KERNVERSION vmlinuz
 	# Remove the old filesystem.squashfs (if it exists)
 	rm -f filesystem.squashfs
 	############
@@ -837,41 +870,38 @@ EOF
 	then
 		EXHOME="home"
 	fi
+	# Append / to the SquashFS file
 	mksquashfs / filesystem.squashfs $SQUASHFSOPTSHIGH \
 	-e .thumbnails .cache .bash_history Cache boot/grub dev etc media mnt proc \
 	sys var $EXHOME $WORKDIR $EXCLUDES
-	# Make sure that the SquashFS file is under the iso9660 specification
-	SQUASHFSSIZE=`wc -c $WORKDIR/ISOTMP/casper/filesystem.squashfs | \
-	awk -F " " '{print $1}'`
-	if [ $SQUASHFSSIZE -ge 4294967296 ]
-	then
-		echo " The compressed filesystem is larger than the iso9660 "\
-		"specification allows for a single file. You must try to reduce the "\
-		"amount of data you are making and try again."
-		exit 1
-	fi
-	# Add filesystem size
-	echo "Calculating the installed filesystem size for the installer"
-	unsquashfs -lls filesystem.squashfs | \
-	grep -v " inodes " | grep -v "unsquashfs:" | \
-	awk '{print $3}' | grep -v "," > /tmp/size.tmp
-	for i in `cat /tmp/size.tmp`
-	do
-		if isnumber $i
-		then
-			a=$(($a+$i))
-		fi
-	done
-	echo $a > filesystem.size
-	rm -f /tmp/size.tmp
-	echo "Done"
-	echo "Creating MD5 sum"
-	md5sum filesystem.squashfs > $WORKDIR/.filesystem.squashfs.md5
-	echo "Done"
-	echo "Finished generating SquashFS file."
-	echo "Reverting filesystem changes"
 	# Switch back to the directory relinux was run in
 	prev_workspace
+	# Just in case something goes wrong
+	EXITCMD=""
+	# Make sure that the SquashFS file is OK
+	do_squashfs_checks
+	if rete $?
+	then
+		# Add filesystem size
+		echo "Calculating the installed filesystem size for the installer"
+		unsquashfs -lls filesystem.squashfs | \
+		grep -v " inodes " | grep -v "unsquashfs:" | \
+		awk '{print $3}' | grep -v "," > /tmp/size.tmp
+		for i in `cat /tmp/size.tmp`
+		do
+			if isnumber $i
+			then
+				a=$(($a+$i))
+			fi
+		done
+		echo $a > filesystem.size
+		rm -f /tmp/size.tmp
+		echo "Done"
+		echo "Finished generating SquashFS file."
+	else
+		EXITCMD="exit 1"
+	fi
+	echo "Reverting filesystem changes"
 	if [ -f "/usr/share/ubiquity/apt-setup.saved" ]
 	then
 		mv /usr/share/ubiquity/apt-setup.saved /usr/share/ubiquity/apt-setup
@@ -881,6 +911,7 @@ EOF
 		mv /usr/lib/ubiquity/40cdrom.saved /usr/lib/ubiquity/apt-setup/generators/40cdrom
 	fi
 	echo "Done"
+	$EXITCMD
 }
 # Generate the ISO file from the function above
 iso()
@@ -904,36 +935,10 @@ iso()
 	# Verify the SquashFS file
 	box 'STEP 2 of ISO Generation'
 	echo "Verifying your SquashFS file"
-	# check to see if the cd filesystem exists
-	if [ ! -f "$WORKDIR/ISOTMP/casper/filesystem.squashfs" ]; then
-		echo "The CD filesystem is missing.  Either there was a problem "\
-		"creating the compressed filesystem or you are trying to run "\
-		"sudo relinux only before sudo relinux squashfs"
-		exit 1
-	fi
-	if [ ! -f "$WORKDIR/.filesystem.squashfs.md5" ]
+	# Make sure the SquashFS file is ok
+	do_squashfs_checks
+	if not rete $?
 	then
-		echo "No MD5 Sums are present. Run 'sudo relinux squashfs "\
-		"[configfile]' (without quotes, and replace configfile with your "\
-		"configuration file) to fix this problem."
-		exit 1
-	else
-		md5sum -c $WORKDIR/.filesystem.squashfs.md5 &>$NULL
-		if [ $? -ne 0 ]
-		then
-			echo "SquashFS file does not match MD5 sum. Run 'sudo relinux "\
-			"squashfs [configfile]' (without quotes, and replace configfile with "\
-			"your configuration file) to fix this problem."
-			exit 1
-		fi
-	fi
-	# Make sure that the SquashFS file is under the iso9660 specification
-	SQUASHFSSIZE=`wc -c $WORKDIR/ISOTMP/casper/filesystem.squashfs | \
-	awk -F " " '{print $1}'`
-	if [ "$SQUASHFSSIZE" -ge "4294967296" ]; then
-		echo " The compressed filesystem is larger than the iso9660 "\
-		"specification allows for a single file. You must try to reduce the "\
-		"amount of data you are making and try again."
 		exit 1
 	fi
 	echo "Done. No errors."
