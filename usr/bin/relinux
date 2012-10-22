@@ -454,9 +454,9 @@ parseboolean()
 # Switches to a new "workspace" (i.e. new directory)
 new_workspace() {
 	PREVWORKSPACE="$PREVWORKSPACE `pwd`"
+	cd $1
 	echo -n "NW"
 	pwd
-	cd $1
 	return $TRUE
 }
 # Switches back to the old "workspace"
@@ -466,6 +466,7 @@ prev_workspace() {
 	pwd
 	PREVWORKSPACE_="`pop $PREVWORKSPACE`"
 	PREVWORKSPACE="$PREVWORKSPACE_"
+	echo $PREVWORKSPACE
 	return $TRUE
 }
 # Give an error message that should never be shown
