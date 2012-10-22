@@ -631,7 +631,7 @@ cdfs() {
 	rsync --exclude-from=$excludefrom -a /var/. $WORKDIR/dummysys/var/.
 	rsync --exclude-from=$excludefrom -a /etc/. $WORKDIR/dummysys/etc/.
 	rm -f $excludefrom
-	echo "Done. Removing unneeded files, and editing others"
+	echo "Done. Removing unneeded files and editing others"
 	# Switch to $WORKDIR/dummysys
 	new_workspace $WORKDIR/dummysys
 	# Switch to $WORKDIR/dummysys/etc
@@ -704,7 +704,7 @@ cdfs() {
 	echo "Setting up ISOLINUX"
 	# Switch to $WORKDIR/ISOTMP
 	new_workspace $WORKDIR/ISOTMP
-	# Make sure that adduser and autologin have the correct permissions
+	# Make sure that all casper scripts have exec permissions
 	chmod 755 /usr/share/initramfs-tools/scripts/casper-bottom/*
 	# Copy the Preseed files
 	cp $PRESEED preseed/
@@ -713,7 +713,7 @@ cdfs() {
 	# Check for some files that can come in handy
 	if [ ! -f $DIR/customisolinux/isolinux.cfg ]
 	then
-		# Copy isolinux (booloader) and vesamenu (graphical menu plugin)
+		# Copy isolinux (bootloader) and vesamenu (graphical menu plugin)
 		cp /usr/lib/syslinux/isolinux.bin isolinux/
 		cp /usr/lib/syslinux/vesamenu.c32 isolinux/
 		ISOLINCFGPATH=isolinux/isolinux.cfg
@@ -744,7 +744,7 @@ cdfs() {
 #define TOTALNUM0  1
 EOF
 	cp README.diskdefines casper/README.diskdefines
-	# Make filesystem.manifest (package list)
+	# Generate filesystem.manifest (package list)
 	echo "Creating filesystem.manifest and filesystem.manifest-desktop"
 	dpkg-query -W --showformat='${Package} ${Version}\n' \
 	> casper/filesystem.manifest
@@ -756,6 +756,7 @@ EOF
 		sed -i 's#'"$i"'##g' casper/filesystem.manifest-desktop
 		echo "$i" >> casper/filesystem.manifest-remove
 	done
+	echo "Done"
 	# Switch back to the directory relinux was run in
 	prev_workspace
 	# Switch to $WORKDIR/dummysys/etc
@@ -838,6 +839,7 @@ EOF
 	fi
 	# Switch back to the directory relinux was run in
 	prev_workspace
+	echo "Done"
 	# Switch to $WORKDIR/ISOTMP/casper
 	new_workspace $WORKDIR/ISOTMP/casper
 	echo "Copying your kernel and initrd to the livecd"
@@ -847,8 +849,7 @@ EOF
 	mkinitramfs -o initrd.gz $KERNVERSION
 	# Copy linux kernel to casper
 	cp /boot/vmlinuz-$KERNVERSION vmlinuz
-	# Remove the old filesystem.squashfs (if it exists)
-	rm -f filesystem.squashfs
+	echo "Done"
 	############
 	## STEP 5 ##
 	############
@@ -857,9 +858,12 @@ EOF
 	box 'STEP 5 of SquashFS'
 	echo "Creating filesystem.squashfs"
 	echo "This will take a while so be patient"
+	# Remove the old filesystem.squashfs (if it exists)
+	rm -f filesystem.squashfs
+	# Set general options for SquashFS
 	SQUASHFSOPTSHIGH="-no-recovery -always-use-fragments -b 1M -no-duplicates"
 	echo "Adding stage 1 files/folders that the livecd requires."
-	# Add the blank folders and trimmed down /var to the cd filesystem
+	# Add the blank folders and the edited /var and /etc to the SquashFS file
 	mksquashfs $WORKDIR/dummysys/ filesystem.squashfs $SQUASHFSOPTSHIGH
 	echo "Adding stage 2 files/folders that the livecd requires."
 	echo "This will probably take longer than the first stage."
@@ -883,10 +887,11 @@ EOF
 	then
 		# Add filesystem size
 		echo "Calculating the installed filesystem size for the installer"
+		SIZEFILE=`tempfile`
 		unsquashfs -lls filesystem.squashfs | \
 		grep -v " inodes " | grep -v "unsquashfs:" | \
-		awk '{print $3}' | grep -v "," > /tmp/size.tmp
-		for i in `cat /tmp/size.tmp`
+		awk '{print $3}' | grep -v "," > $SIZEFILE
+		for i in `cat $SIZEFILE`
 		do
 			if isnumber $i
 			then
@@ -894,7 +899,7 @@ EOF
 			fi
 		done
 		echo $a > filesystem.size
-		rm -f /tmp/size.tmp
+		rm -f $SIZEFILE
 		echo "Done"
 		echo "Finished generating SquashFS file."
 	else
