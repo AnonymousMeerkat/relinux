@@ -426,12 +426,12 @@ firstchar()
 # Parses Yes/No answers in relinux.conf
 parseboolean()
 {
-	OPT_="`toupper $1`"
+	OPT_="`tolower $1`"
 	OPT="`firstchar $OPT_`"
-	YES="Y"
-	NO="N"
-	OPTTRUE="T"
-	OPTFALSE="F"
+	YES="y"
+	NO="n"
+	OPTTRUE="t"
+	OPTFALSE="f"
 	if [[ $OPT == $YES || $OPT == $OPTTRUE ]]
 	then
 		return $TRUE
