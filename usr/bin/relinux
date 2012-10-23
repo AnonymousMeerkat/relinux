@@ -9,7 +9,10 @@
 # Joel Leclerc (lkjoel)
 #
 # Original Script (remastersys) Copyright 2007-2011 Tony "Fragadelic" Brijeski <tb6517@yahoo.com>
-# Some parts were copied from the original script
+# Some parts were copied and/or modified from the original script. The original script was under
+# the GNU GPLv2 license, so this makes this script completely legal. Even though this script
+# is based on remastersys, they are different, so bugs affecting remastersys will not
+# neccessarily affect relinux, and vice-versa.
 #
 # A few useful variables
 export DIR=/etc/relinux/
