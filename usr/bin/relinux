@@ -891,8 +891,6 @@ EOF
 	mksquashfs / filesystem.squashfs $SQUASHFSOPTSHIGH \
 	-e .thumbnails .cache .bash_history Cache boot/grub dev etc media mnt proc \
 	sys var $EXHOME $WORKDIR $EXCLUDES
-	# Switch back to the directory relinux was run in
-	prev_workspace
 	# Just in case something goes wrong
 	EXITCMD=""
 	# Make sure that the SquashFS file is OK
@@ -919,6 +917,8 @@ EOF
 	else
 		EXITCMD="exit 1"
 	fi
+	# Switch back to the directory relinux was run in
+	prev_workspace
 	echo "Reverting filesystem changes"
 	if [ -f "/usr/share/ubiquity/apt-setup.saved" ]
 	then
