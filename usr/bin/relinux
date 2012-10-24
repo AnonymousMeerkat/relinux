@@ -378,15 +378,13 @@ poplast()
 # Empty a file
 emptyfile()
 {
-	rm -f $@
-	touch $@
+	cat $NULL > $1
 	return $?
 }
 # Empty a directory
 emptydir()
 {
-	rm -rf $@
-	makedir $@
+	rm -rf `pop "\`find $1\`" 0`
 	return $?
 }
 # Checks if a variable is a number or not
