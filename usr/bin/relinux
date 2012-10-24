@@ -344,18 +344,13 @@ fixarray()
 # Returns the length of an array
 len()
 {
-	c=0
-	for i in $@
-	do
-		c=$(($c+1))
-	done
-	echo $c
+	fixarray $1 | tr ' ' '\n' | sed ':^ *$:d' | wc -l
 	return $TRUE
 }
-# Returns a certain item from an index in an array
+# Returns a certain item in an array
 getitem()
 {
-	arr1=`echo "\`fixarray $1\`" | tr ' ' '\n'`
+	arr1=`fixarray $1 | tr ' ' '\n'`
 	a=`echo "$arr1" | awk "BEGIN{i=0}{if(i==$2){print}i++}"`
 	echo $a
 	return $TRUE
@@ -366,17 +361,18 @@ lastitem()
 	echo "`fixarray $*`" | tr ' ' '\n' | tail -1
 	return $TRUE
 }
-# Pops the last item of an array
+# Removes a certain item of an array
 pop()
 {
-	l_=`len $@`
-	l=$(($l_-1))
-	if [ $l -lt 1 ]
-	then
-		echo ""
-		return $TRUE
-	fi
-	echo `fixarray $@` | cut -d" " -f-$l
+	arr1=`fixarray $1 | tr ' ' '\n'`
+	a=`echo "$arr1" | awk "BEGIN{i=0}{if(i!=$2){print}i++}"`
+	fixarray `echo $a | tr '\n' ' '`
+	return $TRUE
+}
+# Removes the last item of an array
+poplast()
+{
+	pop "$*" `len "$*"`
 	return $TRUE
 }
 # Empty a file
@@ -456,7 +452,7 @@ prev_workspace() {
 	cd `lastitem $PREVWORKSPACE`
 	echo -n "PW"
 	pwd
-	PREVWORKSPACE_="`pop $PREVWORKSPACE`"
+	PREVWORKSPACE_="`poplast $PREVWORKSPACE`"
 	PREVWORKSPACE="$PREVWORKSPACE_"
 	echo $PREVWORKSPACE
 	return $TRUE
