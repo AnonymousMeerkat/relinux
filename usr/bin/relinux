@@ -970,8 +970,8 @@ iso()
 	new_workspace $WORKDIR/ISOTMP
 	md5sum `find . -type f` > md5sum.txt
 	# Remove files that change and cause problems with checking the disk
-	sed -i 's/.*isolinux.*//g' md5sum.txt
-	sed -i 's/.*md5sum.*//g' md5sum.txt
+	sed -i '/.*isolinux.*/d' md5sum.txt
+	sed -i '/.*md5sum.*/d' md5sum.txt
 	# Switch back to the directory relinux was run in
 	prev_workspace
 	############
