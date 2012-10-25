@@ -324,9 +324,19 @@ def run(adict):
             tn = threadmanager.getThread(threadid, threads)["tn"]
             setProgress(tn, 100)
             onThreadAdded(threadid, threadsrunning, threads)
+        def onThreadsEnd(threadids, threadsdone, threads):
+            if len(threadsdone) >= numthreads:
+                msg = QtGui.QMessageBox()
+                msg.setText("Relinux generated the ISO at " +
+                            configutils.getValue(
+                                    config.Configuration["OSWeaver"][configutils.isolocation]) +
+                            ".")
+                msg.exec_()
         for i in page["progress"]:
             page["progress"][i] = 0
-        runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress})
+        runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress},
+                   threadsend = onThreadsEnd)
+
     def onWrite(msg):
         logger.logVV(tn, logger.D, "Updating terminal (from thread " + threading.current_thread().name + ")")
         #return

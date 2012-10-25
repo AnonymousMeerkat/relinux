@@ -9,6 +9,7 @@ from PyQt4 import QtCore
 import time
 import threading
 import copy
+import collections
 
 
 tn = logger.genTN("TheadManager")
@@ -175,6 +176,8 @@ def threadLoop(threads1_, **options):
             for x in findRunnableThreads(threadids, threadsdone, threadsrunning, threads, **options):
                 runThread(x, threadsdone, threadsrunning, threads, pslock, **options)
             time.sleep(float(1.0 / config.ThreadRPS))
+        if ("threadsend" in options and isinstance(options["threadsend"], collections.Callable)):
+            options["threadsend"](threadids, threadsdone, threads)
     # Make a new thread (so that the user can continue on using relinux)
     t = threading.Thread(target = _ActualLoop, args = (threads, threadsdone, threadsrunning, threadids))
     t.start()
