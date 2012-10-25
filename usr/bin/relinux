@@ -344,7 +344,7 @@ fixarray()
 # Returns the length of an array
 len()
 {
-	fixarray $1 | tr ' ' '\n' | sed ':^ *$:d' | wc -l
+	fixarray $1 | tr ' ' '\n' | sed '/^$/d' | wc -l
 	return $TRUE
 }
 # Returns a certain item in an array
