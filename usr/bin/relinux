@@ -372,8 +372,7 @@ pop()
 # Removes the last item of an array
 poplast()
 {
-	l=`len "$*"`
-	pop "$*" $(($l-1))
+	pop "$*" $((`len "$*"`-1))
 	return $TRUE
 }
 # Empty a file
@@ -869,15 +868,10 @@ EOF
 	echo "Adding stage 2 files/folders that the livecd requires."
 	echo "This will probably take longer than the first stage."
 	# Add the rest of the system
-	EXHOME=""
-	if not parseboolean $BACKUPMODE
-	then
-		EXHOME="home"
-	fi
 	# Append / to the SquashFS file
 	mksquashfs / filesystem.squashfs $SQUASHFSOPTSHIGH \
 	-e .thumbnails .cache .bash_history Cache boot/grub dev etc media mnt proc \
-	sys var $EXHOME $WORKDIR $EXCLUDES
+	sys var home $WORKDIR $EXCLUDES
 	# Just in case something goes wrong
 	EXITCMD=""
 	# Make sure that the SquashFS file is OK
