@@ -279,6 +279,11 @@ def parseCompressedBuffer(buffers, filename_):
             if returnme[i][x][types] == filename:
                 if not os.path.isabs(returnme[i][x][value]):
                     print("ORIGINALVALUE" + returnme[i][x][value])
+                    print("FILENAME" + os.path.dirname(os.path.abspath(filename_)))
+                    print("RELPATH1" + os.path.relpath(returnme[i][x][value]))
+                    print("RELPATH2" + os.path.join(
+                                                    os.path.dirname(os.path.abspath(filename_)),
+                                                        os.path.relpath(returnme[i][x][value])))
                     returnme[i][x][value] = os.path.abspath(
                                                 os.path.join(
                                                     os.path.dirname(os.path.abspath(filename_)),
