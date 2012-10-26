@@ -326,6 +326,8 @@ def run(adict):
             setProgress(tn, 100)
             onThreadAdded(threadid, threadsrunning, threads)
         def onThreadsEnd(threadids, threadsdone, threads):
+            print(numthreads)
+            print(threadsdone)
             if len(threadsdone) >= numthreads:
                 QtCore.QMetaObject.invokeMethod(ui.msg, "setText", QtCore.Qt.QueuedConnection,
                                                 QtCore.Q_ARG("QString",
