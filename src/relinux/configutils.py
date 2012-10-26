@@ -278,17 +278,10 @@ def parseCompressedBuffer(buffers, filename_):
             returnme[i][x] = getProperties(getLinesWithinOption(liness, x))
             if returnme[i][x][types] == filename:
                 if not os.path.isabs(returnme[i][x][value]):
-                    print("ORIGINALVALUE" + returnme[i][x][value])
-                    print("FILENAME" + os.path.dirname(os.path.abspath(filename_)))
-                    print("RELPATH1" + os.path.relpath(returnme[i][x][value]))
-                    print("RELPATH2" + os.path.join(
-                                                    os.path.dirname(os.path.abspath(filename_)),
-                                                        returnme[i][x][value]))
                     returnme[i][x][value] = os.path.abspath(
                                                 os.path.join(
                                                     os.path.dirname(os.path.abspath(filename_)),
                                                         returnme[i][x][value]))
-                    print("NEWVALUE" + returnme[i][x][value])
     return returnme
 
 
@@ -350,11 +343,8 @@ def saveBuffer(buffers_):
                 if not x in files_[f][i]:
                     files_[f][i][x] = {}
             lastfile = os.path.dirname(os.path.abspath(buffers[i][x][files][len(buffers[i][x][files]) - 1]))
-            #print("LASTFILE" + lastfile)
             if buffers[i][x][types] == filename:
-                #print("ORIGINALVALUE" + buffers[i][x][value])
                 buffers[i][x][value] = os.path.relpath(buffers[i][x][value], lastfile)
-                #print("NEWVALUE" + buffers[i][x][value])
             '''if buffers[i][x][types] == filename and os.path.dirname(buffers[i][x][value]) == lastfile:
                 temp = fsutil.beautifypath(os.curdir + "/" + buffers[i][x][value][len(lastfile):])
                 buffers[i][x][value] = temp'''
