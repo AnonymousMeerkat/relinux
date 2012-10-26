@@ -131,9 +131,9 @@ def threadLoop(threads1_, **options):
     if "postend" in options and pelock == None:
         pelock = threading.RLock()
     logger.logVV(tn, logger.D, "Check postend")
-    # Remove duplicates
+    # Remove duplicates and remove disabled threads
     for i in threads1:
-        if not i in threads:
+        if not i in threads and i["enabled"]:
             threads.append(i)
     logger.logVV(tn, logger.D, "Check remduplicates")
     addOptional(threads)
