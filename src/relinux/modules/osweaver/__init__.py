@@ -305,6 +305,7 @@ def run(adict):
                 else:
                     numthreads2 += threads[i]["threadspan"]
                     threadspans[tn] = threads[i]["threadspan"]
+        print(threadspans)
         tfdeps = False
         if ui.nodepends.isChecked():
             tfdeps = True
