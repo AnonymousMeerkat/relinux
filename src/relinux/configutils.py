@@ -343,8 +343,10 @@ def saveBuffer(buffers_):
                 if not x in files_[f][i]:
                     files_[f][i][x] = {}
             lastfile = os.path.dirname(os.path.abspath(buffers[i][x][files][len(buffers[i][x][files]) - 1]))
+            print("LASTFILE" + lastfile)
             if buffers[i][x][types] == filename:
                 buffers[i][x][value] = os.path.relpath(buffers[i][x][value], lastfile)
+                print("VALUE" + buffers[i][x][value])
             '''if buffers[i][x][types] == filename and os.path.dirname(buffers[i][x][value]) == lastfile:
                 temp = fsutil.beautifypath(os.curdir + "/" + buffers[i][x][value][len(lastfile):])
                 buffers[i][x][value] = temp'''
