@@ -329,20 +329,17 @@ def run(adict):
             tn = threadmanager.getThread(threadid, threads)["tn"]
             setProgress(tn, 100)
             onThreadAdded(threadid, threadsrunning, threads)
-        def showSuccessMessage(tn):
-            msg = "Relinux generated the ISO at " + configutils.getValue(
-                                config.Configuration["OSWeaver"][configutils.isolocation])
-            msg += "."
+        def showMessage(tn, msg):
             logger.logI(tn, logger.I, msg)
             QtCore.QMetaObject.invokeMethod(ui.msgbox, "realSetText", QtCore.Qt.QueuedConnection,
                                             QtCore.Q_ARG("QString", msg))
             QtCore.QMetaObject.invokeMethod(ui.msgbox, "exec", QtCore.Qt.QueuedConnection)
         def onThreadsEnd(threadids, threadsdone, threads):
             if len(threadsdone) >= numthreads and False:
-                showSuccessMessage(tn)
+                pass
         for i in page["progress"]:
             page["progress"][i] = 0
-        runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress, "successMessage": showSuccessMessage},
+        runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress, "showMessage": showMessage},
                    threadsend = onThreadsEnd)
 
     def onWrite(msg):

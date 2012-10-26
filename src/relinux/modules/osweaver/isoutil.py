@@ -311,7 +311,10 @@ class genISO(threadmanager.Thread):
                                        location))
         files.close()
         self.setProgress(self.tn, 100)
-        self.successMessage(self.tn)
+        msg = "Relinux generated the ISO at " + configutils.getValue(
+                            config.Configuration["OSWeaver"][configutils.isolocation])
+        msg += "."
+        self.showMessage(self.tn, msg)
 geniso["thread"] = genISO
 
 threads = threads1
