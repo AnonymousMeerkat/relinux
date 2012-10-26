@@ -74,7 +74,7 @@ D = "D"
 def writeAll(status, lists, tn, importance, text, **options):
     if tn == "" or tn == None or not status:
         return
-    text_ = tn
+    text_ = "[" + tn + "] "
     if importance == E:
         text_ += MError
     elif importance == W:
@@ -110,7 +110,7 @@ def writeAll(status, lists, tn, importance, text, **options):
 
 # Generates a thread name string
 def genTN(tn):
-    return "[" + tn + "] "
+    return tn
 
 
 # Log to essential stream
