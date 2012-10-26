@@ -296,14 +296,15 @@ def run(adict):
         threadspans = {}
         for i in range(len(page["boxes"])):
             threads[i]["enabled"] = page["boxes"][i].get()
+            tn = threads[i]["tn"]
             if threads[i]["enabled"]:
                 numthreads += 1
                 if threads[i]["threadspan"] < 0:
                     numthreads2 += threadmanager.cpumax
-                    threadspans[i] = threadmanager.cpumax
+                    threadspans[tn] = threadmanager.cpumax
                 else:
                     numthreads2 += threads[i]["threadspan"]
-                    threadspans[i] = threads[i]["threadspan"]
+                    threadspans[tn] = threads[i]["threadspan"]
         tfdeps = False
         if ui.nodepends.isChecked():
             tfdeps = True
