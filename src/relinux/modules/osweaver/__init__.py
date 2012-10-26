@@ -206,7 +206,7 @@ def run(adict):
         @QtCore.pyqtSlot(QtCore.QString)
         def realSetText(self, text):
             self.setText(text)
-        @QtCore.pyqtSlot(QtCore.QIcon)
+        @QtCore.pyqtSlot(QtGui.QIcon)
         def realSetIcon(self, icon):
             self.setIcon(icon)
     ui.msgbox = customMsgBox()
