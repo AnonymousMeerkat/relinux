@@ -329,13 +329,13 @@ def run(adict):
             print(numthreads)
             print(threadsdone)
             if len(threadsdone) >= numthreads:
-                QtCore.QMetaObject.invokeMethod(ui.msg, "setText", QtCore.Qt.QueuedConnection,
+                QtCore.QMetaObject.invokeMethod(ui.msgbox, "setText", QtCore.Qt.QueuedConnection,
                                                 QtCore.Q_ARG("QString",
                                                 "Relinux generated the ISO at " +
                             configutils.getValue(
                                     config.Configuration["OSWeaver"][configutils.isolocation]) +
                             "."))
-                QtCore.QMetaObject.invokeMethod(ui.msg, "exec", QtCore.Qt.QueuedConnection)
+                QtCore.QMetaObject.invokeMethod(ui.msgbox, "exec", QtCore.Qt.QueuedConnection)
         for i in page["progress"]:
             page["progress"][i] = 0
         runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress},
