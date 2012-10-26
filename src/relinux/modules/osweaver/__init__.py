@@ -202,6 +202,7 @@ def run(adict):
     ui = ui_osweaver.Ui_OSWeaver()
     ui.setupUi(page_container)
     ui.notroot.hide()
+    ui.msgbox = QtGui.QMessageBox()
     #ui.terminal.hide()
     class customCheck(QtGui.QCheckBox):
         def __init__(self, *args):
@@ -326,12 +327,13 @@ def run(adict):
             onThreadAdded(threadid, threadsrunning, threads)
         def onThreadsEnd(threadids, threadsdone, threads):
             if len(threadsdone) >= numthreads:
-                msg = QtGui.QMessageBox()
-                msg.setText("Relinux generated the ISO at " +
+                QtCore.QMetaObject.invokeMethod(ui.msg, "setText", QtCore.Qt.QueuedConnection,
+                                                QtCore.Q_ARG("QString",
+                                                "Relinux generated the ISO at " +
                             configutils.getValue(
                                     config.Configuration["OSWeaver"][configutils.isolocation]) +
-                            ".")
-                msg.exec_()
+                            "."))
+                QtCore.QMetaObject.invokeMethod(ui.msg, "exec", QtCore.Qt.QueuedConnection)
         for i in page["progress"]:
             page["progress"][i] = 0
         runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress},
