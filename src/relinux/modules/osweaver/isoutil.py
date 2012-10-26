@@ -58,7 +58,7 @@ def showFileNotFound(files, dirs, tn):
 
 
 # Copy a file
-def copyFile(src, dst, tn, critical=False):
+def copyFile(src, dst, tn, critical = False):
     if os.path.isfile(src):
         shutil.copy2(src, dst)
     elif critical is True:
@@ -289,7 +289,7 @@ class genISO(threadmanager.Thread):
         isocmd = subprocess.Popen(shlex.split(configutils.getValue(configs[configutils.isogenerator]) + " -o " +
                                               location + " " + isogenopts + " -V \"" +
                                               configutils.getValue(configs[configutils.label]) + "\" " + isotreel),
-                                  stderr=subprocess.PIPE, universal_newlines=True)
+                                  stderr = subprocess.PIPE, universal_newlines = True)
         oldprogress = 0
         while isocmd.poll() is None:
             output = isocmd.stderr.readline()
@@ -310,6 +310,8 @@ class genISO(threadmanager.Thread):
         files.write(fsutil.genFinalMD5("./" + configutils.getValue(configs[configutils.isolocation]),
                                        location))
         files.close()
+        self.setProgress(self.tn, 100)
+        self.successMessage(self.tn)
 geniso["thread"] = genISO
 
 threads = threads1
