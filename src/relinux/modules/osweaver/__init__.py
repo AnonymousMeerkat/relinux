@@ -293,14 +293,17 @@ def run(adict):
         numthreads = 0
         numthreads2 = 0
         threadmanager.addOptional(threads)
+        threadspans = {}
         for i in range(len(page["boxes"])):
             threads[i]["enabled"] = page["boxes"][i].get()
             if threads[i]["enabled"]:
                 numthreads += 1
                 if threads[i]["threadspan"] < 0:
                     numthreads2 += threadmanager.cpumax
+                    threadspans[i] = threadmanager.cpumax
                 else:
                     numthreads2 += threads[i]["threadspan"]
+                    threadspans[i] = threads[i]["threadspan"]
         tfdeps = False
         if ui.nodepends.isChecked():
             tfdeps = True
@@ -324,10 +327,10 @@ def run(adict):
                                             )
         def setProgress(tn, progress):
             logger.logVV(tn, logger.D, "Setting progress to " + str(progress) + " (from thread " + threading.current_thread().name + ")")
-            #return
-            # Do something here
-            if progress > 100:
-                progress = 100
+            ts = threadspans[tn]
+            progress *= ts
+            if progress > 100 * ts:
+                progress = 100 * ts
             elif progress < 0:
                 progress = 0
             page["progress"][tn] = progress
