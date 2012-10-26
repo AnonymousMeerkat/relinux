@@ -157,12 +157,12 @@ def main():
     def showMessage(str_):
         splash.showMessage(str_ + "...", QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         App.processEvents()
-    showMessage("Loading modules")
+    showMessage(_("Loading modules"))
     modules = []
     modulemetas = modloader.getModules()
     for i in modulemetas:
         modules.append(modloader.loadModule(i))
-    showMessage("Loading configuration files")
+    showMessage(_("Loading configuration files"))
     configfiles = [config.relinuxdir + "/relinux.conf"]
     for i in range(len(modulemetas)):
         for x in modules[i].moduleconfig:
@@ -170,19 +170,19 @@ def main():
     cbuffer = configutils.parseFiles(configfiles)
     config.Configuration = cbuffer
     configutils.saveBuffer(config.Configuration)
-    showMessage("Loading APT cache 0%")
+    showMessage(_("Loading APT cache 0%"))
     def aptupdate(op, percent):
         global minis
         if percent:
             minis = percent
-        showMessage("Loading APT cache (" + op + ") " + str(minis) + "%")
+        showMessage(_("Loading APT cache") + " (" + op + ") " + str(minis) + "%")
     aptcache = aptutil.getCache(aptutil.OpProgress(aptupdate, None))
     config.AptCache = aptcache
-    showMessage("Loading stylesheet")
+    showMessage(_("Loading stylesheet"))
     App.setStyleSheet(open(mainsrcdir + "/stylesheet.css", "r").read())
-    showMessage("Loading GUI")
+    showMessage(_("Loading GUI"))
     gui_ = gui.GUI(App)
-    showMessage("Running modules")
+    showMessage(_("Running modules"))
     for i in modules:
             modloader.runModule(i, {"gui": gui_, "config": cbuffer, "aptcache": aptcache})
     gui_.show()

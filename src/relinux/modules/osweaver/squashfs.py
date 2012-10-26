@@ -73,6 +73,7 @@ class genSFS(threadmanager.Thread):
         # Hack to make sure all output is given
         os.environ["LD_PRELOAD"] = os.path.split(os.path.realpath(__file__))[0] + "/isatty" + appnd + ".so"
         logger.logI(tn, logger.I, _("Adding the edited /etc and /var to the filesystem"))
+        logger.logI(tn, logger.I, logger.MTab + _("This might take a couple of minutes"))
         sfscmd = subprocess.Popen(shlex.split("mksquashfs " + tmpsys + " " + sfspath + " " + opts),
                                    stdout = subprocess.PIPE, universal_newlines = True)
         oldprogress = 0
@@ -89,7 +90,7 @@ class genSFS(threadmanager.Thread):
             else:
                 logger.logI(tn, logger.I, output.rstrip(), noterm = True, nogui = True)
         sys.stdout.write("\n")
-        logger.logI(tn, logger.I, _("Adding the rest of the system"))
+        logger.logI(tn, logger.I, _("Adding the rest of the system (this can take a while)"))
         sfscmd = subprocess.Popen(shlex.split("mksquashfs / " + sfspath + " " + opts + " -e " + sfsex),
                                    stdout = subprocess.PIPE, universal_newlines = True)
         oldprogress = 0
