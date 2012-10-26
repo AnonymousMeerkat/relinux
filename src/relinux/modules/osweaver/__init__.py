@@ -331,7 +331,8 @@ def run(adict):
                                     config.Configuration["OSWeaver"][configutils.isolocation])
                 msg += "."
                 print(msg)
-                ui.msgbox.setText(msg)
+                QtCore.QMetaObject.invokeMethod(ui.msgbox, QtCore.SLOT("setText()"), QtCore.Qt.QueuedConnection,
+                                                QtCore.Q_ARG("QString", msg))
                 QtCore.QMetaObject.invokeMethod(ui.msgbox, "exec", QtCore.Qt.QueuedConnection)
         for i in page["progress"]:
             page["progress"][i] = 0
