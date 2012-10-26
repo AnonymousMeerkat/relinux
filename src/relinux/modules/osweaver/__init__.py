@@ -326,15 +326,13 @@ def run(adict):
             setProgress(tn, 100)
             onThreadAdded(threadid, threadsrunning, threads)
         def onThreadsEnd(threadids, threadsdone, threads):
-            print(numthreads)
-            print(threadsdone)
             if len(threadsdone) >= numthreads:
+                msg = "Relinux generated the ISO at " + configutils.getValue(
+                                    config.Configuration["OSWeaver"][configutils.isolocation])
+                msg += "."
+                print(msg)
                 QtCore.QMetaObject.invokeMethod(ui.msgbox, "setText", QtCore.Qt.QueuedConnection,
-                                                QtCore.Q_ARG("QString",
-                                                "Relinux generated the ISO at " +
-                            configutils.getValue(
-                                    config.Configuration["OSWeaver"][configutils.isolocation]) +
-                            "."))
+                                                QtCore.Q_ARG("QString", msg))
                 QtCore.QMetaObject.invokeMethod(ui.msgbox, "exec", QtCore.Qt.QueuedConnection)
         for i in page["progress"]:
             page["progress"][i] = 0
