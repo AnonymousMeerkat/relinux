@@ -27,7 +27,7 @@ def version():
 
 aptops = 4
 captop = 0
-minis = 0.0
+minis = 0
 
 def main():
     def parsePyHex(string1):
@@ -170,9 +170,17 @@ def main():
     cbuffer = configutils.parseFiles(configfiles)
     config.Configuration = cbuffer
     configutils.saveBuffer(config.Configuration)
+    showMessage("Loading APT cache 0%")
+    def aptupdate(op, percent):
+        global minis
+        if percent:
+            minis = percent
+        showMessage("Loading APT cache (" + op + ") " + str(minis) + "%")
+    aptcache = aptutil.getCache(aptutil.OpProgress(aptupdate, None))
+    config.AptCache = aptcache
     showMessage("Loading stylesheet")
     App.setStyleSheet(open(mainsrcdir + "/stylesheet.css", "r").read())
-    showMessage("Loading GUI...")
+    showMessage("Loading GUI")
     gui_ = gui.GUI(App)
     showMessage("Running modules")
     for i in modules:

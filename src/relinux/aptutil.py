@@ -23,17 +23,18 @@ class OpProgress(apt.progress.base.OpProgress):
         self.updatefunc = update
         self.finishfunc = finish
 
-    def update(self, percent=None):
+    def update(self, percent = None):
         apt.progress.base.OpProgress.update(self, percent)
         op = self.op
         if self.major_change and self.old_op:
             op = self.old_op
-        self.updatefunc(op, percent)
+        if self.updatefunc:
+            self.updatefunc(op, percent)
         self.old_op = self.op
 
     def done(self):
         apt.progress.base.OpProgress.done(self)
-        if self.old_op:
+        if self.old_op and self.finishfunc:
             self.finishfunc(self.old_op)
         self.old_op = ""
 
@@ -45,7 +46,7 @@ def initApt():
 
 # Returns an APT cache
 # Note that this can take around 2-30 seconds
-def getCache(progress=None):
+def getCache(progress = None):
     if progress:
         return apt.apt_pkg.Cache(progress)
     else:
