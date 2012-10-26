@@ -202,7 +202,11 @@ def run(adict):
     ui = ui_osweaver.Ui_OSWeaver()
     ui.setupUi(page_container)
     ui.notroot.hide()
-    ui.msgbox = QtGui.QMessageBox()
+    class customMsgBox(QtGui.QMessageBox):
+        @QtCore.pyqtSlot(QtCore.QString)
+        def realSetText(self, text):
+            self.setText(text)
+    ui.msgbox = customMsgBox()
     #ui.terminal.hide()
     class customCheck(QtGui.QCheckBox):
         def __init__(self, *args):
@@ -331,7 +335,7 @@ def run(adict):
                                     config.Configuration["OSWeaver"][configutils.isolocation])
                 msg += "."
                 print(msg)
-                QtCore.QMetaObject.invokeMethod(ui.msgbox, QtCore.SLOT("setText()"), QtCore.Qt.QueuedConnection,
+                QtCore.QMetaObject.invokeMethod(ui.msgbox, "realSetText", QtCore.Qt.QueuedConnection,
                                                 QtCore.Q_ARG("QString", msg))
                 QtCore.QMetaObject.invokeMethod(ui.msgbox, "exec", QtCore.Qt.QueuedConnection)
         for i in page["progress"]:
