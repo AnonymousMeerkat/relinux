@@ -281,7 +281,7 @@ def parseCompressedBuffer(buffers, filename_):
                     returnme[i][x][value] = os.path.abspath(
                                                 os.path.join(
                                                     os.path.dirname(os.path.abspath(filename_)),
-                                                        fsutil.relpath(returnme[i][x][value])))
+                                                        os.path.relpath(returnme[i][x][value])))
     return returnme
 
 
