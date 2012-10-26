@@ -283,11 +283,11 @@ def parseCompressedBuffer(buffers, filename_):
                     print("RELPATH1" + os.path.relpath(returnme[i][x][value]))
                     print("RELPATH2" + os.path.join(
                                                     os.path.dirname(os.path.abspath(filename_)),
-                                                        os.path.relpath(returnme[i][x][value])))
+                                                        returnme[i][x][value]))
                     returnme[i][x][value] = os.path.abspath(
                                                 os.path.join(
                                                     os.path.dirname(os.path.abspath(filename_)),
-                                                        os.path.relpath(returnme[i][x][value])))
+                                                        returnme[i][x][value]))
                     print("NEWVALUE" + returnme[i][x][value])
     return returnme
 
