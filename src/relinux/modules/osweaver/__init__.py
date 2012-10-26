@@ -206,8 +206,17 @@ def run(adict):
         @QtCore.pyqtSlot(QtCore.QString)
         def realSetText(self, text):
             self.setText(text)
-        @QtCore.pyqtSlot(QtGui.QIcon)
-        def realSetIcon(self, icon):
+        @QtCore.pyqtSlot(QtGui.QString)
+        def setImportance(self, importance):
+            icon = None
+            if importance == logger.I:
+                icon = QtGui.QMessageBox.Information
+            elif importance == logger.W:
+                icon = QtGui.QMessageBox.Warning
+            elif importance == logger.E:
+                icon = QtGui.QMessageBox.Critical
+            else:
+                icon = QtGui.QMessageBox.NoIcon
             self.setIcon(icon)
     ui.msgbox = customMsgBox()
     #ui.terminal.hide()
@@ -334,17 +343,8 @@ def run(adict):
             onThreadAdded(threadid, threadsrunning, threads)
         def showMessage(tn, importance, msg):
             logger.logI(tn, importance, msg)
-            icon = None
-            if importance == logger.I:
-                icon = QtGui.QMessageBox.Information
-            elif importance == logger.W:
-                icon = QtGui.QMessageBox.Warning
-            elif importance == logger.E:
-                icon = QtGui.QMessageBox.Critical
-            else:
-                icon = QtGui.QMessageBox.NoIcon
-            QtCore.QMetaObject.invokeMethod(ui.msgbox, "realSetIcon", QtCore.Qt.QueuedConnection,
-                                            QtCore.Q_ARG("QIcon", icon))
+            QtCore.QMetaObject.invokeMethod(ui.msgbox, "setImportance", QtCore.Qt.QueuedConnection,
+                                            QtCore.Q_ARG("QString", importance))
             QtCore.QMetaObject.invokeMethod(ui.msgbox, "realSetText", QtCore.Qt.QueuedConnection,
                                             QtCore.Q_ARG("QString", msg))
             QtCore.QMetaObject.invokeMethod(ui.msgbox, "exec", QtCore.Qt.QueuedConnection)
