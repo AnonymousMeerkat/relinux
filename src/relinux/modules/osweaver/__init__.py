@@ -206,7 +206,7 @@ def run(adict):
         @QtCore.pyqtSlot(QtCore.QString)
         def realSetText(self, text):
             self.setText(text)
-        @QtCore.pyqtSlot(QtGui.QString)
+        @QtCore.pyqtSlot(QtCore.QString)
         def setImportance(self, importance):
             icon = None
             if importance == logger.I:
