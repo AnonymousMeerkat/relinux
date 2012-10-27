@@ -174,7 +174,7 @@ def main():
     def aptupdate(op, percent):
         global minis
         if percent:
-            minis = percent
+            minis = int(percent)
         showMessage(_("Loading APT cache") + " (" + op + ") " + str(minis) + "%")
     aptcache = aptutil.getCache(aptutil.OpProgress(aptupdate, None))
     config.AptCache = aptcache

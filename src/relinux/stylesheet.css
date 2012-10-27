@@ -9,6 +9,14 @@
 	border-image: none;
 }
 
+QCheckBox::indicator {
+	width: 1.2em;
+}
+
+QCheckBox::indicator, QComboBox, QTextEdit {
+	height: 1.2em;
+}
+
 QTabWidget::pane {
 	border: 1px solid #aaa;
 	border-radius: 2px;

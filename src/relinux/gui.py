@@ -39,6 +39,8 @@ class RelinuxSplash(QtGui.QSplashScreen):
 class ConfigWidget():
     def __init__(self, widget, thevar):
         self.widget = widget
+        self.widget.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding,
+                                                        QtGui.QSizePolicy.Fixed)
         def temp(s):
             saveFunc(thevar, s)
         if isinstance(widget, QtGui.QCheckBox):
@@ -142,17 +144,21 @@ class GUI(QtGui.QMainWindow):
                     vb = QtGui.QVBoxLayout(fw)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c] = QtGui.QScrollArea(fw)
                     vb.addWidget(self.configTab.notebook1.__dict__[i].nbook.__dict__[c])
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].setWidgetResizable(False)
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].setWidgetResizable(True)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout = QtGui.QFormLayout()
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setSizeConstraint(
-                                                                QtGui.QLayout.SetFixedSize)
+                    #self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setSizeConstraint(
+                    #                                            QtGui.QLayout.SetFixedSize)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setFieldGrowthPolicy(
-                                                        QtGui.QFormLayout.AllNonFixedFieldsGrow)
+                                                        QtGui.QFormLayout.ExpandingFieldsGrow)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setLabelAlignment(
                                                                         QtCore.Qt.AlignLeft)
+                    #self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setFormAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop);
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC = QtGui.QWidget()
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC.setLayout(
                             self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout)
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC.setSizePolicy(
+                                                                QtGui.QSizePolicy.MinimumExpanding,
+                                                        QtGui.QSizePolicy.Preferred)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].setWidget(
                             self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC)
                     self.configTab.notebook1.__dict__[i].nbook.addTab(
@@ -178,8 +184,8 @@ class GUI(QtGui.QMainWindow):
                 else:
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = ConfigWidget(QtGui.QLineEdit(), var)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.setText(v_)
-                self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.setSizePolicy(
-                                    QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding))
+                #self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.setSizePolicy(
+                #                    QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding))
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.addRow(
                         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l],
                         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget)
