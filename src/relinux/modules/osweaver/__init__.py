@@ -40,8 +40,9 @@ def run(adict):
     config.TempSys = isodir + "/.TMPSYS/"
     aptcache = adict["aptcache"]
     ourgui = adict["gui"]
-    from relinux.modules.osweaver import isoutil, squashfs, tempsys, ui_osweaver
+    from relinux.modules.osweaver import isoutil, squashfs, tempsys, ui_osweaver, setup
     threads = []
+    threads.extend(setup.threads)
     threads.extend(tempsys.threads)
     threads.extend(squashfs.threads)
     threads.extend(isoutil.threads)
@@ -202,6 +203,11 @@ def run(adict):
     ui = ui_osweaver.Ui_OSWeaver()
     ui.setupUi(page_container)
     ui.notroot.hide()
+    # TODO: Figure out why the terminal is always crashing relinux!
+    # Some random error messages that could help:
+    ##############################################
+    # QTextLine: Can't set a line width while not layouting.
+    ui.terminal.hide()
     class customMsgBox(QtGui.QMessageBox):
         @QtCore.pyqtSlot(QtCore.QString)
         def realSetText(self, text):

@@ -74,22 +74,22 @@ def runThread(threadid, threadsdone, threadsrunning, threads, lock, **options):
     thread = getThread(threadid, threads)
     if not thread["thread"].is_alive() and not threadid in threadsdone and not threadid in threadsrunning:
         threadsrunning.append(threadid)
-        logger.logV(tn, logger.I, _("Starting") + " " + getThread(threadid, threads)["tn"] + "...")
+        logger.logV(tn, logger.I, _("Starting") + " " + thread["tn"] + "...")
         thread["thread"].start()
         if options.get("poststart") != None and lock != None:
             with lock:
                 options["poststart"](threadid, threadsrunning, threads)
-        print(threadid)
 
 
 # Check if a thread is alive
 def checkThread(threadid, threadsdone, threadsrunning, threads, lock, **options):
+    thread = getThread(threadid, threads)
     if threadid in threadsrunning:
-        if (not getThread(threadid, threads)["thread"].is_alive()
-            or getThread(threadid, threads)["thread"].isFinished()):
+        if not thread["thread"].is_alive():
+            thread["thread"].wait()
             threadsrunning.remove(threadid)
             threadsdone.append(threadid)
-            logger.logV(tn, logger.I, getThread(threadid, threads)["tn"] + " " +
+            logger.logV(tn, logger.I, thread["tn"] + " " +
                         _("has finished. Number of threads running: ") + str(len(threadsrunning)))
             if options.get("postend") != None and lock != None:
                 with lock:

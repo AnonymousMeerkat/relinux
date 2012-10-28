@@ -68,6 +68,8 @@ E = "E"
 W = "W"
 I = "I"
 D = "D"
+V = "V"
+VV = "VV"
 
 
 # Writes in all files in list (plus formats the text)
@@ -111,6 +113,19 @@ def writeAll(status, lists, tn, importance, text, **options):
 # Generates a thread name string
 def genTN(tn):
     return tn
+
+
+# Log to a stream
+def log(tn, stream, importance, text, **options):
+    args = (tn, importance, text)
+    if stream == E:
+        logE(*args, **options)
+    elif stream == I:
+        logI(*args, **options)
+    elif stream == V:
+        logV(*args, **options)
+    elif stream == VV:
+        logVV(*args, **options)
 
 
 # Log to essential stream

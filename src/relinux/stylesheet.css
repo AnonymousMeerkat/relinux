@@ -9,12 +9,17 @@
 	border-image: none;
 }
 
-QCheckBox::indicator {
-	width: 1.2em;
+QCheckBox::indicator, QScrollBar {
+	width: 1em;
 }
 
-QCheckBox::indicator, QComboBox, QTextEdit {
-	height: 1.2em;
+QScrollBar::handle {
+	min-height: .5em;
+}
+
+QCheckBox::indicator, QComboBox, QTextEdit, QScrollBar::handle, QScrollBar::add-line,
+QScrollBar::sub-line {
+	height: 1em;
 }
 
 QTabWidget::pane {
@@ -27,20 +32,15 @@ QScrollBar, QScrollArea, QTextEdit {
 	border: 0px;
 	border-radius: 0px;
 	background: transparent;
-	padding: 20px 0 20px 0;
+	padding: 1em 0 1em 0;
 	margin: 0;
 }
 
-QScrollBar {
-	width: 20px;
-}
-
-QScrollBar::handle {
-	min-height: 20px;
+#terminal {
+	min-height: 3em;
 }
 
 QScrollBar::add-line, QScrollBar::sub-line {
-	height: 20px;
 	color: #bbb;
 }
 

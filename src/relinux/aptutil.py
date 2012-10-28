@@ -4,7 +4,9 @@ Various APT Utilities
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
+from relinux import logger
 import apt
+import apt.progress
 
 
 # Version Comparison Operations
@@ -13,6 +15,8 @@ le = 0x01
 eq = 0x02
 ge = 0x03
 gt = 0x04
+
+tn = logger.genTN("APT")
 
 
 # OpProgress implementation
@@ -39,6 +43,47 @@ class OpProgress(apt.progress.base.OpProgress):
         self.old_op = ""
 
 
+# AcquireProgress implementation
+class AcquireProgress(apt.progress.text.AcquireProgress):
+    def __init__(self, finishfunc = None):
+        apt.progress.text.AcquireProgress.__init__(self)
+        self.finishfunc = finishfunc
+
+    def start(self):
+        apt.progress.base.AcquireProgress.start(self)
+
+    def stop(self):
+        apt.progress.base.AcquireProgress.stop(self)
+        ### CODE COPIED FROM ORIGINAL CLASS ###
+        self._write((_("Fetched %sB in %s (%sB/s)\n") % (
+                    apt.apt_pkg.size_to_str(self.fetched_bytes),
+                    apt.apt_pkg.time_to_str(self.elapsed_time),
+                    apt.apt_pkg.size_to_str(self.current_cps))).rstrip("\n"))
+        ### END CODE COPIED FROM ORIGINAL CLASS ###
+        if self.finishfunc:
+            self.finishfunc()
+
+
+# InstallProgress implementation
+class InstallProgress(apt.progress.base.InstallProgress):
+    def __init__(self, finishfunc = None):
+        apt.progress.base.InstallProgress.__init__(self)
+        self.finishfunc = finishfunc
+        self.ran_finish = False
+
+    def __del__(self):
+        apt.progress.base.InstallProgress.finish_update(self)
+        if not self.ran_finish:
+            self.finishfunc()
+            self.ran_finish = True
+
+    def finish_update(self):
+        apt.progress.base.InstallProgress.finish_update(self)
+        if self.finishfunc:
+            self.finishfunc()
+            self.ran_finish = True
+
+
 # Initializes APT
 def initApt():
     apt.apt_pkg.init()
@@ -48,15 +93,9 @@ def initApt():
 # Note that this can take around 2-30 seconds
 def getCache(progress = None):
     if progress:
-        return apt.apt_pkg.Cache(progress)
+        return apt.cache.Cache(progress)
     else:
-        return apt.apt_pkg.Cache()
-
-
-# Returns an APT DepCache
-# Used for package managing
-def getDepCache(cache):
-    return apt.apt_pkg.DepCache(cache)
+        return apt.cache.Cache()
 
 
 # Returns a package in an APT cache
@@ -108,43 +147,28 @@ def compVersions(v1, v2, operation):
         else:
             return False
 
-
-# Helper function for checking if a package is installed within a depcache
-def _depCacheInstalled(package, depcache):
-    if (depcache.is_auto_installed(package) or depcache.is_garbage(package) or
-        depcache.is_inst_broken(package) or depcache.is_now_broken(package) or
-        depcache.is_upgradeable(package)):
-        return True
-    else:
-        return False
-
-
 # Installs a package
-def instPkg(package, depcache, reinstall = True):
-    if _depCacheInstalled(package, depcache):
-        if reinstall:
-            depcache.set_reinstall(package)
+def instPkg(package, upgrade = True):
+    if package.is_installed:
+        if upgrade and package.is_upgradable:
+            package.mark_upgrade()
             return True
         else:
             return False
     else:
-        depcache.mark_install(package, True, True)
+        package.mark_install(True, True, True)
         return True
 
 
 # Removes a package
-def remPkg(package, depcache, purge = True):
-    if _depCacheInstalled(package, depcache):
-        depcache.mark_delete(package, purge)
+def remPkg(package, purge = True):
+    if package.is_installed:
+        package.mark_delete(True, purge)
         return True
     else:
         return False
 
 
 # Commits the changes
-def commitChanges(depcache, ap, ip):
-    if depcache.inst_count > 0 or depcache.del_count > 0:
-        depcache.commit(ap, ip)
-        return True
-    else:
-        return False
+def commitChanges(cache, ap, ip):
+    return cache.commit(ap, ip)

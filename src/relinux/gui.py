@@ -58,13 +58,29 @@ class ConfigWidget():
             # Someone obviously doesn't know how to use this class
             pass
 
+
+# An about dialog
+class AboutDialog(QtGui.QWidget):
+    def __init__(self, progname, progdesc):
+        QtGui.QWidget.__init__(self)
+        self.progname = progname
+        self.progdesc = progdesc
+        self.label = QtGui.QLabel(self)
+        self.label.setText("<h1>" + self.progname + "</h1><br />" + self.progdesc)
+        self.label.show()
+
+
 class GUI(QtGui.QMainWindow):
     def __init__(self, app):
         QtGui.QMainWindow.__init__(self)
         self.app = app
+        self.about = AboutDialog(config.product, "Relinux a free and open-source Linux distro" +
+        "creation toolkit")
+        #self.about.show()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.actionAbout_Qt.triggered.connect(app.aboutQt)
+        self.ui.actionAbout.triggered.connect(self.about.show)
         self.ui.actionQuit.triggered.connect(self.quit)
         self.ui.quitBtn.clicked.connect(self.quit)
         self.ui.moduleNotebook.currentChanged.connect(self.updateWizButtons)
