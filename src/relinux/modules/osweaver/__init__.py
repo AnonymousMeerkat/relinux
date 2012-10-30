@@ -370,6 +370,7 @@ def run(*args):
                    threadsend = onThreadsEnd)
 
     def onWrite(msg):
+        return  # Delete this if you want a GUI terminal (which might crash relinux)
         logger.logVV(tn, logger.D, "Updating terminal (from thread " + threading.current_thread().name + ")")
         #return
         ui.terminal.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)

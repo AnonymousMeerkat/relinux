@@ -106,7 +106,7 @@ class genSFS(threadmanager.Thread):
                 if progress > oldprogress:
                     self.setProgress(tn, 50 + int(utilities.floatDivision(progress, 2)))
                     oldprogress = progress
-            else:
+            elif len(output.strip()) > 0:
                 logger.logI(tn, logger.I, output.rstrip(), noterm = True, nogui = True)
         sys.stdout.write("\n")
         os.environ["LD_PRELOAD"] = ""
