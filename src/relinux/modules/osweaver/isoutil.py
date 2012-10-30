@@ -158,7 +158,7 @@ class genPakManifest(threadmanager.Thread):
         # Generate the package manifest
         logger.logV(self.tn, logger.I, _("Generating package manifests"))
         logger.logVV(self.tn, logger.I, _("Generating filesystem.manifest and filesystem.manifest-desktop"))
-        pkglistu = config.AptCache.packages
+        pkglistu = config.AptCache.cache
         writer = open(isotreel + "casper/filesystem.manifest", "w")
         writer_desktop = open(isotreel + "casper/filesystem.manifest-desktop", "w")
         for i in pkglistu:
