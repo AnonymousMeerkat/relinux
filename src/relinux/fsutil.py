@@ -386,7 +386,7 @@ def adrm(dirs, options, excludes1 = [], tn = ""):
 # Moves the contents of a directory to another
 def moveContents(src, dst, tn = ""):
     fscopy(src, dst, [], tn)
-    adrm(src, options = {"remoriginal": False}, [], tn)
+    adrm(src, {"remoriginal": False}, [], tn)
 
 # Returns the unix stat of a file
 def getStat(files):
