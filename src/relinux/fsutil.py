@@ -319,9 +319,11 @@ def fscopy(src, dst, excludes1, tn = ""):
                 continue
         dfile = delink(fullpath)
         if dfile is not None:
-            #logger.logVV(tn, logger.I, utilities.utf8all(file_, " ",
-            #                                _("is a symlink. Creating an identical symlink at"), " ",
-            #                                newpath))
+            logger.logVV(tn, logger.D, utilities.utf8all(file_, " ",
+                                            _("is a symlink. Creating an identical symlink at"), " ",
+                                            newpath))
+            logger.logVV(tn, logger.D, utilities.utf8all(os.path.normpath("/" + os.path.normpath(os.path.join(newpath,
+                                    os.path.relpath(dfile, fullpath)))[len(src):])))
             symlink(os.path.normpath("/" + os.path.normpath(os.path.join(newpath,
                                     os.path.relpath(dfile, fullpath)))[len(src):]),
                                 newpath)
