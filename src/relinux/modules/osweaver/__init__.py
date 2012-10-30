@@ -336,7 +336,6 @@ def run(*args):
                                             QtCore.Qt.QueuedConnection
                                             )
         def setProgress(tn, progress):
-            logger.logVV(tn, logger.D, "Setting progress to " + str(progress) + " (from thread " + threading.current_thread().name + ")")
             ts = threadspans[tn]
             progress *= ts
             if progress > 100 * ts:
@@ -371,8 +370,6 @@ def run(*args):
 
     def onWrite(msg):
         return  # Delete this if you want a GUI terminal (which might crash relinux)
-        logger.logVV(tn, logger.D, "Updating terminal (from thread " + threading.current_thread().name + ")")
-        #return
         ui.terminal.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
         QtCore.QMetaObject.invokeMethod(ui.terminal, "insertPlainText",
                                         QtCore.Qt.QueuedConnection,
