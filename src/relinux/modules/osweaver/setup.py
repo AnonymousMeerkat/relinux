@@ -3,7 +3,7 @@ Setup Dependencies
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
-from relinux import logger, aptutil, configutils, threadmanager, config
+from relinux import logger, aptutil, configutils, threadmanager, config, fsutil
 import os
 import copy
 import threading
@@ -40,4 +40,14 @@ class setupInst(threadmanager.Thread):
         self.exec_()
 instdepends["thread"] = setupInst
 
-threads = [instdepends]
+
+# Clean the build directory
+cleanbuild = {"deps": [], "tn": "Clean"}
+class cleanBuildDir(threadmanager.Thread):
+    def runthread(self):
+        logger.logI(self.tn, logger.I, "Cleaning build directory")
+        # Nice and simple rm -rf :)
+        fsutil.rm(configutils.getValue(configs[configutils.isodir]))
+cleanbuild["thread"] = cleanBuildDir
+
+threads = [instdepends, cleanbuild]
