@@ -35,9 +35,17 @@ def relpath(files):
 
 
 # Reads the link location of a file or returns None
-def delink(files):
+def delink(files, recursive = False):
     if os.path.islink(files):
-        return utilities.utf8(os.readlink(files))
+        link = ""
+        if recursive:
+            notfound = True
+            while notfound:
+                link = utilities.utf8(os.readlink(files))
+                notfound = os.path.islink(link)
+        else:
+            link = utilities.utf8(os.readlink(files))
+        return link
     return None
 
 
@@ -314,7 +322,9 @@ def fscopy(src, dst, excludes1, tn = ""):
             #logger.logVV(tn, logger.I, utilities.utf8all(file_, " ",
             #                                _("is a symlink. Creating an identical symlink at"), " ",
             #                                newpath))
-            symlink(dfile, newpath)
+            symlink(os.path.normpath("/" + os.path.normpath(os.path.join(newpath,
+                                    os.path.relpath(dfile, fullpath)))[len(src):]),
+                                newpath)
         elif os.path.isdir(fullpath):
             #logger.logVV(tn, logger.I, utilities.utf8all(_("Creating directory"), " ", file_))
             makedir(newpath)
@@ -334,9 +344,12 @@ def fscopy(src, dst, excludes1, tn = ""):
 #     remsymlink (True or False): If True, remove symlinks too
 #     remfullpath (True or False): If True, symlinks will have both their symlink and the file
 #                                  referenced removed
+#     remoriginal (True or False): If True, remove the original directory too
 def adrm(dirs, options, excludes1 = [], tn = ""):
     # Get a list of all files inside the directory
     files = listdir(dirs, {"recurse": True, "dirs": True, "symlinks": False}, tn)
+    utilities.setDefault(options, excludes = False, remdirs = True, remsymlink = True,
+                         remfullpath = False, remoriginal = True)
     excludes = []
     # Exclude the files listed to exclude
     if options["excludes"] and len(excludes1) > 0:
@@ -365,10 +378,15 @@ def adrm(dirs, options, excludes1 = [], tn = ""):
                 #logger.logVV(tn, logger.I, utilities.utf8all(_("Removing"), " ", dfile, " (",
                 #                                   _("directed by symlink"), fullpath, ")"))
                 rm(dfile)
-    if options["remdirs"] is True:
+    if options["remdirs"] and options["remoriginal"]:
         #logger.logVV(tn, logger.I, utilities.utf8all(_("Removing source directory"), " ", dirs))
         rm(dirs)
 
+
+# Moves the contents of a directory to another
+def moveContents(src, dst, tn = ""):
+    fscopy(src, dst, [], tn)
+    adrm(src, options = {"remoriginal": False}, [], tn)
 
 # Returns the unix stat of a file
 def getStat(files):

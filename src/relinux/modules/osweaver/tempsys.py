@@ -48,6 +48,13 @@ class copyEtcVar(threadmanager.Thread):
         varexcludes.extend(["*.log", "*.log.*", "*.pid", "*/pid", "*.bak", "*.[0-9].gz", "*.deb"])
         fsutil.fscopy("/etc", tmpsys + "etc", excludes, self.tn)
         fsutil.fscopy("/var", tmpsys + "var", varexcludes, self.tn)
+        #logger.logV(self.tn, logger.I, _("Moving some directories to /run"))
+        #fsutil.fscopy(tmpsys + "var/run/", tmpsys + "run/")
+        #fsutil.rm(tmpsys + "var/run/")
+        #fsutil.fscopy(tmpsys + "var/lock/", tmpsys + "run/lock/")
+        #fsutil.rm(tmpsys + "var/lock/")
+        #fsutil.symlink(tmpsys + "run/", tmpsys + "var/run/")
+        #fsutil.symlink(tmpsys + "run/lock/", tmpsys + "var/lock/")
 cpetcvar["thread"] = copyEtcVar
 
 
