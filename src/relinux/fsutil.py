@@ -311,19 +311,19 @@ def fscopy(src, dst, excludes1, tn = ""):
                 continue
         dfile = delink(fullpath)
         if dfile is not None:
-            logger.logVV(tn, logger.I, utilities.utf8all(file_, " ",
-                                            _("is a symlink. Creating an identical symlink at"), " ",
-                                            newpath))
+            #logger.logVV(tn, logger.I, utilities.utf8all(file_, " ",
+            #                                _("is a symlink. Creating an identical symlink at"), " ",
+            #                                newpath))
             symlink(dfile, newpath)
         elif os.path.isdir(fullpath):
-            logger.logVV(tn, logger.I, utilities.utf8all(_("Creating directory"), " ", file_))
+            #logger.logVV(tn, logger.I, utilities.utf8all(_("Creating directory"), " ", file_))
             makedir(newpath)
-            logger.logVV(tn, logger.I, _("Setting permissions"))
+            #logger.logVV(tn, logger.I, _("Setting permissions"))
             copystat(fullpath, newpath)
         else:
-            logger.logVV(tn, logger.I, utilities.utf8all(_("Copying"), " ", fullpath, " ", _("to"), " ", newpath))
+            #logger.logVV(tn, logger.I, utilities.utf8all(_("Copying"), " ", fullpath, " ", _("to"), " ", newpath))
             shutil.copy2(fullpath, newpath)
-    logger.logVV(tn, logger.I, _("Setting permissions"))
+    #logger.logVV(tn, logger.I, _("Setting permissions"))
     copystat(src, dst)
 
 
@@ -347,8 +347,8 @@ def adrm(dirs, options, excludes1 = [], tn = ""):
         file_ = utilities.utf8(os.path.basename(file__))
         # Make sure we don't remove files that are listed to exclude from removal
         if file__ in excludes:
-            logger.logVV(tn, logger.I, utilities.utf8all(file_, " ",
-                                                         _("is to be excluded. Skipping a CPU cycle")))
+            #logger.logVV(tn, logger.I, utilities.utf8all(file_, " ",
+            #                                             _("is to be excluded. Skipping a CPU cycle")))
             continue
         fullpath = file__
         dfile = delink(fullpath)
@@ -359,14 +359,14 @@ def adrm(dirs, options, excludes1 = [], tn = ""):
                 rm(fullpath)
         else:
             if options["remsymlink"]:
-                logger.logVV(tn, logger.I, utilities.utf8all(_("Removing symlink"), " ", fullpath))
+                #logger.logVV(tn, logger.I, utilities.utf8all(_("Removing symlink"), " ", fullpath))
                 rm(fullpath)
             if options["remfullpath"]:
-                logger.logVV(tn, logger.I, utilities.utf8all(_("Removing"), " ", dfile, " (",
-                                                   _("directed by symlink"), fullpath, ")"))
+                #logger.logVV(tn, logger.I, utilities.utf8all(_("Removing"), " ", dfile, " (",
+                #                                   _("directed by symlink"), fullpath, ")"))
                 rm(dfile)
     if options["remdirs"] is True:
-        logger.logVV(tn, logger.I, utilities.utf8all(_("Removing source directory"), " ", dirs))
+        #logger.logVV(tn, logger.I, utilities.utf8all(_("Removing source directory"), " ", dirs))
         rm(dirs)
 
 
