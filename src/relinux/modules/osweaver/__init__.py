@@ -324,6 +324,8 @@ def run(*args):
                 if c + 1 < len(threadsrunning) and len(threadsrunning) > 2:
                     rt += ", "
                 if c + 2 == len(threadsrunning):
+                    if c == 0:
+                        rt += " "
                     rt += "and "
                 c += 1
             QtCore.QMetaObject.invokeMethod(ui.notroot, "setText",
