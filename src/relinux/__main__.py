@@ -65,7 +65,7 @@ def main():
     #import time
     from relinux import gui, configutils, logger, aptutil, modloader, utilities, fsutil
     config.Arch = fsutil.getArch()
-    logger.normal()
+    logger.veryverbose()
     config.GUIStream = utilities.eventStringIO()
     tn = logger.genTN("Main")
     parser = ArgumentParser(prog = "relinux", usage = "%(prog)s [options]")

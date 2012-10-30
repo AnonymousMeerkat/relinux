@@ -94,8 +94,6 @@ def writeAll(status, lists, tn, importance, text, **options):
             continue
         text_ = copy.copy(text)
         if i in config.TermStreams:
-            if hasattr(i, "writefunc"):
-                print(True)
             text__ = "\033["
             if importance == E:
                 text__ += str(config.TermRed)
