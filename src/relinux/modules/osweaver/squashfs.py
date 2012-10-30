@@ -92,10 +92,21 @@ class genSFS(threadmanager.Thread):
         sys.stdout.write("\n")
         logger.logI(tn, logger.I, _("Adding the rest of the system (this can take a while)"))
         sfscmd = subprocess.Popen(shlex.split("mksquashfs / " + sfspath + " " + opts + " -e " + sfsex),
-                                   stdout = subprocess.PIPE, universal_newlines = True)
+                                   stdout = subprocess.PIPE, stderr = subprocess.PIPE,
+                                   universal_newlines = True)
         oldprogress = 0
+        bufferdata = ""
         while sfscmd.poll() is None:
-            output = sfscmd.stdout.readline()
+            output, errput = sfscmd.communicate()
+            output = bufferdata + output
+            if errput and len(errput.rstrip()) > 0:
+                # Make sure the error is seen
+                logger.logE(self.tn, logger.E, errput.rstrip() + "\n")
+            if "\n" in output:
+                # Dang, we need to add extra stuff to bufferdata
+                splitted = output.split("\n", 1)
+                output = splitted[0]
+                bufferdata = splitted[1]
             match = patt.match(output)
             if match != None:
                 sys.stdout.write("\r" + match.group(0))
