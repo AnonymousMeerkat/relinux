@@ -163,7 +163,7 @@ class genPakManifest(threadmanager.Thread):
         for i in config.AptCache:
             if i.installedVersion == None or len(i.installedVersion) <= 0:
                 continue
-            name = i.get_fullname(True).strip()
+            name = i.fullname.strip()
             ver = i.installedVersion.strip()
             strs = name + " " + ver + "\n"
             writer.write(strs)
