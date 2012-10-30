@@ -27,8 +27,9 @@ python3 = sys.hexversion >= python3_version
 product = "Relinux"
 productunix = "relinux"
 version = "0.4a1"
+author_string = "Anonymous Meerkat <meerkatanonymous@gmail.com>"
 version_string = product + " version " + str(version)
-about_string = product + " is a free software designed to help you make a professional-looking OS easily"
+about_string = ""
 
 TermStreams = [sys.stderr, sys.stdout]
 
@@ -55,10 +56,10 @@ IStatus = True
 VStatus = True
 VVStatus = True
 
-EFiles = [sys.stderr]
-IFiles = [sys.stdout]
-VFiles = [sys.stdout]
-VVFiles = [sys.stdout]
+EFiles = []
+IFiles = []
+VFiles = []
+VVFiles = []
 
 # GUI Section
 GUIStream = None
@@ -66,8 +67,9 @@ GUIStatus = True
 background = "lightgrey"
 
 # Generated
-Configuration = ""
-AptCache = ""
+Configuration = None
+AptCache = None
+Gui = None
 ISOTree = ""
 TempSys = ""
 SysVersion = ""  # Should be filled in by: os.popen("/usr/bin/lsb_release -rs").read().strip()

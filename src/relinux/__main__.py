@@ -17,6 +17,10 @@ from relinux import config
 import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
 
+config.about_string = (config.product + _(" is a free and open-source Linux ") +
+_("distribution creation toolkit.\n\nRelinux ") + config.version +
+_(" is written and maintained by ") + config.author_string + _("."))
+
 
 def exitprog(exitcode = 0):
     sys.exit(exitcode)
@@ -58,16 +62,12 @@ def main():
     if config.python3:
         tkname = "tkinter"
     Tkinter = __import__(tkname)'''
-    import time
+    #import time
     from relinux import gui, configutils, logger, aptutil, modloader, utilities, fsutil
     config.Arch = fsutil.getArch()
     logger.normal()
     config.GUIStream = utilities.eventStringIO()
-    config.EFiles.append(config.GUIStream)
-    config.IFiles.append(config.GUIStream)
-    config.VFiles.append(config.GUIStream)
-    #config.VVFiles.append(config.GUIStream)
-    logger.logI(logger.genTN("Main"), logger.I, "Test")
+    tn = logger.genTN("Main")
     parser = ArgumentParser(prog = "relinux", usage = "%(prog)s [options]")
     parser.add_argument("-V", "--version", action = "store_true",
                       dest = "showversion",
@@ -82,17 +82,18 @@ def main():
                   action = "store_true", dest = "veryverbose", default = False,
                   help = "log even more to stdout")
     args = parser.parse_args()
-    if args.showversion is True:
+    config.EFiles.extend([config.GUIStream, sys.stdout])
+    if args.showversion:
         version()
-    if args.quiet is True:
-        logger.quiet()
-    if args.verbose is True or True:
-        logger.verbose()
-    if args.veryverbose is True:
-        logger.veryverbose()
-    modules = []
-    aptcache = []
-    cbuffer = {}
+    if not args.quiet:
+        config.IFiles.extend([config.GUIStream, sys.stdout])
+    if args.verbose:
+        config.VFiles.extend([config.GUIStream, sys.stdout])
+    if args.veryverbose:
+        config.VVFiles.extend([config.GUIStream, sys.stdout])
+    #modules = []
+    #aptcache = []
+    #cbuffer = {}
     '''root = Tkinter.Tk()
     App = None
     def startProg(splash):
@@ -163,13 +164,22 @@ def main():
     for i in modulemetas:
         modules.append(modloader.loadModule(i))
     showMessage(_("Loading configuration files"))
-    configfiles = [config.relinuxdir + "/relinux.conf"]
+    configfiles = [relinuxdir + "/relinux.conf"]
     for i in range(len(modulemetas)):
         for x in modules[i].moduleconfig:
             configfiles.append(os.path.join(os.path.dirname(modulemetas[i]["path"]), x))
     cbuffer = configutils.parseFiles(configfiles)
     config.Configuration = cbuffer
     configutils.saveBuffer(config.Configuration)
+    logfilename = configutils.getValue(cbuffer["Relinux"]["LOGFILE"])
+    logfile = open(logfilename, "a")
+    config.EFiles.append(logfile)
+    config.IFiles.append(logfile)
+    config.VFiles.append(logfile)
+    config.VVFiles.append(logfile)
+    logger.logI(tn, logger.I, "===========================")
+    logger.logI(tn, logger.I, "=== Started new session ===")
+    logger.logI(tn, logger.I, "===========================")
     showMessage(_("Loading APT cache 0%"))
     def aptupdate(op, percent):
         global minis
@@ -182,13 +192,16 @@ def main():
     App.setStyleSheet(open(mainsrcdir + "/stylesheet.css", "r").read())
     showMessage(_("Loading GUI"))
     gui_ = gui.GUI(App)
+    config.Gui = gui_
     showMessage(_("Running modules"))
     for i in modules:
-            modloader.runModule(i, {"gui": gui_, "config": cbuffer, "aptcache": aptcache})
+            modloader.runModule(i, {})
     gui_.show()
     splash.finish(gui_)
-    sys.exit(App.exec_())
+    exitcode = App.exec_()
     config.ThreadStop = True
+    logfile.close()
+    sys.exit(exitcode)
 
 if __name__ == '__main__':
     main()

@@ -31,15 +31,15 @@ def runThreads(threads, **options):
     threadmanager.threadLoop(threads, **options)
 
 
-def run(adict):
+def run(*args):
     global aptcache, page
-    configs = adict["config"]["OSWeaver"]
+    configs = config.Configuration["OSWeaver"]
     isodir = configutils.getValue(configs[configutils.isodir])
     config.ISOTree = isodir + "/.ISO_STRUCTURE/"
     print(config.ISOTree)
     config.TempSys = isodir + "/.TMPSYS/"
-    aptcache = adict["aptcache"]
-    ourgui = adict["gui"]
+    aptcache = config.AptCache
+    ourgui = config.Gui
     from relinux.modules.osweaver import isoutil, squashfs, tempsys, ui_osweaver, setup
     threads = []
     threads.extend(setup.threads)

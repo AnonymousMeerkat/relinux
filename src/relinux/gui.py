@@ -21,7 +21,7 @@ class RelinuxSplash(QtGui.QSplashScreen):
     def __init__(self, *args):
         QtGui.QSplashScreen.__init__(self, *args)
         self.frameid = 0
-        self.imageviewer = QtCore.QImageReader()
+        self.imageviewer = QtGui.QImageReader()
 
     def setAnimatedPixmap(self, file_):
         self.imageviewer.setFilename(file_)
@@ -59,28 +59,14 @@ class ConfigWidget():
             pass
 
 
-# An about dialog
-class AboutDialog(QtGui.QWidget):
-    def __init__(self, progname, progdesc):
-        QtGui.QWidget.__init__(self)
-        self.progname = progname
-        self.progdesc = progdesc
-        self.label = QtGui.QLabel(self)
-        self.label.setText("<h1>" + self.progname + "</h1><br />" + self.progdesc)
-        self.label.show()
-
-
 class GUI(QtGui.QMainWindow):
     def __init__(self, app):
         QtGui.QMainWindow.__init__(self)
         self.app = app
-        self.about = AboutDialog(config.product, "Relinux a free and open-source Linux distro" +
-        "creation toolkit")
-        #self.about.show()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.actionAbout_Qt.triggered.connect(app.aboutQt)
-        self.ui.actionAbout.triggered.connect(self.about.show)
+        self.ui.actionAbout.triggered.connect(self.showAbout)
         self.ui.actionQuit.triggered.connect(self.quit)
         self.ui.quitBtn.clicked.connect(self.quit)
         self.ui.moduleNotebook.currentChanged.connect(self.updateWizButtons)
@@ -210,6 +196,9 @@ class GUI(QtGui.QMainWindow):
         self.ui.moduleNotebook.addTab(*args)
         self.updateWizButtons()
 
+    def showAbout(self):
+        QtGui.QMessageBox.about(self, config.product, config.about_string)
+
     def quit(self, *args):
         quitProg(self.app)
 
@@ -219,10 +208,9 @@ if __name__ == "__main__":
         return t
     from relinux import modloader
     import os
-    import time
     app = QtGui.QApplication([])
     app.setStyleSheet(open("./stylesheet.css", "r").read())
-    splash = QtGui.QSplashScreen(QtGui.QPixmap("../../splash_light.png"))
+    splash = QtGui.QSplashScreen(QtGui.QPixmap(config.relinuxdir + "splash_light.png"))
     splash.show()
     splash.showMessage("Loading...", QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
     app.processEvents()
