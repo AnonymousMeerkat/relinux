@@ -161,10 +161,10 @@ class genPakManifest(threadmanager.Thread):
         writer = open(isotreel + "casper/filesystem.manifest", "w")
         writer_desktop = open(isotreel + "casper/filesystem.manifest-desktop", "w")
         for i in config.AptCache:
-            if i.current_ver == None:
+            if i.installedVersion == None or len(i.installedVersion) <= 0:
                 continue
             name = i.get_fullname(True).strip()
-            ver = i.current_ver.ver_str.strip()
+            ver = i.installedVersion.strip()
             strs = name + " " + ver + "\n"
             writer.write(strs)
             if (not name in
