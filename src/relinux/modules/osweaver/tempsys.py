@@ -52,8 +52,10 @@ class copyEtcVar(threadmanager.Thread):
         # Exclude all log files (*.log *.log.*), PID files (to show that no daemons are running),
         # backup and old files (for obvious reasons), and any .deb files that a person might have downloaded
         varexcludes.extend(["*.log", "*.log.*", "*.pid", "*/pid", "*.bak", "*.[0-9].gz", "*.deb"])
-        fsutil.fscopy("/etc", tmpsys + "etc", excludes, self.tn, progressfunc = self.progressfunc)
-        fsutil.fscopy("/var", tmpsys + "var", varexcludes, self.tn, progressfunc = self.progressfunc)
+        fsutil.fscopy("/etc", tmpsys + "etc", excludes, self.tn,
+                      progressfunc = lambda p: self.progressfunc(p / 2))
+        fsutil.fscopy("/var", tmpsys + "var", varexcludes, self.tn,
+                      progressfunc = lambda p: self.progressfunc(50 + p / 2))
         #logger.logV(self.tn, logger.I, _("Moving some directories to /run"))
         #fsutil.fscopy(tmpsys + "var/run/", tmpsys + "run/")
         #fsutil.rm(tmpsys + "var/run/")
