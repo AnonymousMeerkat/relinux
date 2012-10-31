@@ -284,7 +284,7 @@ def listdir(x, **options):
         for i in os.listdir(x):
             f = utilities.utf8(os.path.join(x, i))
             if os.path.isdir(f):
-                if (os.path.islink(f) and not options["symlinks"] or
+                if ((os.path.islink(f) and not options["symlinks"]) or
                     (not options["recurse"] and options["dirs"])):
                     yield f
                     continue
@@ -310,6 +310,7 @@ def fscopy(src, dst, excludes1, tn = ""):
     makedir(dst)
     # Copy the files
     for file___ in files:
+        print(file___)
         file__ = utilities.utf8(os.path.abspath(file___))
         file_ = utilities.utf8(os.path.basename(utilities.utf8(file__)))
         # Make sure we don't copy files that are supposed to be excluded
