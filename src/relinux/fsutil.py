@@ -42,7 +42,7 @@ def abspath(files, src):
 
 # Reads the link location of a file or returns None
 def delink(files, absolutify = True, recursive = False):
-    if os.path.islink(files):
+    if os.path.exists(files) and os.path.islink(files):
         link = ""
         if recursive:
             notfound = True
@@ -322,6 +322,9 @@ def fscopy(src, dst, excludes1, tn = ""):
         #print(dst + " " + file__[len(src):])
         temp = re.sub(r"^/+", "", file__[len(src):])
         newpath = utilities.utf8(os.path.join(dst, temp))
+        if not os.path.exists(fullpath):
+            # Either an error on fsutil's part, or the file got deleted
+            continue
         # Save some valuable time
         if os.path.exists(newpath):
             fpmd5 = genMD5(fullpath)
@@ -346,7 +349,10 @@ def fscopy(src, dst, excludes1, tn = ""):
             copystat(fullpath, newpath)
         else:
             #logger.logVV(tn, logger.I, utilities.utf8all(_("Copying"), " ", fullpath, " ", _("to"), " ", newpath))
-            shutil.copy2(fullpath, newpath)
+            try:
+                shutil.copy2(fullpath, newpath)
+            except Exception as e:
+                print e
     #logger.logVV(tn, logger.I, _("Setting permissions"))
     copystat(src, dst)
 
