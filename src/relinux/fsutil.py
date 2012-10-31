@@ -15,6 +15,7 @@ import gettext
 import subprocess
 import multiprocessing
 import re
+import copy
 
 
 # "Beautifies" a path
@@ -298,7 +299,8 @@ def listdir(x, **options):
 
 
 # Filesystem copier (like rsync --exclude... -a SRC DST)
-def fscopy(src, dst, excludes1, tn = ""):
+def fscopy(src, dst, excludes1, tn = "", **options):
+    utilities.setDefault(options, progressfunc = None)
     src1 = re.sub(r"/+$", "", src)
     src = src1
     dst1 = re.sub(r"/+$", "", dst)
@@ -306,13 +308,19 @@ def fscopy(src, dst, excludes1, tn = ""):
     dstp = re.sub(r"/+$", "", os.path.dirname(dst))
     # Get a list of all files
     files = list(listdir(src, tn = tn))
+    # Get the length of the file list
+    lfiles = len(files)
     # Exclude the files that are not wanted
     excludes = []
     if len(excludes1) > 0:
         excludes = exclude(files, excludes1)
     makedir(dst)
+    c = 0
     # Copy the files
     for file___ in files:
+        if options["progressfunc"]:
+            options["progressfunc"](utilities.calcPercent(c, lfiles))
+        c += 1
         file__ = utilities.utf8(os.path.abspath(file___))
         file_ = utilities.utf8(os.path.basename(utilities.utf8(file__)))
         # Make sure we don't copy files that are supposed to be excluded

@@ -42,6 +42,9 @@ tmpsystree["thread"] = genTempSysTree
 # Copy the contents of /etc/ and /var/ to the tempsys
 cpetcvar = {"deps": [tmpsystree], "tn": "EtcVar", "threadspan":-1}
 class copyEtcVar(threadmanager.Thread):
+    def progressfunc(self, progress):
+        self.setProgress(self.tn, progress)
+
     def runthread(self):
         logger.logI(self.tn, logger.I, _("Copying files to the temporary filesystem"))
         excludes = configutils.parseMultipleValues(configutils.getValue(configs[configutils.excludes]))
@@ -49,8 +52,8 @@ class copyEtcVar(threadmanager.Thread):
         # Exclude all log files (*.log *.log.*), PID files (to show that no daemons are running),
         # backup and old files (for obvious reasons), and any .deb files that a person might have downloaded
         varexcludes.extend(["*.log", "*.log.*", "*.pid", "*/pid", "*.bak", "*.[0-9].gz", "*.deb"])
-        fsutil.fscopy("/etc", tmpsys + "etc", excludes, self.tn)
-        fsutil.fscopy("/var", tmpsys + "var", varexcludes, self.tn)
+        fsutil.fscopy("/etc", tmpsys + "etc", excludes, self.tn, progressfunc = self.progressfunc)
+        fsutil.fscopy("/var", tmpsys + "var", varexcludes, self.tn, progressfunc = self.progressfunc)
         #logger.logV(self.tn, logger.I, _("Moving some directories to /run"))
         #fsutil.fscopy(tmpsys + "var/run/", tmpsys + "run/")
         #fsutil.rm(tmpsys + "var/run/")
