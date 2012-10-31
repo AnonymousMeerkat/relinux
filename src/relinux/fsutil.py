@@ -310,7 +310,6 @@ def fscopy(src, dst, excludes1, tn = ""):
     makedir(dst)
     # Copy the files
     for file___ in files:
-        print(file___)
         file__ = utilities.utf8(os.path.abspath(file___))
         file_ = utilities.utf8(os.path.basename(utilities.utf8(file__)))
         # Make sure we don't copy files that are supposed to be excluded
