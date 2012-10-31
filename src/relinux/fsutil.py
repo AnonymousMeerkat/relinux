@@ -317,8 +317,6 @@ def fscopy(src, dst, excludes1, tn = ""):
             #logger.logVV(tn, logger.W, utilities.utf8all(file_, " ", _("is to be excluded. Skipping a CPU cycle")))
             continue
         fullpath = utilities.utf8(file__)
-        if "lock" in fullpath or "run" in fullpath:
-            print(fullpath)
         #print(dst + " " + file__[len(src):])
         temp = re.sub(r"^/+", "", file__[len(src):])
         newpath = utilities.utf8(os.path.join(dst, temp))
