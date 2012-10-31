@@ -51,7 +51,7 @@ def delink(files, recursive = False):
                 notfound = os.path.islink(link)
         else:
             link_ = utilities.utf8(os.readlink(files))
-            link = abspath(link_, files)
+            link = utilities.utf8(abspath(link_, os.path.dirname(files)))
         return link
     return None
 
