@@ -41,13 +41,4 @@ class setupInst(threadmanager.Thread):
 instdepends["thread"] = setupInst
 
 
-# Clean the build directory
-cleanbuild = {"deps": [], "tn": "Clean"}
-class cleanBuildDir(threadmanager.Thread):
-    def runthread(self):
-        logger.logI(self.tn, logger.I, "Cleaning build directory")
-        # Nice and simple rm -rf :)
-        fsutil.rm(configutils.getValue(configs[configutils.isodir]))
-cleanbuild["thread"] = cleanBuildDir
-
-threads = [instdepends, cleanbuild]
+threads = [instdepends]

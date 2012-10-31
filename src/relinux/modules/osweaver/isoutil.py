@@ -80,8 +80,9 @@ genisotree = {"deps": [], "tn": "ISOTree"}
 class genISOTree(threadmanager.Thread):
     def runthread(self):
         logger.logI(self.tn, logger.I, _("Generating ISO Tree"))
+        # Clean the tree, if it exists
+        fsutil.rm(isotreel)
         # Make the tree
-        print(isotreel)
         fsutil.maketree([isotreel + "casper", isotreel + "preseed",
                           isotreel + "isolinux", isotreel + ".disk"])
 genisotree["thread"] = genISOTree
@@ -280,6 +281,7 @@ class genISO(threadmanager.Thread):
         logger.logI(self.tn, logger.I, _("Generating the ISO"))
         location = (configutils.getValue(configs[configutils.isodir]) + "/" +
                     configutils.getValue(configs[configutils.isolocation]))
+        fsutil.rm(location)
         patt = re.compile("^ *([0-9]+)\.?[0-9]*%.*$")
         appnd = "32"
         if sys.maxsize > 2 ** 32:

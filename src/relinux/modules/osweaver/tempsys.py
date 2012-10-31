@@ -27,6 +27,9 @@ tmpsystree = {"deps": [], "tn": "TempSysTree"}
 class genTempSysTree(threadmanager.Thread):
     def runthread(self):
         logger.logI(self.tn, logger.I, _("Generating the tree for the temporary filesystem"))
+        # Clean the TMPSYS tree, if it exists
+        fsutil.rm(tmpsys)
+        # Generate the tree
         fsutil.maketree([tmpsys + "etc", tmpsys + "dev",
                           tmpsys + "proc", [tmpsys + "tmp", 0o1777],
                           tmpsys + "sys", tmpsys + "mnt",

@@ -171,6 +171,9 @@ def symlink(files, dst, tn = ""):
 # Removes a file
 # If followlink is True, then it will remove both the link and the origin
 def rm(files, followlink = False, tn = ""):
+    if not os.path.exists(files):
+        # If there isn't anything to remove, why bother with this function?
+        return
     rfile = files
     dfile = delink(files)
     rmstring = "Removing "
