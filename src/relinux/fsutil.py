@@ -302,7 +302,7 @@ def fscopy(src, dst, excludes1, tn = ""):
     dst = dst1
     dstp = re.sub(r"/+$", "", os.path.dirname(dst))
     # Get a list of all files
-    files = listdir(src, recurse = True, dirs = True, symlinks = False, tn = tn)
+    files = list(listdir(src, tn = tn))
     # Exclude the files that are not wanted
     excludes = []
     if len(excludes1) > 0:
@@ -362,7 +362,7 @@ def fscopy(src, dst, excludes1, tn = ""):
 #     remoriginal (True or False): If True, remove the original directory too
 def adrm(dirs, options, excludes1 = [], tn = ""):
     # Get a list of all files inside the directory
-    files = listdir(dirs, recurse = True, dirs = True, symlinks = False, tn = tn)
+    files = list(listdir(dirs, recurse = True, dirs = True, symlinks = False, tn = tn))
     utilities.setDefault(options, excludes = False, remdirs = True, remsymlink = True,
                          remfullpath = False, remoriginal = True)
     excludes = []
