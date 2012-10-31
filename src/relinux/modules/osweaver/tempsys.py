@@ -107,7 +107,7 @@ class remTempVar(threadmanager.Thread):
         for i in ["etc/NetworkManager/system-connections/", "var/run", "var/log", "var/mail",
                   "var/spool", "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]:
             fsutil.adrm(tmpsys + i,
-                        {"excludes": False, "remdirs": False, "remsymlink": True, "remfullpath": False},
+                        {"excludes": False, "remdirs": False, "remsymlink": True, "remfullpath": False, "remoriginal": False},
                         None, self.tn)
 remtempvar["thread"] = remTempVar
 

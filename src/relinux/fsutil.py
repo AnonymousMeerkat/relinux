@@ -401,8 +401,9 @@ def adrm(dirs, options, excludes1 = [], tn = ""):
                 rm(fullpath)
         else:
             if options["remsymlink"]:
-                #logger.logVV(tn, logger.I, utilities.utf8all(_("Removing symlink"), " ", fullpath))
-                rm(fullpath)
+                if (os.path.isdir(fullpath) and options["remdirs"]) or os.path.isfile(fullpath):
+                    #logger.logVV(tn, logger.I, utilities.utf8all(_("Removing symlink"), " ", fullpath))
+                    rm(fullpath)
             if options["remfullpath"]:
                 #logger.logVV(tn, logger.I, utilities.utf8all(_("Removing"), " ", dfile, " (",
                 #                                   _("directed by symlink"), fullpath, ")"))
