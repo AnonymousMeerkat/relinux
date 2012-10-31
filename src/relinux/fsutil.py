@@ -293,6 +293,8 @@ def listdir(dirs, options = {}, tn = ""):
 def fscopy(src, dst, excludes1, tn = ""):
     src1 = re.sub(r"/+$", "", src)
     src = src1
+    dst1 = re.sub(r"/+$", "", dst)
+    dst = dst1
     # Get a list of all files
     files = listdir(src, {"recurse": True, "dirs": True, "symlinks": False}, tn)
     # Exclude the files that are not wanted
@@ -323,9 +325,9 @@ def fscopy(src, dst, excludes1, tn = ""):
                                             _("is a symlink. Creating an identical symlink at"), " ",
                                             newpath))
             logger.logVV(tn, logger.D, utilities.utf8all(os.path.normpath("/" + os.path.normpath(os.path.join(newpath,
-                                    os.path.relpath(dfile, fullpath)))[len(src):])))
+                                    os.path.relpath(dfile, fullpath)))[len(dst):])))
             symlink(os.path.normpath("/" + os.path.normpath(os.path.join(newpath,
-                                    os.path.relpath(dfile, fullpath)))[len(src):]),
+                                    os.path.relpath(dfile, fullpath)))[len(dst):]),
                                 newpath)
         elif os.path.isdir(fullpath):
             #logger.logVV(tn, logger.I, utilities.utf8all(_("Creating directory"), " ", file_))
