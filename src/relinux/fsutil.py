@@ -41,17 +41,20 @@ def abspath(files, src):
         return files
 
 # Reads the link location of a file or returns None
-def delink(files, recursive = False):
+def delink(files, absolutify = True, recursive = False):
     if os.path.islink(files):
         link = ""
         if recursive:
             notfound = True
             while notfound:
-                link = delink(files, False)
+                link = delink(files, True, False)
                 notfound = os.path.islink(link)
         else:
             link_ = utilities.utf8(os.readlink(files))
-            link = utilities.utf8(abspath(link_, os.path.dirname(files)))
+            if absolutify:
+                link = utilities.utf8(abspath(link_, os.path.dirname(files)))
+            else:
+                link = link_
         return link
     return None
 
@@ -273,27 +276,23 @@ def chmod(files, mod, tn = ""):
 #    recurse (True or False): If True, recurse into the directory
 #    dirs (True or False): If True, show directories too
 #    symlinks (True or False): If True and recurse is True, recurse into symlink directories
-def listdir(dirs, options = {}, tn = ""):
-    utilities.setDefault(options, recurse = True, dirs = True, symlinks = False)
-    logger.logV(tn, logger.I, utilities.utf8all(_("Gathering a list of files in"), " ", dirs))
-    listed = []
-    if options["recurse"]:
-        listed = os.walk(utilities.utf8(dirs), True, None, options["symlinks"])
-    else:
-        listed = os.listdir(utilities.utf8(dirs))
-    returnme = []
-    for i in listed:
-        if options["dirs"]:
-            if options["recurse"]:
-                returnme.append(utilities.utf8(i[0]))
-            elif os.path.isdir(i):
-                returnme.append(utilities.utf8(i))
-        if options["recurse"]:
-            for x in i[2]:
-                returnme.append(utilities.utf8(os.path.join(i[0], x)))
-        elif os.path.isfile(i) or os.path.islink(i):
-            returnme.append(utilities.utf8(i))
-    return returnme
+def listdir(x, **options):
+    utilities.setDefault(options, recurse = True, dirs = True, symlinks = False, tn = "")
+    if not os.path.isdir(x):
+        return None
+    if options["dirs"]:
+        yield utilities.utf8(x)
+    for i in os.listdir(x):
+        f = utilities.utf8(os.path.join(x, i))
+        if os.path.isdir(f):
+            if (os.path.islink(f) and not options["symlinks"] or
+                (not options["recurse"] and options["dirs"])):
+                yield f
+                continue
+            for y in listdir(f, **options):
+                yield y
+        else:
+            yield f
 
 
 # Filesystem copier (like rsync --exclude... -a SRC DST)
@@ -304,7 +303,7 @@ def fscopy(src, dst, excludes1, tn = ""):
     dst = dst1
     dstp = re.sub(r"/+$", "", os.path.dirname(dst))
     # Get a list of all files
-    files = listdir(src, {"recurse": True, "dirs": True, "symlinks": False}, tn)
+    files = listdir(src, recurse = True, dirs = True, symlinks = False, tn = tn)
     # Exclude the files that are not wanted
     excludes = []
     if len(excludes1) > 0:
@@ -330,7 +329,7 @@ def fscopy(src, dst, excludes1, tn = ""):
             npmd5 = genMD5(newpath)
             if fpmd5 == npmd5:
                 continue
-        dfile = delink(fullpath)
+        dfile = delink(fullpath, False)
         if dfile is not None:
             '''logger.logVV(tn, logger.D, utilities.utf8all(file_, " ",
                                             _("is a symlink. Creating an identical symlink at"), " ",
@@ -363,7 +362,7 @@ def fscopy(src, dst, excludes1, tn = ""):
 #     remoriginal (True or False): If True, remove the original directory too
 def adrm(dirs, options, excludes1 = [], tn = ""):
     # Get a list of all files inside the directory
-    files = listdir(dirs, {"recurse": True, "dirs": True, "symlinks": False}, tn)
+    files = listdir(dirs, recurse = True, dirs = True, symlinks = False, tn = tn)
     utilities.setDefault(options, excludes = False, remdirs = True, remsymlink = True,
                          remfullpath = False, remoriginal = True)
     excludes = []
