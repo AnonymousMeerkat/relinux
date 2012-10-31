@@ -310,7 +310,8 @@ def fscopy(src, dst, excludes1, tn = ""):
         excludes = exclude(files, excludes1)
     makedir(dst)
     # Copy the files
-    for file__ in files:
+    for file___ in files:
+        file__ = utilities.utf8(os.path.abspath(file___))
         file_ = utilities.utf8(os.path.basename(utilities.utf8(file__)))
         # Make sure we don't copy files that are supposed to be excluded
         if file_ in excludes:
@@ -331,7 +332,7 @@ def fscopy(src, dst, excludes1, tn = ""):
             logger.logVV(tn, logger.D, utilities.utf8all(file_, " ",
                                             _("is a symlink. Creating an identical symlink at"), " ",
                                             newpath))
-            logger.logI(tn, logger.D, utilities.utf8all(os.path.normpath("/" +
+            logger.logI(tn, logger.D, utilities.utf8all("ORIGINAL ", dfile, "NEW ", os.path.normpath("/" +
                                     abspath(os.path.relpath(dfile, fullpath), newpath)[len(dst):])))
             symlink(os.path.normpath("/" +
                                     abspath(os.path.relpath(dfile, fullpath), newpath)[len(dst):]),
