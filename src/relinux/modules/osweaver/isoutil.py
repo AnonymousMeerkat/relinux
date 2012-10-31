@@ -268,7 +268,7 @@ class genISO(threadmanager.Thread):
         # Generate MD5 checksums
         logger.logV(self.tn, logger.I, _("Generating MD5 sums"))
         files = open(isotreel + "md5sum.txt", "w")
-        for x in fsutil.listdir(isotreel, {"recurse": True}):
+        for x in fsutil.listdir(isotreel, tn = self.tn):
             i = re.sub(r"^ *" + isotreel + "/*", "./", x)
             if not "isolinux" in i and not "md5sum" in i:
                 logger.logVV(self.tn, logger.I, _("Writing MD5 sum of") + " " + i)
