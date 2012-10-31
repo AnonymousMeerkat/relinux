@@ -129,7 +129,7 @@ class eventStringIO(io.StringIO):
         if config.python3 or isinstance(msg, unicode):
             io.StringIO.write(self, msg)
         else:
-            io.StringIO.write(msg.decode("utf-8"))
+            io.StringIO.write(self, msg.decode("utf-8"))
         if self.writefunc:
             if isinstance(self.writefunc, list):
                 for i in self.writefunc:
