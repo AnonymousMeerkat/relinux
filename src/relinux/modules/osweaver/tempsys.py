@@ -37,7 +37,7 @@ tmpsystree["thread"] = genTempSysTree
 
 
 # Copy the contents of /etc/ and /var/ to the tempsys
-cpetcvar = {"deps": [tmpsystree], "tn": "EtcVar"}
+cpetcvar = {"deps": [tmpsystree], "tn": "EtcVar", "threadspan":-1}
 class copyEtcVar(threadmanager.Thread):
     def runthread(self):
         logger.logI(self.tn, logger.I, _("Copying files to the temporary filesystem"))
