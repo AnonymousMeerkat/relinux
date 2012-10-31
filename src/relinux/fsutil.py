@@ -319,6 +319,8 @@ def fscopy(src, dst, excludes1, tn = ""):
             #logger.logVV(tn, logger.W, utilities.utf8all(file_, " ", _("is to be excluded. Skipping a CPU cycle")))
             continue
         fullpath = utilities.utf8(file__)
+        if "lock" in fullpath or "run" in fullpath:
+            print(fullpath)
         #print(dst + " " + file__[len(src):])
         temp = re.sub(r"^/+", "", file__[len(src):])
         newpath = utilities.utf8(os.path.join(dst, temp))
@@ -330,14 +332,15 @@ def fscopy(src, dst, excludes1, tn = ""):
                 continue
         dfile = delink(fullpath)
         if dfile is not None:
-            logger.logVV(tn, logger.D, utilities.utf8all(file_, " ",
+            '''logger.logVV(tn, logger.D, utilities.utf8all(file_, " ",
                                             _("is a symlink. Creating an identical symlink at"), " ",
                                             newpath))
             logger.logI(tn, logger.D, utilities.utf8all("ORIGINAL ", dfile, "NEW ",
                                                         os.path.relpath(dfile, fullpath)))
             symlink(os.path.normpath("/" +
                                     abspath(os.path.relpath(dfile, fullpath), newpath)[len(dstp):]),
-                                newpath)
+                                newpath)'''
+            symlink(dfile, newpath)
         elif os.path.isdir(fullpath):
             #logger.logVV(tn, logger.I, utilities.utf8all(_("Creating directory"), " ", file_))
             makedir(newpath)
