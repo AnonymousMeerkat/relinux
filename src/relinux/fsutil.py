@@ -41,10 +41,11 @@ def delink(files, recursive = False):
         if recursive:
             notfound = True
             while notfound:
-                link = utilities.utf8(os.readlink(files))
+                link = delink(files, False)
                 notfound = os.path.islink(link)
         else:
-            link = utilities.utf8(os.readlink(files))
+            link_ = utilities.utf8(os.readlink(files))
+            link = os.path.normpath(os.path.join(files, link_))
         return link
     return None
 
