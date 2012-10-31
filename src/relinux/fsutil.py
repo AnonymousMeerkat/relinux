@@ -33,6 +33,12 @@ def beautifypath(path):
 def relpath(files):
         return os.path.join(os.curdir, os.path.relpath(files, os.curdir))
 
+# Generates an absolute path
+def abspath(files, src):
+    if not os.path.isabs(files):
+        return os.path.normpath(os.path.join(src, files))
+    else:
+        return files
 
 # Reads the link location of a file or returns None
 def delink(files, recursive = False):
@@ -45,7 +51,7 @@ def delink(files, recursive = False):
                 notfound = os.path.islink(link)
         else:
             link_ = utilities.utf8(os.readlink(files))
-            link = os.path.normpath(os.path.join(files, link_))
+            link = abspath(link_, files)
         return link
     return None
 
@@ -325,10 +331,10 @@ def fscopy(src, dst, excludes1, tn = ""):
             logger.logVV(tn, logger.D, utilities.utf8all(file_, " ",
                                             _("is a symlink. Creating an identical symlink at"), " ",
                                             newpath))
-            logger.logVV(tn, logger.D, utilities.utf8all(os.path.normpath("/" + os.path.normpath(os.path.join(newpath,
-                                    os.path.relpath(dfile, fullpath)))[len(dst):])))
-            symlink(os.path.normpath("/" + os.path.normpath(os.path.join(newpath,
-                                    os.path.relpath(dfile, fullpath)))[len(dst):]),
+            logger.logI(tn, logger.D, utilities.utf8all(os.path.normpath("/" +
+                                    abspath(os.path.relpath(dfile, fullpath), newpath)[len(dst):])))
+            symlink(os.path.normpath("/" +
+                                    abspath(os.path.relpath(dfile, fullpath), newpath)[len(dst):]),
                                 newpath)
         elif os.path.isdir(fullpath):
             #logger.logVV(tn, logger.I, utilities.utf8all(_("Creating directory"), " ", file_))
