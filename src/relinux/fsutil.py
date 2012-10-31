@@ -278,21 +278,20 @@ def chmod(files, mod, tn = ""):
 #    symlinks (True or False): If True and recurse is True, recurse into symlink directories
 def listdir(x, **options):
     utilities.setDefault(options, recurse = True, dirs = True, symlinks = False, tn = "")
-    if not os.path.isdir(x):
-        return None
-    if options["dirs"]:
-        yield utilities.utf8(x)
-    for i in os.listdir(x):
-        f = utilities.utf8(os.path.join(x, i))
-        if os.path.isdir(f):
-            if (os.path.islink(f) and not options["symlinks"] or
-                (not options["recurse"] and options["dirs"])):
+    if os.path.isdir(x):
+        if options["dirs"]:
+            yield utilities.utf8(x)
+        for i in os.listdir(x):
+            f = utilities.utf8(os.path.join(x, i))
+            if os.path.isdir(f):
+                if (os.path.islink(f) and not options["symlinks"] or
+                    (not options["recurse"] and options["dirs"])):
+                    yield f
+                    continue
+                for y in listdir(f, **options):
+                    yield y
+            else:
                 yield f
-                continue
-            for y in listdir(f, **options):
-                yield y
-        else:
-            yield f
 
 
 # Filesystem copier (like rsync --exclude... -a SRC DST)
