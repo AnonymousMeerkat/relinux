@@ -333,8 +333,8 @@ def fscopy(src, dst, excludes1, tn = ""):
             logger.logVV(tn, logger.D, utilities.utf8all(file_, " ",
                                             _("is a symlink. Creating an identical symlink at"), " ",
                                             newpath))
-            logger.logI(tn, logger.D, utilities.utf8all("ORIGINAL ", dfile, "NEW ", os.path.normpath("/" +
-                                    abspath(os.path.relpath(dfile, fullpath), newpath)[len(dstp):])))
+            logger.logI(tn, logger.D, utilities.utf8all("ORIGINAL ", dfile, "NEW ",
+                                                        os.path.relpath(dfile, fullpath)))
             symlink(os.path.normpath("/" +
                                     abspath(os.path.relpath(dfile, fullpath), newpath)[len(dstp):]),
                                 newpath)
