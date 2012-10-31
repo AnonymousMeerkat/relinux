@@ -4,7 +4,7 @@ Contains streams for logging information
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 """
 
-from relinux import config
+from relinux import config, utilities
 import copy
 #from threading import RLock
 
@@ -105,7 +105,7 @@ def writeAll(status, lists, tn, importance, text, **options):
                 text__ += config.TermBlue'''
             text__ += "m" + text_ + "\033[" + str(config.TermReset) + "m"
             text_ = text__
-        i.write(text_ + MNewline)
+        i.write(utilities.utf8(text_ + MNewline))
 
 
 # Generates a thread name string
