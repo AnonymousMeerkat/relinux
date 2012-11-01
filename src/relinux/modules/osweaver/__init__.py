@@ -204,10 +204,11 @@ def run(*args):
     ui.setupUi(page_container)
     ui.notroot.hide()
     # TODO: Figure out why the terminal is always crashing relinux!
-    # Some random error messages that could help:
+    # Some random error messages that could help debug:
     ##############################################
     # QTextLine: Can't set a line width while not layouting.
-    ui.terminal.hide()
+    if not configutils.getValue(config.Configuration["Relinux"]["EXPERIMENTFEATURES"]):
+        ui.terminal.hide()
     class customMsgBox(QtGui.QMessageBox):
         @QtCore.pyqtSlot(QtCore.QString)
         def realSetText(self, text):

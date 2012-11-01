@@ -71,7 +71,7 @@ def main():
     parser = ArgumentParser(prog = "relinux", usage = "%(prog)s [options]")
     parser.add_argument("-V", "--version", action = "store_true",
                       dest = "showversion",
-                      help = "show version info")
+                      help = "show version information")
     parser.add_argument("-q", "--quiet",
                   action = "store_true", dest = "quiet", default = False,
                   help = "log as little as possible to stdout")
@@ -81,6 +81,8 @@ def main():
     parser.add_argument("-vv", "--veryverbose",
                   action = "store_true", dest = "veryverbose", default = False,
                   help = "log even more to stdout")
+    parser.add_argument("--no-stylesheet", action = "store_true", dest = "nostylesheet", default = False,
+                        help = "don't use any stylesheets")
     args = parser.parse_args()
     config.EFiles.extend([config.GUIStream, sys.stdout])
     if args.showversion:

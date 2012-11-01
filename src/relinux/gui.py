@@ -225,6 +225,7 @@ class GUI(QtGui.QMainWindow):
                 c = configutils.getValueP(configs[i][x], configutils.category)
                 n = configutils.getValueP(configs[i][x], configutils.name)
                 t = configutils.getValueP(configs[i][x], configutils.types)
+                d = configutils.getValueP(configs[i][x], configutils.desc)
                 v_ = configutils.getValue(configs[i][x])
                 c_ = configutils.getChoices(t)
                 var = (i, x)
@@ -258,6 +259,7 @@ class GUI(QtGui.QMainWindow):
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n] = {}
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l] = QtGui.QLabel()
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l].setText(n)
+                self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l].setToolTip(d)
                 # Add the value
                 if t == configutils.yesno:
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = ConfigWidget(QtGui.QCheckBox(), var)
@@ -288,6 +290,7 @@ class GUI(QtGui.QMainWindow):
                     p = self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget
                 else:
                     p = self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v]
+                p.setToolTip(d)
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.addRow(
                         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l], p)
 
