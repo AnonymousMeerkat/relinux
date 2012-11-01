@@ -220,6 +220,9 @@ class genWUBI(threadmanager.Thread):
             files.write("PictureFiles=false\n")
             files.write("VideoFiles=false\n")
             files.close()
+            self.setProgress(self.tn, 50)
+            logger.logV(self.tn, logger.I, _("Copying WUBI to the ISO tree"))
+            copyFile(config.relinuxdir + "/wubi.exe", isotreel + "wubi.exe")
 genwubi["thread"] = genWUBI
 
 
@@ -232,16 +235,20 @@ class USBComp(threadmanager.Thread):
         files = open(isotreel + ".disk/info", "w")
         files.write(getDiskName() + "\n")
         files.close()
+        self.setProgress(self.tn, 20)
         logger.logV(self.tn, logger.I, _("Making symlink pointing to the ISO root dir"))
         if os.path.lexists(isotreel + "ubuntu"):
             fsutil.rm(isotreel + "ubuntu", False, self.tn)
         os.symlink(isotreel, isotreel + "ubuntu")
+        self.setProgress(self.tn, 40)
         logger.logVV(self.tn, logger.I, _("Writing release notes URL"))
         files = open(isotreel + ".disk/release_notes_url", "w")
         files.write(configutils.getValue(configs[configutils.url]) + "\n")
         files.close()
+        self.setProgress(self.tn, 60)
         logger.logVV(self.tn, logger.I, _("Writing .disk/base_installable"))
         fsutil.touch(isotreel + ".disk/base_installable")
+        self.setProgress(self.tn, 80)
         logger.logVV(self.tn, logger.I, _("Writing CD Type"))
         files = open(isotreel + ".disk/cd_type", "w")
         files.write("full_cd/single\n")
