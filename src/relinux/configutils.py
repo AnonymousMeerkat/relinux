@@ -412,12 +412,18 @@ def humanizeBoolean(bool_):
 
 # Returns a list from a Multiple Values value
 def parseMultipleValues(option):
-    return option.split()
+    if hasattr(option, "split"):
+        return option.split()
+    else:
+        return option
 
 
 # Returns a human-readable version of a list
 def humanizeList(list_):
-    return " ".join(list_)
+    if isinstance(list_, list):
+        return " ".join(list_)
+    else:
+        return list_
 
 
 # Returns a parsed choice list (None if not a choice list, buffer must be the value of the Type option)
