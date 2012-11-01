@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'modules/osweaver/osweaver.ui'
 #
-# Created: Mon Oct 15 16:31:41 2012
+# Created: Thu Nov  1 16:25:46 2012
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
