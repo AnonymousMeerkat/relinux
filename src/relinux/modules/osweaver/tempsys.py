@@ -202,7 +202,6 @@ class remUsers(threadmanager.Thread):
                 max_uid = 1999
                 sysrange = 555
         usrs = pwdmanip.getPPByUID(numrange.gen_num_range(sysrange, max_uid), pe)
-        print(usrs)
         if config.VVStatus is False:
             logger.logV(self.tn, logger.I, _("Removing them"))
         logger.logVV(self.tn, logger.I, _("Removing users in /etc/passwd"))

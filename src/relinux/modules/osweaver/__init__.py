@@ -36,7 +36,6 @@ def run(*args):
     configs = config.Configuration["OSWeaver"]
     isodir = configutils.getValue(configs[configutils.isodir])
     config.ISOTree = isodir + "/.ISO_STRUCTURE/"
-    print(config.ISOTree)
     config.TempSys = isodir + "/.TMPSYS/"
     aptcache = config.AptCache
     ourgui = config.Gui
@@ -312,7 +311,6 @@ def run(*args):
                 else:
                     numthreads2 += threads[i]["threadspan"]
                     threadspans[tn] = threads[i]["threadspan"]
-        print(threadspans)
         tfdeps = False
         if ui.nodepends.isChecked():
             tfdeps = True

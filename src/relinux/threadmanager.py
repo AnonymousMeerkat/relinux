@@ -63,7 +63,6 @@ def findRunnableThreads(threadids, threadsdone, threadsrunning, threads, **optio
                     for x in thread["deps"]:
                         if not x in threadsdone:
                             ls.append(str(getThread(x, threads)["tn"]) + " " + str(x))
-                    print(thread["tn"] + " " + str(i) + " " + str(ls))
         if current >= cpumax:
             break
     return returnme
