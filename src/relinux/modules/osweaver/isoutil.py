@@ -174,7 +174,7 @@ class genPakManifest(threadmanager.Thread):
             strs = name + " " + ver + "\n"
             writer.write(strs)
             if (not name in
-                configutils.parseMultipleValues(configutils.getValue(configs[configutils.remafterinst]))):
+                configutils.getValue(configs[configutils.remafterinst])):
                 writer_desktop.write(strs)
         writer.close()
         writer_desktop.close()
