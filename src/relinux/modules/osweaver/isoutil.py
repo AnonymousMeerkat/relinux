@@ -227,7 +227,7 @@ class genWUBI(threadmanager.Thread):
             files.close()
             self.setProgress(self.tn, 50)
             logger.logV(self.tn, logger.I, _("Copying WUBI to the ISO tree"))
-            copyFile(config.relinuxdir + "/wubi.exe", isotreel + "wubi.exe")
+            copyFile(config.relinuxdir + "/wubi.exe", isotreel + "wubi.exe", self.tn)
 genwubi["thread"] = genWUBI
 
 
