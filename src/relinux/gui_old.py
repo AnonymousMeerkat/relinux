@@ -974,6 +974,7 @@ class Multiple(Frame):
         self.remEntry(row)
 
     def __rePack(self, c):
+        print("R")
         self.pluses[c].command = lambda: self._plus(c)
         self.minuses[c].command = lambda: self._minus(c)
         self.entries[c].grid(row = c, column = 0)
@@ -1149,7 +1150,7 @@ class GUI:
                     #r2.grid(row=c1, column=2)
                     r = YesNo(curr, savevar = (i, x), savefunc = self.savefunc)
                     r.grid(row = c1, column = 1)
-                    r.set(configutils.parseBoolean(value))
+                    r.set(value)
                 elif choices is not None and len(choices) > 0:
                     cb = Choice(curr, choices, savevar = (i, x), savefunc = self.savefunc)
                     cb.grid(row = c1, column = 1)

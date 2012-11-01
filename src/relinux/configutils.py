@@ -282,6 +282,10 @@ def parseCompressedBuffer(buffers, filename_):
                                                 os.path.join(
                                                     os.path.dirname(os.path.abspath(filename_)),
                                                         returnme[i][x][value]))
+            elif returnme[i][x][types] == yesno:
+                returnme[i][x][value] = parseBoolean(returnme[i][x][value])
+            elif returnme[i][x][types] == multiple:
+                returnme[i][x][value] = parseMultipleValues(returnme[i][x][value])
     return returnme
 
 
@@ -331,7 +335,7 @@ def compressParsedBuffer(buffers):
 
 def saveBuffer(buffers_):
     buffers = copy.deepcopy(buffers_)
-    # First step: Sort the items into the files
+    # First step: Sort the items into the files and fix values
     files_ = {}
     for i in buffers.keys():
         for x in buffers[i].keys():
@@ -345,9 +349,10 @@ def saveBuffer(buffers_):
             lastfile = os.path.dirname(os.path.abspath(buffers[i][x][files][len(buffers[i][x][files]) - 1]))
             if buffers[i][x][types] == filename:
                 buffers[i][x][value] = os.path.relpath(buffers[i][x][value], lastfile)
-            '''if buffers[i][x][types] == filename and os.path.dirname(buffers[i][x][value]) == lastfile:
-                temp = fsutil.beautifypath(os.curdir + "/" + buffers[i][x][value][len(lastfile):])
-                buffers[i][x][value] = temp'''
+            elif buffers[i][x][types] == yesno:
+                buffers[i][x][value] = humanizeBoolean(buffers[i][x][value])
+            elif buffers[i][x][types] == multiple:
+                buffers[i][x][value] = humanizeList(buffers[i][x][value])
             for y in buffers[i][x].keys():
                 if y == files:
                     continue
@@ -396,9 +401,23 @@ def parseBoolean(option):
         return None
 
 
-# Returns a list from a Multiple Value value
+# Returns a human-readable version of a boolean
+def humanizeBoolean(bool_):
+    if bool_ is True:
+        return "Yes"
+    elif bool_ is False:
+        return "No"
+    else:
+        return "Unknown"
+
+# Returns a list from a Multiple Values value
 def parseMultipleValues(option):
-    return option.split(" ")
+    return option.split()
+
+
+# Returns a human-readable version of a list
+def humanizeList(list_):
+    return " ".join(list_)
 
 
 # Returns a parsed choice list (None if not a choice list, buffer must be the value of the Type option)
@@ -412,16 +431,4 @@ def getChoices(buffers):
             returnme.append(si)
     else:
         return None
-    return returnme
-
-
-# Returns a parsed multiple values list (buffer must be the value)
-def getMultipleValues(buffers):
-    returnme = []
-    patt = re.compile("^ *(.*)")
-    m = patt.match(buffers.strip())
-    if utilities.checkMatched(m):
-        for i in m.group(1).split():
-            si = i.strip()
-            returnme.append(si)
     return returnme

@@ -285,7 +285,7 @@ class CasperConfEditor(threadmanager.Thread):
             logger.logI(self.tn, logger.I, _("Editing casper and LSB configuration files"))
         logger.logV(self.tn, logger.I, _("Editing casper.conf"))
         buildsys = "Ubuntu"
-        if configutils.parseBoolean(configutils.getValue(configs[configutils.casperquiet])) is False:
+        if configutils.getValue(configs[configutils.casperquiet]) is False:
             buildsys = ""
         unionfs = configutils.getValue(configs[configutils.unionfs])
         if unionfs == "overlayfs" and aptutil.compVersions(aptutil.getPkgVersion(aptutil.getPkg("casper", aptcache)), "1.272", aptutil.lt):
@@ -325,7 +325,7 @@ class UbiquitySetup(threadmanager.Thread):
             shutil.copy2("/usr/lib/ubiquity/user-setup/user-setup-apply.orig",
                          "/usr/lib/ubiquity/user-setup/user-setup-apply")
         if (True or
-            configutils.parseBoolean(configutils.getValue(configs[configutils.aptlistchange]))):
+            configutils.getValue(configs[configutils.aptlistchange])):
             if not os.path.exists("/usr/share/ubiquity/apt-setup.relinux-backup"):
                 os.rename("/usr/share/ubiquity/apt-setup",
                           "/usr/share/ubiquity/apt-setup.relinux-backup")

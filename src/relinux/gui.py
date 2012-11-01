@@ -8,13 +8,18 @@ import sys
 from PyQt4 import QtGui, QtCore
 from ui_mainwindow import Ui_MainWindow
 from ui_welcome import Ui_Welcome
-from relinux import config, configutils
+from relinux import config, configutils, logger
+
+
+tn = logger.genTN("GUI")
 
 def quitProg(app):
     sys.exit(app.exec_())
 
 def saveFunc(var, val):
-    config.Configuration[str(var[0])][str(var[1])][configutils.value] = str(val)
+    if isinstance(val, QtCore.QString):
+        val = str(val)
+    config.Configuration[str(var[0])][str(var[1])][configutils.value] = val
     configutils.saveBuffer(config.Configuration)
 
 class RelinuxSplash(QtGui.QSplashScreen):
@@ -36,6 +41,89 @@ class RelinuxSplash(QtGui.QSplashScreen):
         painter.drawImage(self.imageviewer.read())
         self.frameid += 1
 
+
+class MultipleValues(QtGui.QWidget):
+    def __init__(self, thevar):
+        QtGui.QWidget.__init__(self)
+        self.thevar = thevar
+        self.gridlayout = QtGui.QGridLayout()
+        self.entries = []
+        self.pluses = []
+        self.minuses = []
+        self.dontsave = False
+        self.addEntry(0)
+        self.setLayout(self.gridlayout)
+
+    def addEntry(self, row):
+        self.entries.insert(row, QtGui.QLineEdit())
+        plusbtn = QtGui.QPushButton("+")
+        plusbtn.clicked.connect(lambda *args: self._plus(row))
+        self.pluses.insert(row, plusbtn)
+        minusbtn = QtGui.QPushButton("-")
+        minusbtn.clicked.connect(lambda *args: self._minus(row))
+        self.minuses.insert(row, minusbtn)
+        self.gridlayout.addWidget(self.entries[row], row, 0)
+        self.gridlayout.addWidget(self.minuses[row], row, 1)
+        self.gridlayout.addWidget(self.pluses[row], row, 2)
+        self.entries[row].textEdited.connect(self.save)
+        self._rePack()
+
+    def remEntry(self, row):
+        self.gridlayout.removeWidget(self.entries[row])
+        self.gridlayout.removeWidget(self.minuses[row])
+        self.gridlayout.removeWidget(self.pluses[row])
+        self.entries[row].deleteLater()
+        self.minuses[row].deleteLater()
+        self.pluses[row].deleteLater()
+        del(self.entries[row])
+        del(self.minuses[row])
+        del(self.pluses[row])
+        self._rePack()
+
+    def set(self, arr):
+        self.dontsave = True
+        for i in range(len(self.entries)):
+            self.remEntry(i)
+        if len(arr) > 0:
+            for i in range(len(arr)):
+                self.addEntry(i)
+                self.entries[i].setText(arr[i])
+        else:
+            self.addEntry(0)
+        self.dontsave = False
+        self._rePack()
+
+    def _plus(self, row):
+        self.addEntry(row + 1)
+
+    def _minus(self, row):
+        self.remEntry(row)
+
+    def __rePack(self, c):
+        a = [self.pluses[c], self.minuses[c]]
+        for i in range(len(a)):
+            a[i].clicked.disconnect()
+        self.pluses[c].clicked.connect(lambda *args: self._plus(c))
+        self.minuses[c].clicked.connect(lambda *args: self._minus(c))
+        a = [self.entries[c], self.minuses[c], self.pluses[c]]
+        for i in range(len(a)):
+            self.gridlayout.removeWidget(a[i])
+            self.gridlayout.addWidget(a[i], c, i)
+
+    def _rePack(self):
+        for c in range(len(self.entries)):
+            self.__rePack(c)
+        self.save()
+
+    def save(self):
+        if self.dontsave:
+            return
+        arr = []
+        for i in self.entries:
+            if str(i.text()).strip() != "":
+                arr.append(str(i.text()).strip())
+        saveFunc(self.thevar, arr)
+
 class ConfigWidget():
     def __init__(self, widget, thevar):
         self.widget = widget
@@ -45,7 +133,7 @@ class ConfigWidget():
             saveFunc(thevar, s)
         if isinstance(widget, QtGui.QCheckBox):
             # State > 0 = Checked (1 = partially checked, 2 = checked)
-            widget.stateChanged.connect(lambda s: temp("Yes" if s > 0 else "No"))
+            widget.stateChanged.connect(lambda s: temp(True if s > 0 else False))
         elif isinstance(widget, QtGui.QComboBox):
             # As Qt documents that currentIndexChanged can either send an int or a QString,
             # we'll add support for both
@@ -140,6 +228,7 @@ class GUI(QtGui.QMainWindow):
                 v_ = configutils.getValue(configs[i][x])
                 c_ = configutils.getChoices(t)
                 var = (i, x)
+                uw = True
                 # If the category is not in the section's notebook, add it
                 if not c in self.configTab.notebook1.__dict__[i].nbook.__dict__:
                     fw = QtGui.QWidget(self.configTab.notebook1.__dict__[i].nbook)
@@ -172,7 +261,7 @@ class GUI(QtGui.QMainWindow):
                 # Add the value
                 if t == configutils.yesno:
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = ConfigWidget(QtGui.QCheckBox(), var)
-                    if configutils.parseBoolean(v_):
+                    if v_:
                         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.setChecked(True)
                 elif c_ is not None and len(c_) > 0:
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = ConfigWidget(QtGui.QComboBox(), var)
@@ -183,14 +272,24 @@ class GUI(QtGui.QMainWindow):
                         if y == v_:
                             self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.setCurrentIndex(c__)
                         c__ += 1
+                elif t == configutils.multiple:
+                    if not isinstance(v_, list):
+                        # Wut?
+                        logger.logE(self.tn, logger.E, "Something went wrong")
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = MultipleValues(var)
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].set(v_)
+                    uw = False
                 else:
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = ConfigWidget(QtGui.QLineEdit(), var)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.setText(v_)
                 #self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.setSizePolicy(
                 #                    QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding))
+                if uw:
+                    p = self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget
+                else:
+                    p = self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v]
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.addRow(
-                        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l],
-                        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget)
+                        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l], p)
 
     def addTab(self, *args):
         self.ui.moduleNotebook.addTab(*args)

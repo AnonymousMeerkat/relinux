@@ -83,6 +83,9 @@ def writeAll(status, lists, tn, importance, text, **options):
         text_ += MWarning
     elif importance == D:
         text_ += MDebug
+        from relinux import configutils
+        if not configutils.getValue(config.Configuration["Relinux"]["DEBUG"]):
+            return
     else:
         text_ += ""
     text__ = text_ + text

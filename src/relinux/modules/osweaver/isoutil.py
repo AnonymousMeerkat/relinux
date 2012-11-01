@@ -103,7 +103,7 @@ copypreseed["thread"] = copyPreseed
 copymemtest = {"deps": [genisotree], "tn": "Memtest"}
 class copyMemtest(threadmanager.Thread):
     def runthread(self):
-        if configutils.parseBoolean(configutils.getValue(configs[configutils.memtest])):
+        if configutils.getValue(configs[configutils.memtest]):
             logger.logV(self.tn, logger.I, _("Copying memtest to the ISO tree"))
             copyFile("/boot/memtest86+.bin", isotreel + "isolinux/memtest", self.tn)
 copymemtest["thread"] = copyMemtest
@@ -207,7 +207,7 @@ copykernel["thread"] = copyKernel
 genwubi = {"deps": [genisotree], "tn": "WUBI"}
 class genWUBI(threadmanager.Thread):
     def runthread(self):
-        if configutils.parseBoolean(configutils.getValue(configs[configutils.enablewubi])) is True:
+        if configutils.getValue(configs[configutils.enablewubi]) is True:
             logger.logV(self.tn, logger.I, _("Generating the windows autorun.inf"))
             files = open(isotreel + "autorun.inf", "w")
             files.write("[autorun]\n")

@@ -32,7 +32,7 @@ class setupInst(threadmanager.Thread):
             aptutil.remPkg(aptutil.getPkg("ubiquity-frontend-kde", self.aptcache), True)
             aptutil.instPkg(aptutil.getPkg("ubiquity-frontend-gtk", self.aptcache))
         logger.logV(self.tn, logger.I, "Setting up Popularity Contest")
-        if configutils.parseBoolean(configutils.getValue(configs[configutils.popcon])):
+        if configutils.getValue(configs[configutils.popcon]):
             aptutil.instPkg(aptutil.getPkg("popularity-contest", self.aptcache))
         else:
             aptutil.remPkg(aptutil.getPkg("popularity-contest", self.aptcache), True)
