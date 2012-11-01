@@ -115,15 +115,19 @@ class copySysLinux(threadmanager.Thread):
     def runthread(self):
         logger.logV(self.tn, logger.I, _("Copying ISOLINUX to the ISO tree"))
         copyFile("/usr/lib/syslinux/isolinux.bin", isotreel + "isolinux/", self.tn, True)
+        self.setProgress(self.tn, 20)
         copyFile("/usr/lib/syslinux/vesamenu.c32", isotreel + "isolinux/", self.tn, True)
+        self.setProgress(self.tn, 40)
         logger.logVV(self.tn, logger.I, _("Copying isolinux.cfg to the ISO tree"))
         copyFile(configutils.getValue(configs[configutils.isolinuxfile]), isotreel +
                                       "isolinux/isolinux.cfg", self.tn, True)
+        self.setProgress(self.tn, 50)
         # Edit the isolinux.cfg file to replace the variables
         logger.logV(self.tn, logger.I, _("Editing isolinux.cfg"))
         splash = os.path.basename(configutils.getValue(configs[configutils.splash]))
         shutil.copy2(configutils.getValue(configs[configutils.splash]),
                      isotreel + "isolinux/" + splash)
+        self.setProgress(self.tn, 70)
         for i in [["LABEL", configutils.getValue(configs[configutils.label])],
                   ["SPLASH", splash],
                   ["TIMEOUT", configutils.getValue(configs[configutils.timeout])]]:
@@ -147,6 +151,7 @@ class diskDefines(threadmanager.Thread):
                                                       "TOTALNUM": "0",
                                                       "TOTALNUM0": ct
                                                       })
+        self.setProgress(self.tn, 50)
         # For some reason casper needs (or used to need) the diskdefines in its own directory
         copyFile(isotreel + "README.diskdefines", isotreel + "casper/README.diskdefines", self.tn)
 diskdefines["thread"] = diskDefines
