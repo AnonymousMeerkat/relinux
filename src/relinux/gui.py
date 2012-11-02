@@ -130,6 +130,7 @@ class FileName(QtGui.QWidget):
         QtGui.QWidget.__init__(self)
         self.thevar = thevar
         self.gridlayout = QtGui.QGridLayout()
+        self.gridlayout.setVerticalSpacing(0)
         self.entry = QtGui.QLineEdit()
         self.entry.textEdited.connect(self.save)
         self.gridlayout.addWidget(self.entry, 0, 0)
