@@ -234,6 +234,33 @@ class GUI(QtGui.QMainWindow):
         self.fillConfiguration(configs, self.configTab)
         self.ui.moduleNotebook.addTab(self.configTab, _("Configuration"))
 
+    def addCategory(self, section, category):
+        i = section
+        c = category
+        fw = QtGui.QWidget(self.configTab.notebook1.__dict__[i].nbook)
+        vb = QtGui.QVBoxLayout(fw)
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[c] = QtGui.QScrollArea(fw)
+        vb.addWidget(self.configTab.notebook1.__dict__[i].nbook.__dict__[c])
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].setWidgetResizable(True)
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout = QtGui.QFormLayout()
+        #self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setSizeConstraint(
+        #                                            QtGui.QLayout.SetFixedSize)
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setFieldGrowthPolicy(
+                                            QtGui.QFormLayout.ExpandingFieldsGrow)
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setLabelAlignment(
+                                            QtCore.Qt.AlignLeft)
+        #self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setFormAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop);
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC = QtGui.QWidget()
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC.setLayout(
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout)
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC.setSizePolicy(
+                                                    QtGui.QSizePolicy.MinimumExpanding,
+                                            QtGui.QSizePolicy.Preferred)
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].setWidget(
+                self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC)
+        self.configTab.notebook1.__dict__[i].nbook.addTab(
+                            fw, c)
+
     def fillConfiguration(self, configs, widget):
         # TODO: Clean this mess, or at least comment it
         l = "l"
@@ -249,7 +276,11 @@ class GUI(QtGui.QMainWindow):
                 self.configTab.notebook1.__dict__[i].vlayout.addWidget(
                                                         self.configTab.notebook1.__dict__[i].nbook)
                 self.configTab.notebook1.addTab(self.configTab.notebook1.__dict__[i], i)
+            for c in configutils.getValue(configs[i][configutils.categories]):
+                self.addCategory(i, c)
             for x in configs[i].keys():
+                if x == configutils.categories:
+                    continue
                 c = configutils.getValueP(configs[i][x], configutils.category)
                 n = configutils.getValueP(configs[i][x], configutils.name)
                 t = configutils.getValueP(configs[i][x], configutils.types)
@@ -260,29 +291,7 @@ class GUI(QtGui.QMainWindow):
                 uw = True
                 # If the category is not in the section's notebook, add it
                 if not c in self.configTab.notebook1.__dict__[i].nbook.__dict__:
-                    fw = QtGui.QWidget(self.configTab.notebook1.__dict__[i].nbook)
-                    vb = QtGui.QVBoxLayout(fw)
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c] = QtGui.QScrollArea(fw)
-                    vb.addWidget(self.configTab.notebook1.__dict__[i].nbook.__dict__[c])
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].setWidgetResizable(True)
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout = QtGui.QFormLayout()
-                    #self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setSizeConstraint(
-                    #                                            QtGui.QLayout.SetFixedSize)
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setFieldGrowthPolicy(
-                                                        QtGui.QFormLayout.ExpandingFieldsGrow)
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setLabelAlignment(
-                                                                        QtCore.Qt.AlignLeft)
-                    #self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setFormAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop);
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC = QtGui.QWidget()
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC.setLayout(
-                            self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout)
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC.setSizePolicy(
-                                                                QtGui.QSizePolicy.MinimumExpanding,
-                                                        QtGui.QSizePolicy.Preferred)
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].setWidget(
-                            self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC)
-                    self.configTab.notebook1.__dict__[i].nbook.addTab(
-                                        fw, c)
+                    self.addCategory(i, c)
                 # Add the dictionary
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n] = {}
                 # Add the label

@@ -11,6 +11,7 @@ import glob
 import copy
 
 # Codes
+categories = "__CATEGORIES__"
 excludes = "EXCLUDES"
 preseed = "PRESEED"
 memtest = "MEMTEST"
@@ -47,14 +48,16 @@ category = "Category"
 types = "Type"
 value = "Value"
 files = "__files__"
-
+# Types
 filename = "Filename"
 yesno = "Yes/No"
 multiple = "Multiple Values"
 text = "Text"
 choice = "Choice"
-
 custom = "Custom"
+# Categories
+general = "General"
+advanced = "Advanced"
 
 
 # Returns an empty-line-cleaned version of the buffer
@@ -219,20 +222,31 @@ def getKernel(buffer1):
     return _getKernel(0, buffers)
 
 
-# Temporary key for saving
-def saveSort(l):
-        if l == name:
-            return "a"
-        elif l == desc:
-            return "b"
-        elif l == types:
-            return "c"
-        elif l == category:
-            return "d"
-        elif l == value:
-            return "e"
-        else:
-            return l
+# Temporary key for saving properties
+def savePropertySort(l):
+    if l == name:
+        return "a"
+    elif l == desc:
+        return "b"
+    elif l == types:
+        return "c"
+    elif l == category:
+        return "d"
+    elif l == value:
+        return "e"
+    else:
+        return l
+
+
+# Temporary key for categories
+def categorySort(l_):
+    l = l_.lower()
+    if l == general.lower():
+        return "a"
+    elif l == advanced.lower():
+        return "b"
+    else:
+        return l
 
 
 # Returns a human-readable version of a compressed buffer (if it isn't compressed, it will look weird)
@@ -250,7 +264,7 @@ def beautify(buffers):
             returnme.append("  Option " + x)
             returnme.append("")
             opts = getProperties(getLinesWithinOption(buffer1, x))
-            for y in sorted(list(opts.keys()), key = saveSort):
+            for y in sorted(list(opts.keys()), key = savePropertySort):
                 returnme.append("    " + y + ": " + opts[y])
             returnme.append("")
             returnme.append("  EndOption")
@@ -274,8 +288,11 @@ def parseCompressedBuffer(buffers, filename_):
     for i in getSections(buffers):
         returnme[i] = {}
         liness = getLinesWithinSection(buffers, i)
+        categs = []
         for x in getOptions(liness):
             returnme[i][x] = getProperties(getLinesWithinOption(liness, x))
+            if not returnme[i][x][category] in categs:
+                categs.append(returnme[i][x][category])
             if returnme[i][x][types] == filename:
                 if not os.path.isabs(returnme[i][x][value]):
                     returnme[i][x][value] = os.path.abspath(
@@ -286,6 +303,8 @@ def parseCompressedBuffer(buffers, filename_):
                 returnme[i][x][value] = parseBoolean(returnme[i][x][value])
             elif returnme[i][x][types] == multiple:
                 returnme[i][x][value] = parseMultipleValues(returnme[i][x][value])
+        returnme[i][categories] = {}
+        returnme[i][categories][value] = sorted(categs, key = categorySort)
     return returnme
 
 
@@ -326,7 +345,7 @@ def compressParsedBuffer(buffers):
         returnme.append("Section " + i)
         for x in utilities.sort(list(buffers[i].keys())):
             returnme.append("Option " + x)
-            for y in sorted(list(buffers[i][x].keys()), key = saveSort):
+            for y in sorted(list(buffers[i][x].keys()), key = savePropertySort):
                 returnme.append(y + ": " + buffers[i][x][y])
             returnme.append("EndOption")
         returnme.append("EndSection")
@@ -339,6 +358,8 @@ def saveBuffer(buffers_):
     files_ = {}
     for i in buffers.keys():
         for x in buffers[i].keys():
+            if x == categories:
+                continue
             for f in buffers[i][x][files]:
                 if not f in files_:
                     files_[f] = {}
