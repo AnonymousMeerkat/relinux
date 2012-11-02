@@ -124,6 +124,33 @@ class MultipleValues(QtGui.QWidget):
                 arr.append(str(i.text()).strip())
         saveFunc(self.thevar, arr)
 
+
+class FileName(QtGui.QWidget):
+    def __init__(self, thevar):
+        QtGui.QWidget.__init__(self)
+        self.thevar = thevar
+        self.gridlayout = QtGui.QGridLayout()
+        self.entry = QtGui.QLineEdit()
+        self.entry.textEdited.connect(self.save)
+        self.gridlayout.addWidget(self.entry, 0, 0)
+        self.btn = QtGui.QPushButton("...")
+        self.btn.clicked.connect(self.onbtnclicked)
+        self.gridlayout.addWidget(self.btn, 0, 1)
+        self.setLayout(self.gridlayout)
+
+    def onbtnclicked(self, *args):
+        f = str(QtGui.QFileDialog.getOpenFileName(self, config.product, config.homedir))
+        if f != None and f != "":
+            self.entry.setText(f)
+            self.save()
+
+    def set(self, s):
+        self.entry.setText(s)
+
+    def save(self, *args):
+        saveFunc(self.thevar, self.entry.getText())
+
+
 class ConfigWidget():
     def __init__(self, widget, thevar):
         self.widget = widget
@@ -279,6 +306,10 @@ class GUI(QtGui.QMainWindow):
                         # Wut?
                         logger.logE(self.tn, logger.E, "Something went wrong")
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = MultipleValues(var)
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].set(v_)
+                    uw = False
+                elif t == configutils.filename:
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = FileName(var)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].set(v_)
                     uw = False
                 else:

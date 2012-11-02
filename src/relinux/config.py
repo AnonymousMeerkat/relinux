@@ -13,6 +13,7 @@ import os
 mainsrcdir = sys.path[0]
 srcdir = os.path.abspath(os.path.join(mainsrcdir, os.pardir))
 relinuxdir = os.path.abspath(os.path.join(srcdir, os.pardir))
+homedir = os.path.expanduser("~")
 
 min_python_version = 0x020700F0 # 2.7.0 final
 max_python_version = 0x040000A0 # 4.0.0a0
