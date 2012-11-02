@@ -190,8 +190,9 @@ def main():
         showMessage(_("Loading APT cache") + " (" + op + ") " + str(minis) + "%")
     aptcache = aptutil.getCache(aptutil.OpProgress(aptupdate, None))
     config.AptCache = aptcache
-    showMessage(_("Loading stylesheet"))
-    App.setStyleSheet(open(mainsrcdir + "/stylesheet.css", "r").read())
+    if not args.nostylesheet:
+        showMessage(_("Loading stylesheet"))
+        App.setStyleSheet(open(mainsrcdir + "/stylesheet.css", "r").read())
     showMessage(_("Loading GUI"))
     gui_ = gui.GUI(App)
     config.Gui = gui_
