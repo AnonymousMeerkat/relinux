@@ -232,7 +232,7 @@ class GUI(QtGui.QMainWindow):
         self.configTab.notebook1 = QtGui.QTabWidget(self.configTab)
         self.configTab.vlayout.addWidget(self.configTab.notebook1)
         self.fillConfiguration(configs, self.configTab)
-        self.ui.moduleNotebook.addTab(self.configTab, "Configuration")
+        self.ui.moduleNotebook.addTab(self.configTab, _("Configuration"))
 
     def fillConfiguration(self, configs, widget):
         # TODO: Clean this mess, or at least comment it
@@ -306,7 +306,7 @@ class GUI(QtGui.QMainWindow):
                 elif t == configutils.multiple:
                     if not isinstance(v_, list):
                         # Wut?
-                        logger.logE(self.tn, logger.E, "Something went wrong")
+                        logger.logE(self.tn, logger.E, _("Something went wrong"))
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = MultipleValues(var)
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].set(v_)
                     uw = False

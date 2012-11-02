@@ -25,16 +25,20 @@ configs = config.Configuration["OSWeaver"]
 # Generate the tree for the tempsys
 tmpsystree = {"deps": [], "tn": "TempSysTree"}
 class genTempSysTree(threadmanager.Thread):
+    def progressfunc(self, progress):
+        self.setProgress(self.tn, progress)
+
     def runthread(self):
         logger.logI(self.tn, logger.I, _("Generating the tree for the temporary filesystem"))
         # Clean the TMPSYS tree, if it exists
         fsutil.rm(tmpsys)
+        self.progressfunc(20)
         # Generate the tree
         fsutil.maketree([tmpsys + "etc", tmpsys + "dev",
                           tmpsys + "proc", [tmpsys + "tmp", 0o1777],
                           tmpsys + "sys", tmpsys + "mnt",
                           tmpsys + "media/cdrom", tmpsys + "var", tmpsys + "home",
-                          tmpsys + "run"], self.tn)
+                          tmpsys + "run"], self.tn, lambda p: self.progressfunc(20 + p / (5 / 3)))
         fsutil.chmod(tmpsys + "tmp", 0o1777, self.tn)
 tmpsystree["thread"] = genTempSysTree
 
@@ -69,6 +73,9 @@ cpetcvar["thread"] = copyEtcVar
 # Remove configuration files that can break the installed/live system
 remconfig = {"deps": [cpetcvar], "tn": "RemConfig"}
 class remConfig(threadmanager.Thread):
+    def progressfunc(self, p):
+        self.setProgress(self.tn, p)
+
     def runthread(self):
         # Remove these files as they can conflict inside the installed system
         logger.logV(self.tn, logger.I, _("Removing personal configurations that can break the installed system"))
@@ -83,32 +90,42 @@ class remConfig(threadmanager.Thread):
 #                        tmpsys + "etc/shadow-", tmpsys + "etc/gshadow", tmpsys + "etc/gshadow-",
                         tmpsys + "etc/wicd/wired-settings.conf",
                         tmpsys + "etc/wicd/wireless-settings.conf", tmpsys + "etc/printcap",
-                        tmpsys + "etc/cups/printers.conf"])
+                        tmpsys + "etc/cups/printers.conf"], self.tn, self.progressfunc)
 remconfig["thread"] = remConfig
 
 
 # Remove cached lists
 remcachedlists = {"deps": [cpetcvar], "tn": "RemCachedLists"}
 class remCachedLists(threadmanager.Thread):
+    def progressfunc(self, p):
+        self.setProgress(self.tn, p)
+
     def runthread(self):
         logger.logV(self.tn, logger.I, _("Removing cached lists"))
-        fsutil.adrm(tmpsys + "var/lib/apt/lists/",
-                    {"excludes": True, "remdirs": False, "remsymlink": True, "remfullpath": False},
-                    ["*.gpg", "*lock*", "*partial*"], self.tn)
+        fsutil.adrm(tmpsys + "var/lib/apt/lists/", excludes = ["*.gpg", "*lock*", "*partial*"],
+                    remdirs = False, remsymlink = True, remfullpath = False, remoriginal = False,
+                    tn = self.tn, progressfunc = self.progressfunc)
 remcachedlists["thread"] = remCachedLists
 
 
 # Remove temporary files in /var
 remtempvar = {"deps": [cpetcvar], "tn": "RemTempVar"}
 class remTempVar(threadmanager.Thread):
+    def progressfunc(self, p):
+        self.setProgress(self.tn, p)
+
     def runthread(self):
         logger.logV(self.tn, logger.I, _("Removing temporary files in /var"))
         # Remove all files in these directories (but not directories inside them)
-        for i in ["etc/NetworkManager/system-connections/", "var/run", "var/log", "var/mail",
-                  "var/spool", "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]:
-            fsutil.adrm(tmpsys + i,
-                        {"excludes": False, "remdirs": False, "remsymlink": True, "remfullpath": False, "remoriginal": False},
-                        None, self.tn)
+        a = ["etc/NetworkManager/system-connections/", "var/run", "var/log", "var/mail",
+                  "var/spool", "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]
+        la = len(a)
+        inc = 100 / la
+        rinc = inc / 100
+        for i in range(la):
+            fsutil.adrm(tmpsys + a[i], excludes = [], remdirs = False, remsymlink = False,
+                        remfullpath = False, remoriginal = False, tn = self.tn,
+                        progressfunc = lambda p: self.progressfunc(inc * i + p * rinc))
 remtempvar["thread"] = remTempVar
 
 
@@ -118,11 +135,15 @@ class genVarLogs(threadmanager.Thread):
     def runthread(self):
         # Create the logs
         logger.logV(self.tn, logger.I, _("Creating empty logs"))
-        for i in ["dpkg.log", "lastlog", "mail.log", "syslog", "auth.log", "daemon.log", "faillog",
+        a = ["dpkg.log", "lastlog", "mail.log", "syslog", "auth.log", "daemon.log", "faillog",
                           "lpr.log", "mail.warn", "user.log", "boot", "debug", "mail.err", "messages", "wtmp",
-                          "bootstrap.log", "dmesg", "kern.log", "mail.info"]:
+                          "bootstrap.log", "dmesg", "kern.log", "mail.info"]
+        la = len(a)
+        inc = 100 / la
+        for i in range(la):
             logger.logVV(self.tn, logger.I, logger.MTab + _("Creating") + " " + i)
             fsutil.touch(tmpsys + "var/log/" + i)
+            self.setProgress(self.tn, (i + 1) * inc)
 genvarlogs["thread"] = genVarLogs
 
 

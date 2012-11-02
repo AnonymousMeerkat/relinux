@@ -141,9 +141,12 @@ def makedir(dirs1, tn = ""):
 
 
 # Makes a directory tree
-def maketree(arr, tn = ""):
-    for i in arr:
-        makedir(i, tn)
+def maketree(arr, tn = "", progressfunc = None):
+    la = len(arr)
+    for i in range(la):
+        makedir(arr[i], tn)
+        if progressfunc:
+            progressfunc(utilities.calcPercent(i, la))
 
 
 # Simple implementation of the touch utility
@@ -200,9 +203,12 @@ def rm(files, followlink = False, tn = ""):
 
 
 # Removes a list of files
-def rmfiles(arr, tn = ""):
-    for i in arr:
+def rmfiles(arr, tn = "", progressfunc = None):
+    la = len(arr)
+    for i in range(la):
         rm(i, tn)
+        if progressfunc:
+            progressfunc(utilities.calcPercent(i, la))
 
 
 # Helper function for chmod
@@ -368,25 +374,30 @@ def fscopy(src, dst, excludes1, tn = "", **options):
 
 # Removes the contents of a directory with excludes and options
 # Current options:
-#     excludes (True or False): If True, exclude the files listed in excludes
+#     excludes (List): Exclude the files listed
 #     remdirs (True or False): If True, remove directories too
 #     remsymlink (True or False): If True, remove symlinks too
 #     remfullpath (True or False): If True, symlinks will have both their symlink and the file
 #                                  referenced removed
 #     remoriginal (True or False): If True, remove the original directory too
-def adrm(dirs, options, excludes1 = [], tn = ""):
+def adrm(dirs, **options):
+    utilities.setDefault(options, excludes = [], remdirs = True, remsymlink = True,
+                         remfullpath = False, remoriginal = True, tn = "", progressfunc = None)
     # Get a list of all files inside the directory
-    files = list(listdir(dirs, recurse = True, dirs = True, symlinks = False, tn = tn))
-    utilities.setDefault(options, excludes = False, remdirs = True, remsymlink = True,
-                         remfullpath = False, remoriginal = True)
+    files = list(listdir(dirs, recurse = True, dirs = True, symlinks = False, tn = options["tn"]))
     excludes = []
     # Exclude the files listed to exclude
-    if options["excludes"] and len(excludes1) > 0:
-        excludes = exclude(files, excludes1)
+    if len(options["excludes"]) > 0:
+        excludes = exclude(files, options["excludes"])
+    c = 0
+    l = len(files)
     # Remove the wanted files
     for file_ in files:
         file__ = utilities.utf8(file_)
         file_ = utilities.utf8(os.path.basename(file__))
+        if options["progressfunc"]:
+            options["progressfunc"](utilities.calcPercent(c, l))
+        c += 1
         # Make sure we don't remove files that are listed to exclude from removal
         if file__ in excludes:
             #logger.logVV(tn, logger.I, utilities.utf8all(file_, " ",
