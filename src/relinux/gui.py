@@ -235,8 +235,8 @@ class GUI(QtGui.QMainWindow):
 
     def fillConfiguration(self, configs, widget):
         # TODO: Clean this mess, or at least comment it
-        l = chr(108)
-        v = chr(118)
+        l = "l"
+        v = "v"
         for i in configs.keys():
             # If the section is not in the notebook, add it
             if not i in self.configTab.notebook1.__dict__:
@@ -282,8 +282,9 @@ class GUI(QtGui.QMainWindow):
                             self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC)
                     self.configTab.notebook1.__dict__[i].nbook.addTab(
                                         fw, c)
-                # Add the label
+                # Add the dictionary
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n] = {}
+                # Add the label
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l] = QtGui.QLabel()
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l].setText(n)
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l].setToolTip(d)

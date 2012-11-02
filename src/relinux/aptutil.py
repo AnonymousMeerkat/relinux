@@ -156,7 +156,7 @@ def instPkg(package, upgrade = True):
         else:
             return False
     else:
-        package.mark_install(True, True, True)
+        package.mark_install(True, True, False)
         return True
 
 
