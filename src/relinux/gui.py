@@ -149,7 +149,7 @@ class FileName(QtGui.QWidget):
         self.entry.setText(s)
 
     def save(self, *args):
-        saveFunc(self.thevar, self.entry.getText())
+        saveFunc(self.thevar, self.entry.text())
 
 
 class ConfigWidget():
