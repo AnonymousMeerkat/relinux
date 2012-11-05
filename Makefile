@@ -25,6 +25,11 @@ ifeq ($(shell if [ ! -d ${LIBDIR} ];then echo Y;else echo N;fi),Y)
 	mkdir -p ${LIBDIR};
 endif
 
+mkdir_${BINDIR}:
+ifeq ($(shell if [ ! -d ${BINDIR} ];then echo Y;else echo N;fi),Y)
+	mkdir -p ${BINDIR};
+endif
+
 relinux: relinux.in.sh
 	@echo "=== Generating relinux executable ==="
 ifeq ($(shell if [ ! -f relinux.in.sh ];then echo Y;else echo N;fi),Y)
@@ -81,8 +86,12 @@ INSTLIB_copy_src:
 
 INST_lib: INSTLIB_print_head mkdir_${LIBDIR} INSTLIB_copy_src
 
-INST_bin:
+INSTBIN_print_head:
 	@echo " == Copying relinux runner to ${BINDIR} == "
+
+INSTBIN_relinux:
 	install -m 755 ${dot}/relinux ${BINDIR}/relinux
+
+INST_bin: INSTBIN_print_head mkdir_${BINDIR} INSTBIN_relinux
 
 install: check_root relinux INST_print_head INST_confdir INST_lib INST_bin
