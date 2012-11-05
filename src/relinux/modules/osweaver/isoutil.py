@@ -7,7 +7,7 @@ ISO Utilities
 @author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 '''
 
-from relinux.modules.osweaver import tempsys
+from relinux.modules.osweaver import tempsys, setup
 from relinux import logger, config, fsutil, configutils, threadmanager, utilities
 import shutil
 import os
@@ -187,7 +187,7 @@ pakmanifest["thread"] = genPakManifest
 
 
 # Generate the RAMFS
-genramfs = {"deps": [genisotree], "tn": "RAMFS"}
+genramfs = {"deps": [genisotree, setup.instdepends], "tn": "RAMFS"}
 class genRAMFS(threadmanager.Thread):
     def runthread(self):
         logger.logV(self.tn, logger.I, _("Generating RAMFS"))
@@ -265,6 +265,7 @@ from relinux.modules.osweaver import squashfs
 threads1 = [genisotree, copypreseed, copymemtest, copysyslinux, diskdefines, pakmanifest, genramfs,
             copykernel, genwubi, usbcomp]
 githreads = threads1
+githreads.append(setup.instdepends)
 githreads.extend(tempsys.threads)
 githreads.extend(squashfs.threads)
 
