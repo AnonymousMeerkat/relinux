@@ -56,7 +56,6 @@ INST_print_head:
 	@echo "  Executable directory:    ${BINDIR}"
 	@echo "  Library directory:       ${LIBDIR}"
 	@echo
-	read test
 
 INSTCNF_print_head:
 	@echo " == Copying files to ${CONFDIR} == "
