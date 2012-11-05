@@ -163,8 +163,10 @@ def instPkg(package, upgrade = True):
 
 # Removes a package
 def remPkg(package, purge = True):
+    print("REM " + package.name)
     if package.is_installed:
         package.mark_delete(True, purge)
+        print("MI" + str(package.marked_install) + "MRE" + str(package.marked_reinstall) + "MU" + str(package.marked_upgrade))
         return True
     else:
         return False
