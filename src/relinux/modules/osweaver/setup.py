@@ -42,11 +42,9 @@ class setupInst(threadmanager.Thread):
         logger.logV(self.tn, logger.I, _("Setting up Ubiquity"))
         self.instPkg("ubiquity", True)
         if configutils.getValue(configs[configutils.instfront]).lower() == "kde":
-            print("KDE")
             self.instPkg("ubiquity-frontend-kde", True)
             self.remPkg("ubiquity-frontend-gtk")
         else:
-            print("GTK")
             self.instPkg("ubiquity-frontend-gtk", True)
             self.remPkg("ubiquity-frontend-kde")
             g = self.getPkg("ubiquity-frontend-kde")
@@ -69,8 +67,6 @@ class setupInst(threadmanager.Thread):
         logger.logI(self.tn, logger.I, _("Setting up relinux generation dependencies"))
         self.instPkg("squashfs-tools", True)
         self.instPkg("genisoimage", True)
-        g = self.getPkg("ubiquity-frontend-kde")
-        print("MI" + str(g.marked_install) + "MRE" + str(g.marked_reinstall) + "MU" + str(g.marked_upgrade))
         configutils.saveBuffer(config.Configuration)    
         aptutil.commitChanges(self.aptcache, self.ap, self.ip)
         self.exec_()
