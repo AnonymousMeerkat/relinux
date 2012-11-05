@@ -24,6 +24,8 @@ class setupInst(threadmanager.Thread):
         return aptutil.getPkg(pkgname, self.aptcache)
 
     def instPkg(self, pkgname, relinuxdep = False):
+        if "kde" in pkgname:
+            print(pkgname)
         p = self.getPkg(pkgname)
         if not p.is_installed and relinuxdep:
             if not pkgname in configs[configutils.remafterinst][configutils.value]:
