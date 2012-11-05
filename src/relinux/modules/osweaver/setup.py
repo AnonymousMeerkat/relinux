@@ -41,7 +41,7 @@ class setupInst(threadmanager.Thread):
         logger.logI(self.tn, logger.I, _("Setting up distro dependencies"))
         logger.logV(self.tn, logger.I, _("Setting up Ubiquity"))
         self.instPkg("ubiquity", True)
-        if os.getenv("KDE_FULL_SESSION") != None:
+        if configutils.getValue(configs[configutils.instfront]).lower() == "kde":
             self.instPkg("ubiquity-frontend-kde", True)
             self.remPkg("ubiquity-frontend-gtk")
         else:
@@ -63,8 +63,6 @@ class setupInst(threadmanager.Thread):
         self.instPkg("bash")
         self.instPkg("initramfs-tools")
         logger.logI(self.tn, logger.I, _("Setting up relinux generation dependencies"))
-        m = _("Notice that these packages will be removed when the distro is installed")
-        logger.logI(self.tn, logger.I, logger.MTab + m)
         self.instPkg("squashfs-tools", True)
         self.instPkg("genisoimage", True)
         configutils.saveBuffer(config.Configuration)

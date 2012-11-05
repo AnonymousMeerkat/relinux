@@ -40,6 +40,7 @@ isogenerator = "ISOGENERATOR"
 isolocation = "ISOFILENAME"
 unionfs = "UNIONFS"
 popcon = "POPCON"
+instfront = "UBIQUITYFRONTEND"
 isodir = "ISODIR"
 # Property codes
 name = "Name"
