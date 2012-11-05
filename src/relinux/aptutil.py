@@ -149,7 +149,6 @@ def compVersions(v1, v2, operation):
 
 # Installs a package
 def instPkg(package, upgrade = True):
-    print(package.name)
     if package.is_installed:
         if upgrade and package.is_upgradable:
             package.mark_upgrade()
@@ -163,7 +162,6 @@ def instPkg(package, upgrade = True):
 
 # Removes a package
 def remPkg(package, purge = True):
-    print("REM " + package.name)
     if (package.is_installed or package.marked_install or
         package.marked_reinstall or package.marked_upgrade):
         package.mark_delete(True, purge)
