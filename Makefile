@@ -3,15 +3,9 @@ define \n
 
 endef
 dot = $(shell dirname $(shell readlink -f $(lastword $(MAKEFILE_LIST))))
-ifndef CONFDIR
 CONFDIR = $(shell readlink -f ${DESTDIR}/etc/relinux/)
-endif
-ifndef LIBDIR
 LIBDIR = $(shell readlink -f ${DESTDIR}/usr/lib/relinux/)
-endif
-ifndef BINDIR
 BINDIR = $(shell readlink -f ${DESTDIR}/usr/bin/)
-endif
 
 all: relinux
 
@@ -51,7 +45,7 @@ INST_print_head:
 	@echo "  Executable directory:    ${BINDIR}"
 	@echo "  Library directory:       ${LIBDIR}"
 	@echo
-	read
+	read test
 
 INSTCNF_print_head:
 	@echo " == Copying files to ${CONFDIR} == "
