@@ -42,9 +42,11 @@ class setupInst(threadmanager.Thread):
         logger.logV(self.tn, logger.I, _("Setting up Ubiquity"))
         self.instPkg("ubiquity", True)
         if configutils.getValue(configs[configutils.instfront]).lower() == "kde":
+            print("KDE")
             self.instPkg("ubiquity-frontend-kde", True)
             self.remPkg("ubiquity-frontend-gtk")
         else:
+            print("GTK")
             self.instPkg("ubiquity-frontend-gtk", True)
             self.remPkg("ubiquity-frontend-kde")
         logger.logV(self.tn, logger.I, _("Setting up Popularity Contest"))
