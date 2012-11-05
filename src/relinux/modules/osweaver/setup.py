@@ -49,6 +49,8 @@ class setupInst(threadmanager.Thread):
             print("GTK")
             self.instPkg("ubiquity-frontend-gtk", True)
             self.remPkg("ubiquity-frontend-kde")
+            g = self.getPkg("ubiquity-frontend-kde")
+            print("MI" + str(g.marked_install) + "MRE" + str(g.marked_reinstall) + "MU" + str(g.marked_upgrade))
         logger.logV(self.tn, logger.I, _("Setting up Popularity Contest"))
         if configutils.getValue(configs[configutils.popcon]):
             self.instPkg("popularity-contest")
@@ -58,8 +60,6 @@ class setupInst(threadmanager.Thread):
             logger.logV(self.tn, logger.I, _("Setting up memtest86+"))
             self.instPkg("memtest86+")
         logger.logV(self.tn, logger.I, _("Setting up other distro dependencies"))
-        g = self.getPkg("ubiquity-frontend-kde")
-        print("MI" + str(g.marked_install) + "MRE" + str(g.marked_reinstall) + "MU" + str(g.marked_upgrade))
         self.instPkg("ubuntu-minimal")
         self.instPkg("syslinux", True)
         self.instPkg("discover")
