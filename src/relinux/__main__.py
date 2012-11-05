@@ -11,9 +11,13 @@ import os
 from PyQt4 import QtGui, QtCore
 mainsrcdir = sys.path[0]
 srcdir = os.path.abspath(os.path.join(mainsrcdir, os.pardir))
-relinuxdir = os.path.abspath(os.path.join(srcdir, os.pardir))
+if "RELINUXCONFDIR" in os.environ:
+    relinuxdir = os.environ["RELINUXCONFDIR"]
+else:
+    relinuxdir = os.path.abspath(os.path.join(srcdir, os.pardir))
 sys.path.append(srcdir)
 from relinux import config
+config.relinuxdir = relinuxdir
 import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
 
@@ -169,7 +173,10 @@ def main():
     configfiles = [relinuxdir + "/relinux.conf"]
     for i in range(len(modulemetas)):
         for x in modules[i].moduleconfig:
-            configfiles.append(os.path.join(os.path.dirname(modulemetas[i]["path"]), x))
+            if "RELINUXCONFDIR" in os.environ:
+                configfiles.append(os.path.join(relinuxdir, x))
+            else:
+                configfiles.append(os.path.join(os.path.dirname(modulemetas[i]["path"]), x))
     cbuffer = configutils.parseFiles(configfiles)
     config.Configuration = cbuffer
     configutils.saveBuffer(config.Configuration)
