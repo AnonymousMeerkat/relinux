@@ -63,13 +63,13 @@ INSTCNF_print_head:
 INSTCNF_mkdir: mkdir_${CONFDIR}
 
 INSTCNF_conf_files:
-	$(foreach cnf,${dot}/relinux.conf $(shell find ${dot}/src/relinux/modules -name '*.conf'),install -m=644 $(cnf) ${CONFDIR}/$(shell basename $(cnf));${\n})
+	$(foreach cnf,${dot}/relinux.conf $(shell find ${dot}/src/relinux/modules -name '*.conf'),install -m 644 $(cnf) ${CONFDIR}/$(shell basename $(cnf));${\n})
 
 INSTCNF_splash:
-	$(foreach spl,${dot}/default.png ${dot}/splash_light.png,install -m=644 $(spl) ${CONFDIR}/$(shell basename $(spl));${\n})
+	$(foreach spl,${dot}/default.png ${dot}/splash_light.png,install -m 644 $(spl) ${CONFDIR}/$(shell basename $(spl));${\n})
 
 INSTCNF_wubi:
-	install -m=755 ${dot}/wubi.exe ${CONFDIR}/wubi.exe;
+	install -m 755 ${dot}/wubi.exe ${CONFDIR}/wubi.exe;
 
 INSTCNF_preseed:
 	cp -R ${dot}/preseed ${CONFDIR}/preseed
@@ -87,6 +87,6 @@ INST_lib: INSTLIB_print_head mkdir_${LIBDIR} INSTLIB_copy_src
 
 INST_bin:
 	@echo " == Copying relinux runner to ${BINDIR} == "
-	install -m=755 ${dot}/relinux ${BINDIR}/relinux
+	install -m 755 ${dot}/relinux ${BINDIR}/relinux
 
 install: check_root relinux INST_print_head INST_confdir INST_lib INST_bin
