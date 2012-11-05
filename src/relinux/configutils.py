@@ -297,7 +297,7 @@ def parseCompressedBuffer(buffers, filename_):
                 if not os.path.isabs(returnme[i][x][value]):
                     returnme[i][x][value] = os.path.abspath(
                                                 os.path.join(
-                                                    os.path.dirname(os.path.abspath(filename_)),
+                                                    config.relinuxdir,
                                                         returnme[i][x][value]))
             elif returnme[i][x][types] == yesno:
                 returnme[i][x][value] = parseBoolean(returnme[i][x][value])
@@ -367,9 +367,9 @@ def saveBuffer(buffers_):
                     files_[f][i] = {}
                 if not x in files_[f][i]:
                     files_[f][i][x] = {}
-            lastfile = os.path.dirname(os.path.abspath(buffers[i][x][files][len(buffers[i][x][files]) - 1]))
-            if buffers[i][x][types] == filename:
-                buffers[i][x][value] = os.path.relpath(buffers[i][x][value], lastfile)
+            if (buffers[i][x][types] == filename and
+                buffers[i][x][value].startswith(fsutil.beautifypath(config.relinuxdir))):
+                buffers[i][x][value] = os.path.relpath(buffers[i][x][value], config.relinuxdir)
             elif buffers[i][x][types] == yesno:
                 buffers[i][x][value] = humanizeBoolean(buffers[i][x][value])
             elif buffers[i][x][types] == multiple:
