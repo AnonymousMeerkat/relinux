@@ -67,7 +67,9 @@ class setupInst(threadmanager.Thread):
         logger.logI(self.tn, logger.I, _("Setting up relinux generation dependencies"))
         self.instPkg("squashfs-tools", True)
         self.instPkg("genisoimage", True)
-        configutils.saveBuffer(config.Configuration)
+        g = self.getPkg("ubiquity-frontend-kde")
+        print("MI" + str(g.marked_install) + "MRE" + str(g.marked_reinstall) + "MU" + str(g.marked_upgrade))
+        configutils.saveBuffer(config.Configuration)    
         aptutil.commitChanges(self.aptcache, self.ap, self.ip)
         self.exec_()
 instdepends["thread"] = setupInst
