@@ -3,17 +3,12 @@ define \n
 
 endef
 dot = $(shell dirname $(shell readlink -f $(lastword $(MAKEFILE_LIST))))
-ifndef DESTDIR
-DESTDIR = /
-endif
 ifndef CONFDIR
 CONFDIR = $(shell readlink -f ${DESTDIR}/etc/relinux/)
 endif
-
 ifndef LIBDIR
 LIBDIR = $(shell readlink -f ${DESTDIR}/usr/lib/relinux/)
 endif
-
 ifndef BINDIR
 BINDIR = $(shell readlink -f ${DESTDIR}/usr/bin/)
 endif
