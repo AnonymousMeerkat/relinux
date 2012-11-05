@@ -149,6 +149,7 @@ def compVersions(v1, v2, operation):
 
 # Installs a package
 def instPkg(package, upgrade = True):
+    print(package.name)
     if package.is_installed:
         if upgrade and package.is_upgradable:
             package.mark_upgrade()
