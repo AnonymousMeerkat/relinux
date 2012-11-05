@@ -206,7 +206,7 @@ def rm(files, followlink = False, tn = ""):
 def rmfiles(arr, tn = "", progressfunc = None):
     la = len(arr)
     for i in range(la):
-        rm(i, tn)
+        rm(la[i], tn)
         if progressfunc:
             progressfunc(utilities.calcPercent(i, la))
 
