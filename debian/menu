@@ -1,0 +1,2 @@
+?package(relinux):needs="X11|text|vc|wm" section="Applications/Accessories"\
+  title="relinux" command="/usr/bin/relinux"

@@ -1,0 +1,13 @@
+relinux
+----------------------------
+Relinux is a free and open-source Linux distro creation toolkit.
+
+Running
+========
+sudo relinux [options]
+
+Usage
+======
+Please refer to the relinux wiki for usage of relinux.
+
+ -- Anonymous Meerkat <meerkatanonymous@gmail.com>  Mon, 05 Nov 2012 00:00:00 -0700

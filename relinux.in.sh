@@ -2,12 +2,31 @@
 # Relinux runner script
 # Author: Anonymous Meerkat <meerkatanonymous@gmail.com>
 # Part of the relinux toolkit
+#
+# Relinux is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with relinux.  If not, see <http://www.gnu.org/licenses/>.
 
 # Global variables
 export TRUE=0
 export FALSE=1
-export RELINUXCONFDIR=MAKEFILE_ENTER_CONF_DIR
-export RELINUXLIBDIR=MAKEFILE_ENTER_LIB_DIR
+if [ -z $RELINUXCONFDIR ]
+then
+	export RELINUXCONFDIR=MAKEFILE_ENTER_CONF_DIR
+fi
+if [ -z $RELINUXLIBDIR ]
+then
+	export RELINUXLIBDIR=MAKEFILE_ENTER_LIB_DIR
+fi
 export RELINUXEXECFILE=$RELINUXLIBDIR/relinux/__main__.py
 if [[ "$RELINUXCONFDIR" == "MAKE""FILE_ENTER_CONF_DIR" || \
 "$RELINUXLIBDIR" == "MAKE""FILE_ENTER_LIB_DIR" ]]
@@ -47,4 +66,4 @@ then
 	echo "Warning: Python 3 is being used. Relinux might have unexpected behavior because of this"
 fi
 
-$PYEXEC $RELINUXEXECFILE
+$PYEXEC $RELINUXEXECFILE $@
