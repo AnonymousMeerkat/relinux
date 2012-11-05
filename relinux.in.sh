@@ -64,6 +64,17 @@ fi
 if [ $GIVEUP -eq $TRUE ]
 then
 	echo "Warning: Python 3 is being used. Relinux might have unexpected behavior because of this"
+	$PYEXEC -c 'import apt' &>/dev/null
+	if [ $? -ne 0 ]
+	then
+		echo "Relinux needs python3-apt. Please wait while relinux tries to install this"
+		sudo apt-get install -y python3-apt
+		if [ $? -ne 0 ]
+		then
+			echo "An error has occurred while trying to install python3-apt"
+			exit 1
+		fi
+	fi
 fi
 
 $PYEXEC $RELINUXEXECFILE $@
