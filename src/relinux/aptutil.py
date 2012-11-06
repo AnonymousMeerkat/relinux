@@ -250,4 +250,6 @@ def remPkg(package, purge = True):
 def commitChanges(cache, ap, ip):
     logger.logV(tn, logger.D, _("Install count: ") + str(cache.install_count) +
                 _("Removal count: ") + str(cache.delete_count))
-    return cache.commit(ap, ip)
+    s = cache.commit(ap, ip)
+    cache.open(None)
+    return s
