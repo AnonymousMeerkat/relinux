@@ -61,6 +61,7 @@ class setupInst(threadmanager.Thread):
         self.instPkg("coreutils")
         self.instPkg("bash")
         self.instPkg("initramfs-tools")
+        self.instPkg("casper")
         logger.logI(self.tn, logger.I, _("Setting up relinux generation dependencies"))
         self.instPkg("squashfs-tools", True)
         self.instPkg("genisoimage", True)
