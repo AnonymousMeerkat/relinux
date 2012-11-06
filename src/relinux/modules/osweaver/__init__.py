@@ -334,6 +334,13 @@ def run(*args):
                 QtCore.QMetaObject.invokeMethod(ui.notroot, "show",
                                             QtCore.Qt.QueuedConnection
                                             )
+        def updateProgress():
+            totprogress = 0
+            for i in page["progress"]:
+                totprogress += utilities.floatDivision(float(page["progress"][i]), 100)
+            QtCore.QMetaObject.invokeMethod(ui.progress, "setValue",
+                                            QtCore.Qt.QueuedConnection,
+                                QtCore.Q_ARG("int", utilities.calcPercent(totprogress, numthreads2)))
         def setProgress(tn, progress):
             ts = threadspans[tn]
             progress *= ts
@@ -342,12 +349,7 @@ def run(*args):
             elif progress < 0:
                 progress = 0
             page["progress"][tn] = progress
-            totprogress = 0
-            for i in page["progress"]:
-                totprogress += utilities.floatDivision(float(page["progress"][i]), 100)
-            QtCore.QMetaObject.invokeMethod(ui.progress, "setValue",
-                                            QtCore.Qt.QueuedConnection,
-                                QtCore.Q_ARG("int", utilities.calcPercent(totprogress, numthreads2)))
+            updateProgress()
         def onThreadRemoved(threadid, threadsrunning, threads):
             tn = threadmanager.getThread(threadid, threads)["tn"]
             setProgress(tn, 100)
@@ -365,6 +367,7 @@ def run(*args):
                 pass
         for i in page["progress"]:
             page["progress"][i] = 0
+        updateProgress()
         runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress, "showMessage": showMessage},
                    threadsend = onThreadsEnd)
 
