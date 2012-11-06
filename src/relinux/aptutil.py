@@ -53,7 +53,6 @@ class AcquireProgress(apt.progress.text.AcquireProgress):
     
     def long(self, i):
         if config.python3:
-            long = None  # Fix eclipse warnings
             return i
         else:
             return long(i)
