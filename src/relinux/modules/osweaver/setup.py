@@ -21,7 +21,7 @@ class setupInst(threadmanager.Thread):
         self.quit()
     
     def percentfunc(self, p):
-        self.setPercent(self.tn, p)
+        self.setProgress(self.tn, p)
 
     def getPkg(self, pkgname):
         return aptutil.getPkg(pkgname, self.aptcache)
