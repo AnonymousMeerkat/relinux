@@ -352,6 +352,7 @@ def run(*args):
             tn = threadmanager.getThread(threadid, threads)["tn"]
             setProgress(tn, 100)
             onThreadAdded(threadid, threadsrunning, threads)
+            page["boxes"][threadid].set(False)
         def showMessage(tn, importance, msg):
             logger.logI(tn, importance, msg)
             QtCore.QMetaObject.invokeMethod(ui.msgbox, "setImportance", QtCore.Qt.QueuedConnection,
