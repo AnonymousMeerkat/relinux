@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Relinux
+GenericName=Relinux
+Comment=Linux distro creation toolkit
+TryExec=relinux
+Exec=relinux
+Icon=relinux
+Terminal=true
+Type=Application
+Categories=Accessories;System;
+Keywords=Linux;Distro;Toolkit;Creator;Creation;Free;
