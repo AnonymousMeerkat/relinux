@@ -141,8 +141,8 @@ class genVarLogs(threadmanager.Thread):
         la = len(a)
         inc = 100 / la
         for i in range(la):
-            logger.logVV(self.tn, logger.I, logger.MTab + _("Creating") + " " + i)
-            fsutil.touch(tmpsys + "var/log/" + i)
+            logger.logVV(self.tn, logger.I, logger.MTab + _("Creating") + " " + a[i])
+            fsutil.touch(tmpsys + "var/log/" + a[i])
             self.setProgress(self.tn, (i + 1) * inc)
 genvarlogs["thread"] = genVarLogs
 
