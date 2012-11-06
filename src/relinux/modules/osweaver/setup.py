@@ -19,6 +19,9 @@ class setupInst(threadmanager.Thread):
 
     def finishfunc(self, event):
         self.quit()
+    
+    def percentfunc(self, p):
+        self.setPercent(self.tn, p)
 
     def getPkg(self, pkgname):
         return aptutil.getPkg(pkgname, self.aptcache)
@@ -36,8 +39,9 @@ class setupInst(threadmanager.Thread):
 
     def runthread(self):
         self.event = threading.Event()
-        self.ap = aptutil.AcquireProgress()
-        self.ip = aptutil.InstallProgress(lambda: self.finishfunc(self.event))
+        self.ap = aptutil.AcquireProgress(lambda p: self.percentfunc(p / 2))
+        self.ip = aptutil.InstallProgress(lambda p: self.percentfunc(50 + p / 2),
+                                          lambda: self.finishfunc(self.event))
         logger.logI(self.tn, logger.I, _("Setting up distro dependencies"))
         logger.logV(self.tn, logger.I, _("Setting up Ubiquity"))
         if configutils.getValue(configs[configutils.instfront]).lower() == "kde":
