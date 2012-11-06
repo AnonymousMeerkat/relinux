@@ -12,8 +12,20 @@ endif
 ifndef BINDIR
 BINDIR = ${DESTDIR}/usr/bin/
 endif
+ifndef CC
+CC = gcc
+endif
+ifndef BITS
+BITS = $(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS | tr '\n' ' ' | sed 's: ::g')
+endif
 
-all: relinux
+all: csrc/isatty${BITS}.so src/relinux/modules/osweaver/isatty${BITS}.so relinux
+
+clean:
+	for i in $(shell find . -type d | grep -v __pycache__ | grep -v /.git) ; do \
+		(cd $$i; rm -rf *.pyc __pycache__); \
+	done
+	rm -f csrc/isatty*.so src/relinux/modules/osweaver/isatty*.so
 
 mkdir_${CONFDIR}:
 ifeq ($(shell if [ ! -d ${CONFDIR} ];then echo Y;else echo N;fi),Y)
@@ -29,6 +41,13 @@ mkdir_${BINDIR}:
 ifeq ($(shell if [ ! -d ${BINDIR} ];then echo Y;else echo N;fi),Y)
 	mkdir -p ${BINDIR};
 endif
+
+csrc/isatty${BITS}.so: csrc/isatty.c 
+	@echo "=== Generating isatty override library ==="
+	${CC} -shared -fPIC -o csrc/isatty${BITS}.so csrc/isatty.c
+
+src/relinux/modules/osweaver/isatty${BITS}.so: csrc/isatty${BITS}.so
+	cp csrc/isatty${BITS}.so src/relinux/modules/osweaver/isatty${BITS}.so
 
 relinux: relinux.in.sh
 	@echo "=== Generating relinux executable ==="
