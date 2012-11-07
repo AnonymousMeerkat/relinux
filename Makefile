@@ -2,22 +2,15 @@ define \n
 
 
 endef
-dot = $(shell dirname $(shell readlink -f $(lastword $(MAKEFILE_LIST))))
-ifndef CONFDIR
-CONFDIR = ${DESTDIR}/etc/relinux/
-endif
-ifndef LIBDIR
-LIBDIR = ${DESTDIR}/usr/lib/relinux/
-endif
-ifndef BINDIR
-BINDIR = ${DESTDIR}/usr/bin/
-endif
-ifndef CC
-CC = gcc
-endif
-ifndef BITS
-BITS = $(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS | tr '\n' ' ' | sed 's: ::g')
-endif
+dot := $(shell dirname $(shell readlink -f $(lastword $(MAKEFILE_LIST))))
+CONFDIR := ${DESTDIR}/etc/relinux/
+LIBDIR := ${DESTDIR}/usr/lib/relinux/
+BINDIR := ${DESTDIR}/usr/bin/
+SHAREDIR := ${DESTDIR}/usr/share/
+APPDIR := ${SHAREDIR}/applications
+CC := gcc
+BITS := $(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS | tr '\n' ' ' | sed 's: ::g')
+
 
 all: csrc/isatty${BITS}.so src/relinux/modules/osweaver/isatty${BITS}.so relinux
 
@@ -93,8 +86,11 @@ INSTCNF_wubi:
 INSTCNF_preseed:
 	cp -R ${dot}/preseed ${CONFDIR}/preseed
 
+INSTCNF_isolinux_cfg:
+	install -m 755 ${dot}/isolinux.cfg ${CONFDIR}/isolinux.cfg
+
 INST_confdir: INSTCNF_print_head INSTCNF_mkdir INSTCNF_conf_files INSTCNF_splash \
-INSTCNF_wubi INSTCNF_preseed
+INSTCNF_wubi INSTCNF_preseed INSTCNF_isolinux_cfg
 
 INSTLIB_print_head:
 	@echo " == Copying relinux core to ${LIBDIR} == "
@@ -112,4 +108,12 @@ INSTBIN_relinux:
 
 INST_bin: INSTBIN_print_head mkdir_${BINDIR} INSTBIN_relinux
 
-install: check_root relinux INST_print_head INST_confdir INST_lib INST_bin
+INSTSHARE_print_head:
+	@echo " == Copying shared files to ${SHAREDIR} == "
+
+INSTSHARE_desktop:
+	install -m 644 ${dot}/relinux.desktop ${APPDIR}/relinux.desktop
+
+INST_share: INSTSHARE_print_head INSTSHARE_desktop
+
+install: check_root relinux INST_print_head INST_confdir INST_lib INST_share INST_bin
