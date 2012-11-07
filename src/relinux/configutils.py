@@ -197,7 +197,7 @@ def getKernelList():
 #    1 - newest kernel
 #    2 - oldest kernel (don't ask me why anyone would want this lol)
 #    3 - current kernel
-def _getKernel(t, kernelVersion = None):
+def _getKernel(t, kernelVersion=None):
     files = getKernelList()
     if t == 0:
         for i in files:
@@ -265,7 +265,7 @@ def beautify(buffers):
             returnme.append("  Option " + x)
             returnme.append("")
             opts = getProperties(getLinesWithinOption(buffer1, x))
-            for y in sorted(list(opts.keys()), key = savePropertySort):
+            for y in sorted(list(opts.keys()), key=savePropertySort):
                 returnme.append("    " + y + ": " + opts[y])
             returnme.append("")
             returnme.append("  EndOption")
@@ -297,15 +297,16 @@ def parseCompressedBuffer(buffers, filename_):
             if returnme[i][x][types] == filename:
                 if not os.path.isabs(returnme[i][x][value]):
                     returnme[i][x][value] = os.path.abspath(
-                                                os.path.join(
-                                                    config.relinuxdir,
-                                                        returnme[i][x][value]))
+                        os.path.join(
+                            config.relinuxdir,
+                            returnme[i][x][value]))
             elif returnme[i][x][types] == yesno:
                 returnme[i][x][value] = parseBoolean(returnme[i][x][value])
             elif returnme[i][x][types] == multiple:
-                returnme[i][x][value] = parseMultipleValues(returnme[i][x][value])
+                returnme[i][x][
+                    value] = parseMultipleValues(returnme[i][x][value])
         returnme[i][categories] = {}
-        returnme[i][categories][value] = sorted(categs, key = categorySort)
+        returnme[i][categories][value] = sorted(categs, key=categorySort)
     return returnme
 
 
@@ -346,7 +347,7 @@ def compressParsedBuffer(buffers):
         returnme.append("Section " + i)
         for x in utilities.sort(list(buffers[i].keys())):
             returnme.append("Option " + x)
-            for y in sorted(list(buffers[i][x].keys()), key = savePropertySort):
+            for y in sorted(list(buffers[i][x].keys()), key=savePropertySort):
                 returnme.append(y + ": " + buffers[i][x][y])
             returnme.append("EndOption")
         returnme.append("EndSection")
@@ -369,8 +370,9 @@ def saveBuffer(buffers_):
                 if not x in files_[f][i]:
                     files_[f][i][x] = {}
             if (buffers[i][x][types] == filename and
-                buffers[i][x][value].startswith(fsutil.beautifypath(config.relinuxdir))):
-                buffers[i][x][value] = os.path.relpath(buffers[i][x][value], config.relinuxdir)
+                    buffers[i][x][value].startswith(fsutil.beautifypath(config.relinuxdir))):
+                buffers[i][x][value] = os.path.relpath(
+                    buffers[i][x][value], config.relinuxdir)
             elif buffers[i][x][types] == yesno:
                 buffers[i][x][value] = humanizeBoolean(buffers[i][x][value])
             elif buffers[i][x][types] == multiple:
@@ -433,6 +435,8 @@ def humanizeBoolean(bool_):
         return "Unknown"
 
 # Returns a list from a Multiple Values value
+
+
 def parseMultipleValues(option):
     if hasattr(option, "split"):
         return option.split()

@@ -15,10 +15,10 @@ srcdir = os.path.abspath(os.path.join(mainsrcdir, os.pardir))
 relinuxdir = os.path.abspath(os.path.join(srcdir, os.pardir))
 homedir = os.path.expanduser("~")
 
-min_python_version = 0x020700F0 # 2.7.0 final
-max_python_version = 0x040000A0 # 4.0.0a0
+min_python_version = 0x020700F0  # 2.7.0 final
+max_python_version = 0x040000A0  # 4.0.0a0
 #max_python_version = 0x020703F0 # 2.7.3 final
-python3_version = 0x030000A0 # 3.0.0a0
+python3_version = 0x030000A0  # 3.0.0a0
 
 min_python = sys.hexversion >= min_python_version
 max_python = sys.hexversion <= max_python_version

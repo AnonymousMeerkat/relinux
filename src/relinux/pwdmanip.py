@@ -51,14 +51,16 @@ def parseGroupEntries(buffers):
 
 # Returns a parsed list of /etc/shadow entries (i.e. PS Entry)
 def parseShadowEntries(buffers):
-    patt = re.compile("^(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?)$")
+    patt = re.compile(
+        "^(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?):(.*?)$")
     returnme = []
     for i in buffers:
         m = patt.match(i)
         if checkMatched(m):
             buff = {}
             buff["user"] = m.group(1)
-            buff["passwd"] = m.group(2)  # Now this one actually contains a hash
+            buff["passwd"] = m.group(
+                2)  # Now this one actually contains a hash
             buff["lastpwdchange"] = m.group(3)
             buff["minpwdchange"] = m.group(4)
             buff["maxpwdchange"] = m.group(5)
@@ -72,8 +74,9 @@ def parseShadowEntries(buffers):
 
 # The function opposite to parsePasswdEntries
 def PPtoEntry(i):
-    return utilities.join([i["user"], i["passwd"], i["uid"], i["gid"], i["name"], i["home"],
-                            i["shell"]], ":") + "\n"
+    return utilities.join(
+        [i["user"], i["passwd"], i["uid"], i["gid"], i["name"], i["home"],
+         i["shell"]], ":") + "\n"
 
 
 # The function opposite to parseGroupEntries
@@ -83,9 +86,11 @@ def PGtoEntry(i):
 
 # The function opposite to parseShadowEntries
 def PStoEntry(i):
-    return utilities.join([i["user"], i["passwd"], i["lastpwdchange"], i["minpwdchange"],
-                               i["maxpwdchange"], i["warnperiod"], i["inactive"], i["expire"],
-                               i["reserved"]], ":") + "\n"
+    return utilities.join(
+        [i["user"], i["passwd"], i["lastpwdchange"], i["minpwdchange"],
+         i["maxpwdchange"], i[
+         "warnperiod"], i["inactive"], i["expire"],
+         i["reserved"]], ":") + "\n"
 
 
 # Returns a list of entries from a user ID regex (buffer must contain PP entries)

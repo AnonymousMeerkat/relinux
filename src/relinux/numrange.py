@@ -6,6 +6,7 @@ Number range generator
 
 import re
 
+
 def _get_first_digit_and_rest(nums):
     num = str(nums)
     if len(num) > 1:
@@ -105,6 +106,7 @@ def _generate_for_same_len_nr(min_, max_):
 
     middle += "[0-9]" * len(rest_min)
     return "|".join([starting, middle, ending])
+
 
 def gen_num_range(min_, max_, capturing=False):
     if isinstance(min_, int):

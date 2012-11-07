@@ -35,6 +35,8 @@ def relpath(files):
         return os.path.join(os.curdir, os.path.relpath(files, os.curdir))
 
 # Generates an absolute path
+
+
 def abspath(files, src):
     if not os.path.isabs(files):
         return os.path.normpath(os.path.join(src, files))
@@ -42,7 +44,9 @@ def abspath(files, src):
         return files
 
 # Reads the link location of a file or returns None
-def delink(files, absolutify = True, recursive = False):
+
+
+def delink(files, absolutify=True, recursive=False):
     if os.path.exists(files) and os.path.islink(files):
         link = ""
         if recursive:
@@ -61,7 +65,7 @@ def delink(files, absolutify = True, recursive = False):
 
 
 # Lengthener for files to exclude
-def exclude(names, files, tn = ""):
+def exclude(names, files, tn=""):
     excludes = []
     for i in files:
         excludes.extend(fnmatch.filter(names, i))
@@ -96,8 +100,8 @@ def getSize(path):
 # htom = Human to Machine (i.e. 4KB to 4096B). If not True, it accepts these values:
 #         T = Bytes-to-Terabytes
 #         etc...
-def sizeTrans(size, htom = True):
-    utilities.setDefault(size, T = 0, G = 0, M = 0, K = 0, B = 0)
+def sizeTrans(size, htom=True):
+    utilities.setDefault(size, T=0, G=0, M=0, K=0, B=0)
     KB = 1024
     MB = 1048576
     GB = 1073741824
@@ -129,7 +133,7 @@ def sizeTrans(size, htom = True):
 
 
 # Makes a directory
-def makedir(dirs1, tn = ""):
+def makedir(dirs1, tn=""):
     dirs = dirs1
     mode = 0o777
     if isinstance(dirs1, list):
@@ -141,7 +145,7 @@ def makedir(dirs1, tn = ""):
 
 
 # Makes a directory tree
-def maketree(arr, tn = "", progressfunc = None):
+def maketree(arr, tn="", progressfunc=None):
     la = len(arr)
     for i in range(la):
         makedir(arr[i], tn)
@@ -150,7 +154,7 @@ def maketree(arr, tn = "", progressfunc = None):
 
 
 # Simple implementation of the touch utility
-def touch(files, tn = ""):
+def touch(files, tn=""):
     if os.path.exists(files):
         logger.logVV(tn, logger.I, _("Touching file") + " " + str(files))
         os.utime(files, None)
@@ -160,21 +164,22 @@ def touch(files, tn = ""):
 
 
 # Same as maketree, but for files instead
-def makefiles(arr, tn = ""):
+def makefiles(arr, tn=""):
     for i in arr:
         touch(i, tn)
 
 
 # Creates a symlink
-def symlink(files, dst, tn = ""):
+def symlink(files, dst, tn=""):
     if not os.path.lexists(dst) and not os.path.exists(dst):
-        logger.logVV(tn, logger.I, utilities.utf8all(_("Creating symlink"), " ", dst))
+        logger.logVV(
+            tn, logger.I, utilities.utf8all(_("Creating symlink"), " ", dst))
         os.symlink(files, dst)
 
 
 # Removes a file
 # If followlink is True, then it will remove both the link and the origin
-def rm(files, followlink = False, tn = ""):
+def rm(files, followlink=False, tn=""):
     if not os.path.exists(files):
         # If there isn't anything to remove, why bother with this function?
         return
@@ -183,12 +188,14 @@ def rm(files, followlink = False, tn = ""):
     rmstring = "Removing "
     if os.path.isdir(files):
         rmstring += "directory "
-    if dfile != None:
+    if dfile is not None:
         files = dfile
         if os.path.isfile(files):
-            logger.logVV(tn, logger.I, utilities.utf8all(_("Removing symlink"), " ", rfile))
+            logger.logVV(tn, logger.I, utilities.utf8all(_(
+                "Removing symlink"), " ", rfile))
         elif os.path.isdir(files):
-            logger.logVV(tn, logger.I, utilities.utf8all(_("Removing directory symlink"), " ", rfile))
+            logger.logVV(tn, logger.I, utilities.utf8all(
+                _("Removing directory symlink"), " ", rfile))
         os.remove(rfile)
         if followlink:
             files = rfile
@@ -203,7 +210,7 @@ def rm(files, followlink = False, tn = ""):
 
 
 # Removes a list of files
-def rmfiles(arr, tn = "", progressfunc = None):
+def rmfiles(arr, tn="", progressfunc=None):
     la = len(arr)
     for i in range(la):
         rm(arr[i], tn)
@@ -258,10 +265,11 @@ def _chmod(c, mi):
 
 
 # Simple implementation of the chmod utility
-def chmod(files, mod, tn = ""):
+def chmod(files, mod, tn=""):
     '''val = 0x00
     c = 0
-    logger.logVV(tn, logger.I, utilities.utf8all(_("Calculating permissions of"), " ", files))
+    logger.logVV(tn, logger.I, utilities.utf8all(
+        _("Calculating permissions of"), " ", files))
     # In case the user of this function used UGO instead of SUGO, we'll cover up for that
     if len(mod) < 4:
         c = 1
@@ -277,7 +285,8 @@ def chmod(files, mod, tn = ""):
         mod_ = str(oct(mod))[1:]
         mod = mod_
     # Chmod it
-    logger.logVV(tn, logger.I, utilities.utf8all(_("Setting permissions of"), " ", files, " ", _("to"), " ", mod))
+    logger.logVV(tn, logger.I, utilities.utf8all(
+        _("Setting permissions of"), " ", files, " ", _("to"), " ", mod))
     os.chmod(files, val)
 
 
@@ -287,7 +296,8 @@ def chmod(files, mod, tn = ""):
 #    dirs (True or False): If True, show directories too
 #    symlinks (True or False): If True and recurse is True, recurse into symlink directories
 def listdir(x, **options):
-    utilities.setDefault(options, recurse = True, dirs = True, symlinks = False, tn = "")
+    utilities.setDefault(
+        options, recurse=True, dirs=True, symlinks=False, tn="")
     if os.path.isdir(x):
         if options["dirs"]:
             yield utilities.utf8(x)
@@ -295,7 +305,7 @@ def listdir(x, **options):
             f = utilities.utf8(os.path.join(x, i))
             if os.path.isdir(f):
                 if ((os.path.islink(f) and not options["symlinks"]) or
-                    (not options["recurse"] and options["dirs"])):
+                        (not options["recurse"] and options["dirs"])):
                     yield f
                     continue
                 for y in listdir(f, **options):
@@ -305,15 +315,15 @@ def listdir(x, **options):
 
 
 # Filesystem copier (like rsync --exclude... -a SRC DST)
-def fscopy(src, dst, excludes1, tn = "", **options):
-    utilities.setDefault(options, progressfunc = None)
+def fscopy(src, dst, excludes1, tn="", **options):
+    utilities.setDefault(options, progressfunc=None)
     src1 = re.sub(r"/+$", "", src)
     src = src1
     dst1 = re.sub(r"/+$", "", dst)
     dst = dst1
     dstp = re.sub(r"/+$", "", os.path.dirname(dst))
     # Get a list of all files
-    files = list(listdir(src, tn = tn))
+    files = list(listdir(src, tn=tn))
     # Get the length of the file list
     lfiles = len(files)
     # Exclude the files that are not wanted
@@ -351,10 +361,14 @@ def fscopy(src, dst, excludes1, tn = "", **options):
             '''logger.logVV(tn, logger.D, utilities.utf8all(file_, " ",
                                             _("is a symlink. Creating an identical symlink at"), " ",
                                             newpath))
-            logger.logI(tn, logger.D, utilities.utf8all("ORIGINAL ", dfile, "NEW ",
+            logger.logI(
+                tn, logger.D, utilities.utf8all("ORIGINAL ", dfile, "NEW ",
                                                         os.path.relpath(dfile, fullpath)))
             symlink(os.path.normpath("/" +
-                                    abspath(os.path.relpath(dfile, fullpath), newpath)[len(dstp):]),
+                                    abspath(
+                                        os.path.relpath(
+                                            dfile, fullpath), newpath)[len(
+                                                dstp):]),
                                 newpath)'''
             symlink(dfile, newpath)
         elif os.path.isdir(fullpath):
@@ -381,10 +395,12 @@ def fscopy(src, dst, excludes1, tn = "", **options):
 #                                  referenced removed
 #     remoriginal (True or False): If True, remove the original directory too
 def adrm(dirs, **options):
-    utilities.setDefault(options, excludes = [], remdirs = True, remsymlink = True,
-                         remfullpath = False, remoriginal = True, tn = "", progressfunc = None)
+    utilities.setDefault(
+        options, excludes=[], remdirs=True, remsymlink=True,
+        remfullpath=False, remoriginal=True, tn="", progressfunc=None)
     # Get a list of all files inside the directory
-    files = list(listdir(dirs, recurse = True, dirs = True, symlinks = False, tn = options["tn"]))
+    files = list(listdir(dirs, recurse=True, dirs=True,
+                 symlinks=False, tn=options["tn"]))
     excludes = []
     # Exclude the files listed to exclude
     if len(options["excludes"]) > 0:
@@ -405,7 +421,7 @@ def adrm(dirs, **options):
             continue
         fullpath = file__
         dfile = delink(fullpath)
-        if dfile == None:
+        if dfile is None:
             if os.path.isfile(fullpath):
                 rm(fullpath)
             elif os.path.isdir(fullpath) and options["remdirs"]:
@@ -425,11 +441,13 @@ def adrm(dirs, **options):
 
 
 # Moves the contents of a directory to another
-def moveContents(src, dst, tn = ""):
+def moveContents(src, dst, tn=""):
     fscopy(src, dst, [], tn)
     adrm(src, {"remoriginal": False}, [], tn)
 
 # Returns the unix stat of a file
+
+
 def getStat(files):
     return os.stat(files)
 
@@ -487,11 +505,11 @@ def ife(buffers, func):
 # Finds the system architecture
 def getArch():
     archcmd = subprocess.Popen(["perl", config.mainsrcdir + "/getarch.pl"],
-                               stdout = subprocess.PIPE, universal_newlines = True)
+                               stdout=subprocess.PIPE, universal_newlines=True)
     arch = archcmd.communicate()[0].strip()
     archcmd.wait()
     exitcode = archcmd.returncode
-    if exitcode != 0 or arch == "" or arch == None:
+    if exitcode != 0 or arch == "" or arch is None:
         bits_64 = sys.maxsize > 2 ** 32
         if bits_64 is True:
             arch = "amd64"
@@ -523,7 +541,7 @@ def getSFSInstSize(files):
 
 
 # Generate an MD5 checksum from a file
-def genMD5(file_, blocksize = 65536):
+def genMD5(file_, blocksize=65536):
     if not os.path.isfile(file_):
         return
     files = open(file_, "r")

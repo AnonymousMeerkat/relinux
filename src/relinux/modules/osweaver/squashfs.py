@@ -23,8 +23,8 @@ configs = config.Configuration["OSWeaver"]
 # Display a iso9660 error
 def dispiso9660(level, maxs, size):
     logger.logE(tn, logger.E, _("Compressed filesystem is higher than the iso9660 level ") + level +
-                    " spec allows (" + fsutil.sizeTrans({"B": maxs}, "M") + _("MB, size is ") +
-                    fsutil.sizeTrans({"B": size}, "M") + "MB).")
+                " spec allows (" + fsutil.sizeTrans({"B": maxs}, "M") + _("MB, size is ") +
+                fsutil.sizeTrans({"B": size}, "M") + "MB).")
     logger.logE(tn, logger.E, logger.MTab + _("Please try to either reduce the amount of data you are generating, or ") +
                 _("increase the ISO level"))
 
@@ -48,7 +48,9 @@ tmpthreads.extend(tempsys.threads)
 tmpthreads.append(setup.instdepends)
 tmpthreads.append(genisotree)
 tmpthreads.append(genramfs)
-gensfs = {"deps": tmpthreads, "tn": threadname, "threadspan":-1}
+gensfs = {"deps": tmpthreads, "tn": threadname, "threadspan": -1}
+
+
 class genSFS(threadmanager.Thread):
     def runthread(self):
         logger.logI(tn, logger.I, _("Generating compressed filesystem"))
@@ -60,7 +62,8 @@ class genSFS(threadmanager.Thread):
         # -comp                    Compression type
         logger.logVV(tn, logger.I, _("Generating options"))
         opts = "-b 1M -no-recovery -no-duplicates -always-use-fragments"
-        opts = opts + " -comp " + configutils.getValue(configs[configutils.sfscomp])
+        opts = opts + " -comp " + configutils.getValue(configs[
+                                                       configutils.sfscomp])
         opts = opts + " " + configutils.getValue(configs[configutils.sfsopts])
         sfsex = "dev etc home media mnt proc sys var run usr/lib/ubiquity/apt-setup/generators/40cdrom tmp"
         sfspath = isotreel + "casper/filesystem.squashfs"
@@ -72,47 +75,59 @@ class genSFS(threadmanager.Thread):
         if sys.maxsize > 2 ** 32:
             appnd = "64"
         # Hack to make sure all output is given
-        os.environ["LD_PRELOAD"] = os.path.split(os.path.realpath(__file__))[0] + "/isatty" + appnd + ".so"
-        logger.logI(tn, logger.I, _("Adding the edited /etc and /var to the filesystem"))
-        logger.logI(tn, logger.I, logger.MTab + _("This might take a couple of minutes"))
-        sfscmd = subprocess.Popen(shlex.split("mksquashfs " + tmpsys + " " + sfspath + " " + opts),
-                                   stdout = subprocess.PIPE, stderr = subprocess.STDOUT,
-                                   universal_newlines = True)
+        os.environ["LD_PRELOAD"] = os.path.split(
+            os.path.realpath(__file__))[0] + "/isatty" + appnd + ".so"
+        logger.logI(tn, logger.I, _(
+            "Adding the edited /etc and /var to the filesystem"))
+        logger.logI(tn, logger.I, logger.MTab + _(
+            "This might take a couple of minutes"))
+        sfscmd = subprocess.Popen(
+            shlex.split("mksquashfs " + tmpsys + " " + sfspath + " " + opts),
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            universal_newlines=True)
         oldprogress = 0
         while sfscmd.poll() is None:
             output = sfscmd.stdout.readline()
             match = patt.match(output)
-            if match != None:
+            if match is not None:
                 sys.stdout.write("\r" + match.group(0))
                 sys.stdout.flush()
                 progress = int(match.group(1))
                 if progress > oldprogress:
-                    self.setProgress(tn, int(utilities.floatDivision(progress, 2)))
+                    self.setProgress(
+                        tn, int(utilities.floatDivision(progress, 2)))
                     oldprogress = progress
             elif len(output.strip()) > 0:
-                logger.logI(tn, logger.I, output.rstrip(), noterm = True, nogui = True)
+                logger.logI(tn, logger.I, output.rstrip(),
+                            noterm=True, nogui=True)
         sys.stdout.write("\n")
-        logger.logI(tn, logger.I, _("Adding the rest of the system (this can take a while)"))
-        sfscmd = subprocess.Popen(shlex.split("mksquashfs / " + sfspath + " " + opts + " -e " + sfsex),
-                                   stdout = subprocess.PIPE, stderr = subprocess.STDOUT,
-                                   universal_newlines = True)
+        logger.logI(tn, logger.I, _(
+            "Adding the rest of the system (this can take a while)"))
+        sfscmd = subprocess.Popen(
+            shlex.split(
+                "mksquashfs / " + sfspath + " " + opts + " -e " + sfsex),
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            universal_newlines=True)
         oldprogress = 0
         while sfscmd.poll() is None:
             output = sfscmd.stdout.readline()
             match = patt.match(output)
-            if match != None:
+            if match is not None:
                 sys.stdout.write("\r" + match.group(0))
                 sys.stdout.flush()
                 progress = int(match.group(1))
                 if progress > oldprogress:
-                    self.setProgress(tn, 50 + int(utilities.floatDivision(progress, 2)))
+                    self.setProgress(
+                        tn, 50 + int(utilities.floatDivision(progress, 2)))
                     oldprogress = progress
             elif len(output.strip()) > 0:
-                logger.logI(tn, logger.I, output.rstrip(), noterm = True, nogui = True)
+                logger.logI(tn, logger.I, output.rstrip(),
+                            noterm=True, nogui=True)
         sys.stdout.write("\n")
         os.environ["LD_PRELOAD"] = ""
         # Make sure the SquashFS file is OK
-        doSFSChecks(sfspath, int(configutils.getValue(configs[configutils.isolevel])))
+        doSFSChecks(
+            sfspath, int(configutils.getValue(configs[configutils.isolevel])))
         # Find the size after it is uncompressed
         logger.logV(tn, logger.I, _("Writing the size"))
         files = open(isotreel + "casper/filesystem.size", "w")

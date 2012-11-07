@@ -58,7 +58,7 @@ def showFileNotFound(files, dirs, tn):
 
 
 # Copy a file
-def copyFile(src, dst, tn, critical = False):
+def copyFile(src, dst, tn, critical=False):
     if os.path.isfile(src):
         shutil.copy2(src, dst)
     elif critical is True:
@@ -77,6 +77,8 @@ def defineWriter(files, lists):
 
 # Generate the ISO tree
 genisotree = {"deps": [], "tn": "ISOTree"}
+
+
 class genISOTree(threadmanager.Thread):
     def runthread(self):
         logger.logI(self.tn, logger.I, _("Generating ISO Tree"))
@@ -84,65 +86,83 @@ class genISOTree(threadmanager.Thread):
         fsutil.rm(isotreel)
         # Make the tree
         fsutil.maketree([isotreel + "casper", isotreel + "preseed",
-                          isotreel + "isolinux", isotreel + ".disk"])
+                         isotreel + "isolinux", isotreel + ".disk"])
 genisotree["thread"] = genISOTree
 
 
 # Copy preseed to the ISO tree
 copypreseed = {"deps": [genisotree], "tn": "Preseed"}
+
+
 class copyPreseed(threadmanager.Thread):
     def runthread(self):
-        logger.logV(self.tn, logger.I, _("Copying preseed files to the ISO tree"))
+        logger.logV(
+            self.tn, logger.I, _("Copying preseed files to the ISO tree"))
         for i in fsutil.listdir(configutils.getValue(configs[configutils.preseed])):
-            logger.logVV(self.tn, logger.I, _("Copying") + " " + i + " " + _("to the ISO tree"))
+            logger.logVV(self.tn, logger.I, _("Copying") +
+                         " " + i + " " + _("to the ISO tree"))
             copyFile(i, isotreel + "preseed/", self.tn)
 copypreseed["thread"] = copyPreseed
 
 
 # Copy memtest to the ISO tree
 copymemtest = {"deps": [genisotree], "tn": "Memtest"}
+
+
 class copyMemtest(threadmanager.Thread):
     def runthread(self):
         if configutils.getValue(configs[configutils.memtest]):
-            logger.logV(self.tn, logger.I, _("Copying memtest to the ISO tree"))
-            copyFile("/boot/memtest86+.bin", isotreel + "isolinux/memtest", self.tn)
+            logger.logV(
+                self.tn, logger.I, _("Copying memtest to the ISO tree"))
+            copyFile("/boot/memtest86+.bin", isotreel +
+                     "isolinux/memtest", self.tn)
 copymemtest["thread"] = copyMemtest
 
 
 # Copy Syslinux to the ISO tree
 copysyslinux = {"deps": [genisotree], "tn": "SysLinux"}
+
+
 class copySysLinux(threadmanager.Thread):
     def runthread(self):
         logger.logV(self.tn, logger.I, _("Copying ISOLINUX to the ISO tree"))
-        copyFile("/usr/lib/syslinux/isolinux.bin", isotreel + "isolinux/", self.tn, True)
+        copyFile("/usr/lib/syslinux/isolinux.bin", isotreel +
+                 "isolinux/", self.tn, True)
         self.setProgress(self.tn, 20)
-        copyFile("/usr/lib/syslinux/vesamenu.c32", isotreel + "isolinux/", self.tn, True)
+        copyFile("/usr/lib/syslinux/vesamenu.c32", isotreel +
+                 "isolinux/", self.tn, True)
         self.setProgress(self.tn, 40)
-        logger.logVV(self.tn, logger.I, _("Copying isolinux.cfg to the ISO tree"))
+        logger.logVV(
+            self.tn, logger.I, _("Copying isolinux.cfg to the ISO tree"))
         copyFile(configutils.getValue(configs[configutils.isolinuxfile]), isotreel +
-                                      "isolinux/isolinux.cfg", self.tn, True)
+                 "isolinux/isolinux.cfg", self.tn, True)
         self.setProgress(self.tn, 50)
         # Edit the isolinux.cfg file to replace the variables
         logger.logV(self.tn, logger.I, _("Editing isolinux.cfg"))
-        splash = os.path.basename(configutils.getValue(configs[configutils.splash]))
+        splash = os.path.basename(
+            configutils.getValue(configs[configutils.splash]))
         shutil.copy2(configutils.getValue(configs[configutils.splash]),
                      isotreel + "isolinux/" + splash)
         self.setProgress(self.tn, 70)
         for i in [["LABEL", configutils.getValue(configs[configutils.label])],
                   ["SPLASH", splash],
                   ["TIMEOUT", configutils.getValue(configs[configutils.timeout])]]:
-            fsutil.ife(fsutil.ife_getbuffers(isotreel + "isolinux/isolinux.cfg"),
-                       lambda line: [True, re.sub("\$" + i[0], i[1], line)])
+            fsutil.ife(
+                fsutil.ife_getbuffers(isotreel + "isolinux/isolinux.cfg"),
+                lambda line: [True, re.sub("\$" + i[0], i[1], line)])
 copysyslinux["thread"] = copySysLinux
 
 
 # Write disk definitions
 diskdefines = {"deps": [genisotree], "tn": "DiskDefines"}
+
+
 class diskDefines(threadmanager.Thread):
     def runthread(self):
         logger.logV(self.tn, logger.I, _("Writing disk definitions"))
-        defineWriter(isotreel + "README.diskdefines", {"DISKNAME": getDiskName(),
-                                                      "TYPE": "binary",
+        defineWriter(
+            isotreel + "README.diskdefines", {"DISKNAME": getDiskName(),
+                                              "TYPE": "binary",
                                                       "TYPEbinary": ct,
                                                       "ARCH": config.Arch,
                                                       "ARCH" + config.Arch: ct,
@@ -153,32 +173,38 @@ class diskDefines(threadmanager.Thread):
                                                       })
         self.setProgress(self.tn, 50)
         # For some reason casper needs (or used to need) the diskdefines in its own directory
-        copyFile(isotreel + "README.diskdefines", isotreel + "casper/README.diskdefines", self.tn)
+        copyFile(isotreel + "README.diskdefines", isotreel +
+                 "casper/README.diskdefines", self.tn)
 diskdefines["thread"] = diskDefines
 
 
 # Generate package manifests
 pakmanifest = {"deps": [genisotree], "tn": "Manifest"}
+
+
 class genPakManifest(threadmanager.Thread):
     def runthread(self):
         # Generate the package manifest
         logger.logV(self.tn, logger.I, _("Generating package manifests"))
-        logger.logVV(self.tn, logger.I, _("Generating filesystem.manifest and filesystem.manifest-desktop"))
+        logger.logVV(self.tn, logger.I, _(
+            "Generating filesystem.manifest and filesystem.manifest-desktop"))
         writer = open(isotreel + "casper/filesystem.manifest", "w")
-        writer_desktop = open(isotreel + "casper/filesystem.manifest-desktop", "w")
+        writer_desktop = open(
+            isotreel + "casper/filesystem.manifest-desktop", "w")
         for i in config.AptCache:
-            if i.installedVersion == None or len(i.installedVersion) <= 0:
+            if i.installedVersion is None or len(i.installedVersion) <= 0:
                 continue
             name = i.fullname.strip()
             ver = i.installedVersion.strip()
             strs = name + " " + ver + "\n"
             writer.write(strs)
             if (not name in
-                configutils.getValue(configs[configutils.remafterinst])):
+                    configutils.getValue(configs[configutils.remafterinst])):
                 writer_desktop.write(strs)
         writer.close()
         writer_desktop.close()
-        logger.logVV(self.tn, logger.I, _("Generating filesytem.manifest-remove"))
+        logger.logVV(
+            self.tn, logger.I, _("Generating filesytem.manifest-remove"))
         writer = open(isotreel + "casper/filesystem.manifest-remove", "w")
         for i in configutils.parseMultipleValues(configutils.getValue(configs[configutils.remafterinst])):
             writer.write(i.strip() + "\n")
@@ -188,6 +214,8 @@ pakmanifest["thread"] = genPakManifest
 
 # Generate the RAMFS
 genramfs = {"deps": [genisotree, setup.instdepends], "tn": "RAMFS"}
+
+
 class genRAMFS(threadmanager.Thread):
     def runthread(self):
         logger.logV(self.tn, logger.I, _("Generating RAMFS"))
@@ -200,25 +228,33 @@ genramfs["thread"] = genRAMFS
 
 # Copy the kernel
 copykernel = {"deps": [genisotree], "tn": "Kernel"}
+
+
 class copyKernel(threadmanager.Thread):
     def runthread(self):
         logger.logI(self.tn, logger.I, _("Copying the kernel to the ISO tree"))
-        copyFile("/boot/vmlinuz-" + configutils.getKernel(configutils.getValue(configs[configutils.kernel])),
-                 isotreel + "casper/vmlinuz", self.tn)
+        copyFile(
+            "/boot/vmlinuz-" + configutils.getKernel(
+                configutils.getValue(configs[configutils.kernel])),
+            isotreel + "casper/vmlinuz", self.tn)
 copykernel["thread"] = copyKernel
 
 
 # Generate WUBI
 genwubi = {"deps": [genisotree], "tn": "WUBI"}
+
+
 class genWUBI(threadmanager.Thread):
     def runthread(self):
         if configutils.getValue(configs[configutils.enablewubi]) is True:
-            logger.logV(self.tn, logger.I, _("Generating the windows autorun.inf"))
+            logger.logV(
+                self.tn, logger.I, _("Generating the windows autorun.inf"))
             files = open(isotreel + "autorun.inf", "w")
             files.write("[autorun]\n")
             files.write("open=wubi.exe\n")
             files.write("icon=wubi.exe,0\n")
-            files.write("label=Install " + configutils.getValue(configs[configutils.sysname]) + "\n")
+            files.write("label=Install " + configutils.getValue(
+                configs[configutils.sysname]) + "\n")
             files.write("\n")
             files.write("[Content]\n")
             files.write("MusicFiles=false\n")
@@ -227,21 +263,26 @@ class genWUBI(threadmanager.Thread):
             files.close()
             self.setProgress(self.tn, 50)
             logger.logV(self.tn, logger.I, _("Copying WUBI to the ISO tree"))
-            copyFile(config.relinuxdir + "/wubi.exe", isotreel + "wubi.exe", self.tn)
+            copyFile(config.relinuxdir + "/wubi.exe",
+                     isotreel + "wubi.exe", self.tn)
 genwubi["thread"] = genWUBI
 
 
 # Make the LiveCD compatible with USB burners
 usbcomp = {"deps": [genisotree], "tn": "USB"}
+
+
 class USBComp(threadmanager.Thread):
     def runthread(self):
-        logger.logI(self.tn, logger.I, _("Making the ISO compatible with a USB burner"))
+        logger.logI(self.tn, logger.I, _(
+            "Making the ISO compatible with a USB burner"))
         logger.logVV(self.tn, logger.I, _("Writing .disk/info"))
         files = open(isotreel + ".disk/info", "w")
         files.write(getDiskName() + "\n")
         files.close()
         self.setProgress(self.tn, 20)
-        logger.logV(self.tn, logger.I, _("Making symlink pointing to the ISO root dir"))
+        logger.logV(self.tn, logger.I, _(
+            "Making symlink pointing to the ISO root dir"))
         if os.path.lexists(isotreel + "ubuntu"):
             fsutil.rm(isotreel + "ubuntu", False, self.tn)
         os.symlink(isotreel, isotreel + "ubuntu")
@@ -271,10 +312,13 @@ githreads.extend(squashfs.threads)
 
 
 # Generates the ISO
-geniso = {"deps": githreads, "tn": "ISO", "threadspan":-1}
+geniso = {"deps": githreads, "tn": "ISO", "threadspan": -1}
+
+
 class genISO(threadmanager.Thread):
     def runthread(self):
-        logger.logI(self.tn, logger.I, _("Starting generation of the ISO image"))
+        logger.logI(
+            self.tn, logger.I, _("Starting generation of the ISO image"))
         # Make a last verification on the SquashFS
         squashfs.doSFSChecks(isotreel + "casper/filesystem.squashfs",
                              configutils.getValue(configs[configutils.isolevel]))
@@ -282,12 +326,13 @@ class genISO(threadmanager.Thread):
         # Generate MD5 checksums
         logger.logV(self.tn, logger.I, _("Generating MD5 sums"))
         files = open(isotreel + "md5sum.txt", "w")
-        for x in fsutil.listdir(isotreel, tn = self.tn):
+        for x in fsutil.listdir(isotreel, tn=self.tn):
             i = re.sub(r"^ *" + isotreel + "/*", "./", x)
             if not "isolinux" in i and not "md5sum" in i:
-                logger.logVV(self.tn, logger.I, _("Writing MD5 sum of") + " " + i)
+                logger.logVV(
+                    self.tn, logger.I, _("Writing MD5 sum of") + " " + i)
                 fmd5 = fsutil.genFinalMD5(i, x)
-                if fmd5 != "" and fmd5 != None:
+                if fmd5 != "" and fmd5 is not None:
                     files.write(fmd5)
         files.close()
         self.setProgress(self.tn, 15)
@@ -299,20 +344,23 @@ class genISO(threadmanager.Thread):
         appnd = "32"
         if sys.maxsize > 2 ** 32:
             appnd = "64"
-        os.environ["LD_PRELOAD"] = os.path.split(os.path.realpath(__file__))[0] + "/isatty" + appnd + ".so"
+        os.environ["LD_PRELOAD"] = os.path.split(
+            os.path.realpath(__file__))[0] + "/isatty" + appnd + ".so"
         isocmd = subprocess.Popen(shlex.split(configutils.getValue(configs[configutils.isogenerator]) + " -o " +
                                               location + " " + isogenopts + " -V \"" +
-                                              configutils.getValue(configs[configutils.label]) + "\" " + isotreel),
-                                  stderr = subprocess.PIPE, universal_newlines = True)
+                                              configutils.getValue(
+                                                  configs[configutils.label]) + "\" " + isotreel),
+                                  stderr=subprocess.PIPE, universal_newlines=True)
         oldprogress = 0
         while isocmd.poll() is None:
             output = isocmd.stderr.readline()
             match = patt.match(output)
-            if match != None:
+            if match is not None:
                 progress = int(match.group(1))
                 if progress > oldprogress:
                     # 1.4285714285714286 is just 100 / 70
-                    self.setProgress(self.tn, 15 + int(utilities.floatDivision(progress, 1.4285714285714286)))
+                    self.setProgress(self.tn, 15 + int(utilities.floatDivision(
+                        progress, 1.4285714285714286)))
                     oldprogress = progress
             sys.stdout.write(output)
             sys.stdout.flush()
@@ -321,12 +369,14 @@ class genISO(threadmanager.Thread):
         # Generate the MD5 sum
         logger.logV(self.tn, logger.I, _("Generating MD5 sum for the ISO"))
         files = open(location + ".md5", "w")
-        files.write(fsutil.genFinalMD5("./" + configutils.getValue(configs[configutils.isolocation]),
-                                       location))
+        files.write(
+            fsutil.genFinalMD5(
+                "./" + configutils.getValue(configs[configutils.isolocation]),
+                location))
         files.close()
         self.setProgress(self.tn, 100)
         msg = "Relinux generated the ISO at " + configutils.getValue(
-                            config.Configuration["OSWeaver"][configutils.isolocation])
+            config.Configuration["OSWeaver"][configutils.isolocation])
         msg += "."
         self.showMessage(self.tn, logger.I, msg)
 geniso["thread"] = genISO

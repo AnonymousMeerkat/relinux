@@ -62,7 +62,8 @@ def findRunnableThreads(threadids, threadsdone, threadsrunning, threads, **optio
                     ls = []
                     for x in thread["deps"]:
                         if not x in threadsdone:
-                            ls.append(str(getThread(x, threads)["tn"]) + " " + str(x))
+                            ls.append(str(
+                                getThread(x, threads)["tn"]) + " " + str(x))
         if current >= cpumax:
             break
     return returnme
@@ -75,7 +76,7 @@ def runThread(threadid, threadsdone, threadsrunning, threads, lock, **options):
         threadsrunning.append(threadid)
         logger.logV(tn, logger.I, _("Starting") + " " + thread["tn"] + "...")
         thread["thread"].start()
-        if options.get("poststart") != None and lock != None:
+        if options.get("poststart") is not None and lock is not None:
             with lock:
                 options["poststart"](threadid, threadsrunning, threads)
 
@@ -90,7 +91,7 @@ def checkThread(threadid, threadsdone, threadsrunning, threads, lock, **options)
             threadsdone.append(threadid)
             logger.logV(tn, logger.I, thread["tn"] + " " +
                         _("has finished. Number of threads running: ") + str(len(threadsrunning)))
-            if options.get("postend") != None and lock != None:
+            if options.get("postend") is not None and lock is not None:
                 with lock:
                     options["postend"](threadid, threadsrunning, threads)
 
@@ -127,7 +128,7 @@ def threadLoop(threads1_, **options):
         if "postend" in options and options["postend"] == options["poststart"]:
             pelock = pslock
     logger.logVV(tn, logger.D, "Check poststart")
-    if "postend" in options and pelock == None:
+    if "postend" in options and pelock is None:
         pelock = threading.RLock()
     logger.logVV(tn, logger.D, "Check postend")
     # Remove duplicates and remove disabled threads
@@ -160,23 +161,27 @@ def threadLoop(threads1_, **options):
                         break
     logger.logVV(tn, logger.D, "Check threaddeps")
     # Actual loop
+
     def _ActualLoop(threads, threadsdone, threadsrunning, threadids):
         logger.logVV(tn, logger.D, "Check ActualLoop")
         #global threads, threadsdone, threadsrunning, threadids
         while config.ThreadStop is False:
             # Clear old threads
             for x in threadsrunning:
-                checkThread(x, threadsdone, threadsrunning, threads, pelock, **options)
+                checkThread(x, threadsdone, threadsrunning,
+                            threads, pelock, **options)
             # End if all threads are done
             if len(threadsdone) >= len(threads):
                 logger.logVV(tn, logger.D, "Ending ActualLoop")
                 break
             # Run runnable threads
             for x in findRunnableThreads(threadids, threadsdone, threadsrunning, threads, **options):
-                runThread(x, threadsdone, threadsrunning, threads, pslock, **options)
+                runThread(x, threadsdone, threadsrunning,
+                          threads, pslock, **options)
             time.sleep(float(1.0 / config.ThreadRPS))
         if ("threadsend" in options and isinstance(options["threadsend"], collections.Callable)):
             options["threadsend"](threadids, threadsdone, threads)
     # Make a new thread (so that the user can continue on using relinux)
-    t = threading.Thread(target = _ActualLoop, args = (threads, threadsdone, threadsrunning, threadids))
+    t = threading.Thread(target=_ActualLoop, args=(
+        threads, threadsdone, threadsrunning, threadids))
     t.start()

@@ -40,17 +40,20 @@ clickc = (255, 0, 0)
 def _rgbtohex(rgb):
     return '#%02x%02x%02x' % rgb
 
+
 def _setPixel(obj, pixel, x, y, color):
     if obj.busy:
         _setPixel(obj, pixel, x, y, color)
     try:
         obj.coords(pixel, x, y, x + 1, y + 1)
-        obj.itemconfig(pixel, fill = color)
+        obj.itemconfig(pixel, fill=color)
     except:
         raise
 
+
 def _getPixel(obj, x, y, color):
-    return obj.create_line(x, y, x + 1, y + 1, fill = color)
+    return obj.create_line(x, y, x + 1, y + 1, fill=color)
+
 
 def _gradientSC(color1, color2, percent):
     col1 = float(float(color1) / 255)
@@ -65,11 +68,13 @@ def _gradientSC(color1, color2, percent):
         fans = 0
     return fans
 
+
 def _gradient(rgb1, rgb2, percent):
     r1, g1, b1 = rgb1
     r2, g2, b2 = rgb2
     return (_gradientSC(r1, r2, percent), _gradientSC(g1, g2, percent),
             _gradientSC(b1, b2, percent))
+
 
 class FuncThread(threading.Thread):
     def __init__(self, target, ondie, *args):
@@ -80,8 +85,9 @@ class FuncThread(threading.Thread):
 
     def run(self):
         self._target(*self._args)
-        if self.ondie != None:
+        if self.ondie is not None:
             self.ondie()
+
 
 class glowyFade(threading.Thread):
     def __init__(self, func, color1, color2):
@@ -163,7 +169,7 @@ class GlowyRectangleRenderer(threading.Thread):
             if self.stopme or self.obj.anim >= 1.0:
                 break
         self.obj.renderlock.set(0)
-        if self.obj.finishrenderingcmd != None:
+        if self.obj.finishrenderingcmd is not None:
             self.obj.finishrenderingcmd()
 
     def _line(self, color):
@@ -175,29 +181,30 @@ class GlowyRectangleRenderer(threading.Thread):
                 return
             percent = float((float(i) / float(self.obj.width)))
             _setPixel(self.obj, self.obj.c_bottom[i], i, self.obj.height - 1,
-                               _rgbtohex(_gradient(start, color, percent)))
+                      _rgbtohex(_gradient(start, color, percent)))
         for i in range(0, self.obj.height):
             if self.stopme:
                 return
             percent = float((float(i) / float(self.obj.height)))
             _setPixel(self.obj, self.obj.c_right[i], self.obj.width - 1, i,
-                                _rgbtohex(_gradient(start, color, percent)))
+                      _rgbtohex(_gradient(start, color, percent)))
         self.obj.coords(self.obj.c_left, 0, 0, 0, self.obj.height)
         self.obj.coords(self.obj.c_top, 0, 0, self.obj.width, 0)
-        self.obj.itemconfig(self.obj.c_left, fill = _rgbtohex(start))
-        self.obj.itemconfig(self.obj.c_top, fill = _rgbtohex(start))
+        self.obj.itemconfig(self.obj.c_left, fill=_rgbtohex(start))
+        self.obj.itemconfig(self.obj.c_top, fill=_rgbtohex(start))
 
 
 # Glowy component
 class Component(Tkinter.Canvas):
     def __init__(self, parent, *args, **kw):
-        utilities.setDefault(kw, background = bg, borderwidth = 0, highlightthickness = 0)
+        utilities.setDefault(
+            kw, background=bg, borderwidth=0, highlightthickness=0)
         Tkinter.Canvas.__init__(self, parent, *args, **kw)
         self.height = 0
         self.width = 0
         self.anim = 1.0
-        self.c_top = self.create_line(0, 0, 0, self.height, fill = "#000")
-        self.c_left = self.create_line(0, 0, self.width, 0, fill = "#000")
+        self.c_top = self.create_line(0, 0, 0, self.height, fill="#000")
+        self.c_left = self.create_line(0, 0, self.width, 0, fill="#000")
         self.c_bottom = []
         self.c_right = []
         self.setHeight(self.height)
@@ -222,14 +229,15 @@ class Component(Tkinter.Canvas):
             rrange = range(width, orig)
             inverted = True
         self.width = width
-        self.config(width = width)
+        self.config(width=width)
         self.coords(self.c_top, 0, 0, width, 0)
         if inverted:
             for i in reversed(rrange):
                 self.delete(self.c_bottom.pop(i))
         else:
             for i in rrange:
-                self.c_bottom.append(_getPixel(self, i, self.height - 1, "#000"))
+                self.c_bottom.append(
+                    _getPixel(self, i, self.height - 1, "#000"))
         self.busy = False
 
     def setHeight(self, height):
@@ -241,7 +249,7 @@ class Component(Tkinter.Canvas):
             rrange = range(height, orig)
             inverted = True
         self.height = height
-        self.config(height = height)
+        self.config(height=height)
         self.coords(self.c_left, 0, 0, 0, height)
         if inverted:
             for i in reversed(rrange):
@@ -252,7 +260,7 @@ class Component(Tkinter.Canvas):
         self.busy = False
 
     def renderlines(self):
-        currr = self.currrenderer != None and self.currrenderer.isAlive()
+        currr = self.currrenderer is not None and self.currrenderer.isAlive()
         if currr:
             self.currrenderer.stop()
             #self.currrenderer.join()
@@ -263,7 +271,8 @@ class Component(Tkinter.Canvas):
 # Temporary Frame
 class Frame(Tkinter.Frame):
     def __init__(self, parent, *args, **kw):
-        utilities.setDefault(kw, highlightthickness = 0, borderwidth = 0, background = bg, relief = Tkinter.FLAT)
+        utilities.setDefault(kw, highlightthickness=0, borderwidth=0,
+                             background=bg, relief=Tkinter.FLAT)
         Tkinter.Frame.__init__(self, parent, *args, **kw)
 
 
@@ -276,7 +285,8 @@ class Button(Tkinter.Canvas):
         bindclick = kw.pop("bindclick", True)
         bindunclick = kw.pop("bindunclick", True)
         self.mousedown = kw.pop("mousedown", None)
-        utilities.setDefault(kw, background=bg, borderwidth=0, highlightthickness=0)
+        utilities.setDefault(
+            kw, background=bg, borderwidth=0, highlightthickness=0)
         Tkinter.Canvas.__init__(self, parent, *args, **kw)
         label = Tkinter.Label(self, text="Unused")
         self.font = tkFont.Font(font=label["font"])
@@ -287,15 +297,18 @@ class Button(Tkinter.Canvas):
         self.clicking = False
         self.commandvalid = False
         self.text = ""
-        self.c_text = self.create_text(self.width / 2, self.height / 2, text=self.text,
+        self.c_text = self.create_text(
+            self.width / 2, self.height / 2, text=self.text,
                                  font=self.font, fill=fg)
         normalch = _rgbtohex(normalc)
         self.c_left = self.create_line(0, 0, 0, self.height, fill=normalch)
         self.c_top = self.create_line(0, 0, self.width, 0, fill=normalch)
         #self.c_bottom = []
         #self.c_right = []
-        self.c_bottom = self.create_line(0, self.height, self.width, self.height, fill=normalch)
-        self.c_right = self.create_line(self.width, 0, self.width, self.height, fill=normalch)
+        self.c_bottom = self.create_line(
+            0, self.height, self.width, self.height, fill=normalch)
+        self.c_right = self.create_line(
+            self.width, 0, self.width, self.height, fill=normalch)
         self.setHeight(self.font.actual("size") * -1 + 8)
         self.setWidth(self.width)
         self.bind("<Enter>", self.hoveringtrue)
@@ -330,7 +343,8 @@ class Button(Tkinter.Canvas):
         if self.lastcolor == color:
             return
         if anims:
-            self.renderthread = glowyFade(self.setLineColor, copy.copy(self.lastcolor), color)
+            self.renderthread = glowyFade(
+                self.setLineColor, copy.copy(self.lastcolor), color)
             self.renderthread.start()
         else:
             self.setLineColor(color)
@@ -358,11 +372,13 @@ class Button(Tkinter.Canvas):
         self.height = height
         self.config(height=height)
         self.coords(self.c_left, 0, 0, 0, height - 1)
-        self.coords(self.c_right, self.width - 1, 0, self.width - 1, height - 1)
+        self.coords(
+            self.c_right, self.width - 1, 0, self.width - 1, height - 1)
         self.busy = False
 
     def setText(self, text):
-        self.setWidth(self.tk.call("font", "measure", tkFont.NORMAL, "-displayof", self, text) + 12)
+        self.setWidth(self.tk.call(
+            "font", "measure", tkFont.NORMAL, "-displayof", self, text) + 12)
         self.setHeight(self.height)
         self.text = text
         self.coords(self.c_text, (self.width) / 2, (self.height) / 2)
@@ -396,14 +412,17 @@ class Button(Tkinter.Canvas):
 '''
 
 # Temporary Button
+
+
 class Button(Tkinter.Label):
     def __init__(self, parent, *args, **kw):
         self.command = kw.pop("command", None)
         bindclick = kw.pop("bindclick", True)
         bindunclick = kw.pop("bindunclick", True)
         self.mousedown = kw.pop("mousedown", None)
-        utilities.setDefault(kw, background = bg, foreground = fg, borderwidth = 0, pady = 3, padx = 8,
-                        highlightbackground = _rgbtohex(normalc), highlightthickness = 1)
+        utilities.setDefault(
+            kw, background=bg, foreground=fg, borderwidth=0, pady=3, padx=8,
+            highlightbackground=_rgbtohex(normalc), highlightthickness=1)
         Tkinter.Label.__init__(self, parent, *args, **kw)
         self.lastcolor = normalc
         self.renderthread = None
@@ -416,8 +435,8 @@ class Button(Tkinter.Label):
         if bindunclick:
             self.bind("<ButtonRelease-1>", self.onunclick)
 
-    def render(self, anims1 = True):
-        if self.renderthread != None and self.renderthread.isAlive():
+    def render(self, anims1=True):
+        if self.renderthread is not None and self.renderthread.isAlive():
             self.renderthread.stop()
             self.renderthread = None
         color = normalc
@@ -428,17 +447,18 @@ class Button(Tkinter.Label):
         if self.lastcolor == color:
             return
         if anims1:
-            self.renderthread = glowyFade(self._setHB, copy.copy(self.lastcolor), color)
+            self.renderthread = glowyFade(
+                self._setHB, copy.copy(self.lastcolor), color)
             self.renderthread.start()
         else:
             self.renderthread = None
             self._setHB(color, True, True)
 
-    def _setHB(self, value, override1 = False, override2 = False):
-        if self.renderthread == None and not override1:
+    def _setHB(self, value, override1=False, override2=False):
+        if self.renderthread is None and not override1:
             return
         self.lastcolor = value
-        self.config(highlightbackground = _rgbtohex(value))
+        self.config(highlightbackground=_rgbtohex(value))
         if override2:
             self.update()
 
@@ -453,13 +473,13 @@ class Button(Tkinter.Label):
     def onclick(self, *args):
         self.clicking = True
         self.render(False)
-        if self.mousedown != None:
+        if self.mousedown is not None:
             self.mousedown()
 
     def onunclick(self, *args):
         self.clicking = False
         self.render()
-        if self.command != None and self.hovering:
+        if self.command is not None and self.hovering:
             self.command()
 
 
@@ -471,9 +491,10 @@ class Entry(Tkinter.Entry):
         if "savefunc" in kw:
             self.savefunc = kw.pop("savefunc")
         self.value = Tkinter.StringVar()
-        utilities.setDefault(kw, background = bg, foreground = fg, selectbackground = fg,
-                    selectforeground = bg, borderwidth = 0, highlightbackground = _rgbtohex(normalc),
-                    highlightcolor = _rgbtohex(clickc), textvariable = self.value)
+        utilities.setDefault(
+            kw, background=bg, foreground=fg, selectbackground=fg,
+            selectforeground=bg, borderwidth=0, highlightbackground=_rgbtohex(normalc),
+            highlightcolor=_rgbtohex(clickc), textvariable=self.value)
         self.lastcolor = normalc
         self.renderthread = None
         Tkinter.Entry.__init__(self, parent, *args, **kw)
@@ -493,19 +514,21 @@ class Entry(Tkinter.Entry):
 
     def _setHB(self, value):
         self.lastcolor = value
-        self.config(highlightbackground = _rgbtohex(value))
+        self.config(highlightbackground=_rgbtohex(value))
 
     def hoveringtrue(self, *args):
-        if self.renderthread != None and self.renderthread.isAlive():
+        if self.renderthread is not None and self.renderthread.isAlive():
             self.renderthread.stop()
-        self.renderthread = glowyFade(self._setHB, copy.copy(self.lastcolor), hoverc)
+        self.renderthread = glowyFade(
+            self._setHB, copy.copy(self.lastcolor), hoverc)
         self.renderthread.start()
         #self.config(highlightbackground=_rgbtohex(hoverc))
 
     def hoveringfalse(self, *args):
-        if self.renderthread != None and self.renderthread.isAlive():
+        if self.renderthread is not None and self.renderthread.isAlive():
             self.renderthread.stop()
-        self.renderthread = glowyFade(self._setHB, copy.copy(self.lastcolor), normalc)
+        self.renderthread = glowyFade(
+            self._setHB, copy.copy(self.lastcolor), normalc)
         self.renderthread.start()
         #self.config(highlightbackground=_rgbtohex(normalc))
 
@@ -518,16 +541,18 @@ class Entry(Tkinter.Entry):
 # Temporary Label
 class Label(Tkinter.Label):
     def __init__(self, parent, *args, **kw):
-        utilities.setDefault(kw, background = bg, foreground = fg, borderwidth = 0, pady = 6, padx = 6,
-                    highlightbackground = _rgbtohex(normalc), highlightcolor = _rgbtohex(hoverc))
+        utilities.setDefault(
+            kw, background=bg, foreground=fg, borderwidth=0, pady=6, padx=6,
+            highlightbackground=_rgbtohex(normalc), highlightcolor=_rgbtohex(hoverc))
         Tkinter.Label.__init__(self, parent, *args, **kw)
 
 
 # Temporary Scrollbar
 class GScrollbar(Tkinter.Scrollbar):
     def __init__(self, parent, *args, **kw):
-        utilities.setDefault(kw, background = lightbg, borderwidth = 0, relief = Tkinter.FLAT,
-                    activebackground = lightbghover, troughcolor = bg)
+        utilities.setDefault(
+            kw, background=lightbg, borderwidth=0, relief=Tkinter.FLAT,
+            activebackground=lightbghover, troughcolor=bg)
         if kw.get("showfunc"):
             self.showfunc = kw.pop("showfunc")
         if kw.get("hidefunc"):
@@ -547,10 +572,10 @@ class GScrollbar(Tkinter.Scrollbar):
         Tkinter.Scrollbar.set(self, lo, hi)'''
 
     def onclick(self, *args):
-        self.config(activebackground = lightbgclick)
+        self.config(activebackground=lightbgclick)
 
     def onunclick(self, *args):
-        self.config(activebackground = lightbghover)
+        self.config(activebackground=lightbghover)
 
 
 # Temporary Combobox
@@ -561,11 +586,11 @@ class Combobox(Tkinter.OptionMenu):
         Tkinter.OptionMenu.__init__(self, parent, self.current, *self.choices)
         self.renderthread = None
         self.lastcolor = normalc
-        self.config(background = bg, foreground = fg, borderwidth = 0,
-                    highlightthickness = 1, relief = Tkinter.FLAT, highlightbackground = _rgbtohex(normalc),
-                    padx = 2, pady = 2, activebackground = bg, activeforeground = fg)
-        self["menu"].config(background = fg, foreground = bg, borderwidth = 0,
-                            activebackground = bg, activeforeground = fg, relief = Tkinter.FLAT)
+        self.config(background=bg, foreground=fg, borderwidth=0,
+                    highlightthickness=1, relief=Tkinter.FLAT, highlightbackground=_rgbtohex(normalc),
+                    padx=2, pady=2, activebackground=bg, activeforeground=fg)
+        self["menu"].config(background=fg, foreground=bg, borderwidth=0,
+                            activebackground=bg, activeforeground=fg, relief=Tkinter.FLAT)
         self.bind("<Enter>", self.hoveringtrue)
         self.bind("<Leave>", self.hoveringfalse)
 
@@ -583,19 +608,21 @@ class Combobox(Tkinter.OptionMenu):
 
     def _setHB(self, value):
         self.lastcolor = value
-        self.config(highlightbackground = _rgbtohex(value))
+        self.config(highlightbackground=_rgbtohex(value))
 
     def hoveringtrue(self, *args):
-        if self.renderthread != None and self.renderthread.isAlive():
+        if self.renderthread is not None and self.renderthread.isAlive():
             self.renderthread.stop()
-        self.renderthread = glowyFade(self._setHB, copy.copy(self.lastcolor), hoverc)
+        self.renderthread = glowyFade(
+            self._setHB, copy.copy(self.lastcolor), hoverc)
         self.renderthread.start()
         #self.config(highlightbackground=_rgbtohex(hoverc))
 
     def hoveringfalse(self, *args):
-        if self.renderthread != None and self.renderthread.isAlive():
+        if self.renderthread is not None and self.renderthread.isAlive():
             self.renderthread.stop()
-        self.renderthread = glowyFade(self._setHB, copy.copy(self.lastcolor), normalc)
+        self.renderthread = glowyFade(
+            self._setHB, copy.copy(self.lastcolor), normalc)
         self.renderthread.start()
         #self.config(highlightbackground=_rgbtohex(normalc))
 
@@ -605,7 +632,7 @@ class Radiobutton(Button):
     def __init__(self, parent, *args, **kw):
         self.variable = kw.pop("variable", Tkinter.IntVar(0))
         self.value = kw.pop("value", 0)
-        utilities.setDefault(kw, bindunclick = False, mousedown = self.select)
+        utilities.setDefault(kw, bindunclick=False, mousedown=self.select)
         Button.__init__(self, parent, *args, **kw)
         self._callback()
         self.variable.trace("w", self._callback)
@@ -626,14 +653,17 @@ class Radiobutton(Button):
 class Checkbutton(Tkinter.Checkbutton):
     def __init__(self, parent, *args, **kw):
         self.value = Tkinter.IntVar()
-        utilities.setDefault(kw, background = bg, borderwidth = 0, highlightthickness = 0, foreground = fg,
-                             selectcolor = bg, activebackground = bg, activeforeground = fg,
-                             variable = self.value)
+        utilities.setDefault(
+            kw, background=bg, borderwidth=0, highlightthickness=0, foreground=fg,
+            selectcolor=bg, activebackground=bg, activeforeground=fg,
+            variable=self.value)
         Tkinter.Checkbutton.__init__(self, parent, *args, **kw)
 
 # Glowy Notebook
+
+
 class Notebook(Frame):
-    def __init__(self, master = None, *args, **kw):
+    def __init__(self, master=None, *args, **kw):
         self.master = master
         self.pages = []
         self.current = Tkinter.IntVar()
@@ -641,12 +671,13 @@ class Notebook(Frame):
         self.old = 0
         self.finishedtb = None
         npages = kw.pop('npages', 0)
-        utilities.setDefault(kw, background = bg, borderwidth = 0, highlightthickness = 0)
+        utilities.setDefault(
+            kw, background=bg, borderwidth=0, highlightthickness=0)
         Frame.__init__(self, master, *args, **kw)
         if npages > 0:
             for page in range(npages):
                 self.add_empty_page()
-            self.pages[self.current.get()].pack(fill = 'both', expand = 1)
+            self.pages[self.current.get()].pack(fill='both', expand=1)
             self._tab_buttons()
         self.current.trace("w", self._select)
 
@@ -654,12 +685,14 @@ class Notebook(Frame):
         # Place tab buttons on the pages
         if hasattr(self, "tabframe"):
             self.tabframe.pack_forget()
-        self.tabframe = Frame(self, background = bg, borderwidth = 0, highlightthickness = 0)
-        self.tabframe.pack(side = "top", fill = "x", padx = 6, pady = 6)
+        self.tabframe = Frame(
+            self, background=bg, borderwidth=0, highlightthickness=0)
+        self.tabframe.pack(side="top", fill="x", padx=6, pady=6)
         for indx1, child1 in enumerate(self.pages):
-            btn = Radiobutton(self.tabframe, variable = self.current, value = indx1,
-                                text = child1.text)
-            btn.grid(row = 0, column = indx1)
+            btn = Radiobutton(
+                self.tabframe, variable=self.current, value=indx1,
+                text=child1.text)
+            btn.grid(row=0, column=indx1)
         '''nextbtn = Button(child.btnframe, text=_("Next"), command=self._select)
         nextbtn.pack(side="right", anchor="e", padx=6)
         quitbtn = Button(child.btnframe, text=_("Quit"), command=self.close)
@@ -671,19 +704,20 @@ class Notebook(Frame):
             if indx == len(self.pages) - 1:
                 nextbtn.setText("Finish")
                 nextbtn.command = self.close'''
-        if self.finishedtb != None:
+        if self.finishedtb is not None:
             self.finishedtb()
 
     def _select(self, *args):
         self.pages[self.old].pack_forget()
         self.old = self.current.get()
-        self.pages[self.current.get()].pack(fill = Tkinter.BOTH, expand = Tkinter.TRUE)
+        self.pages[self.current.get(
+        )].pack(fill=Tkinter.BOTH, expand=Tkinter.TRUE)
 
     def close(self):
         self.master.destroy()
 
     def add_empty_page(self):
-        self.pages.append(Frame(self, relief = Tkinter.FLAT))
+        self.pages.append(Frame(self, relief=Tkinter.FLAT))
         self.pages[len(self.pages) - 1].text = ""
 
     def add_tab(self):
@@ -695,47 +729,57 @@ class Notebook(Frame):
         #self.tab(tab_id, text=title)
         self.pages[tab_id].text = title
         self._tab_buttons()
-        body.pack(side = Tkinter.TOP, fill = Tkinter.BOTH, expand = Tkinter.TRUE)
+        body.pack(
+            side=Tkinter.TOP, fill=Tkinter.BOTH, expand=Tkinter.TRUE)
         self.current.set(0)
 
     def page(self, page_num):
         if page_num < len(self.pages):
             return self.pages[page_num]
         else:
-            logger.logI(tn, logger.E, _("Page") + " " + str(page_num) + " " + _("does not exist"))
+            logger.logI(tn, logger.E, _(
+                "Page") + " " + str(page_num) + " " + _("does not exist"))
 
 
 # Scrolling frame, based on http://Tkinter.unpy.net/wiki/VerticalScrolledFrame
 class VerticalScrolledFrame(Frame):
     def __init__(self, parent, *args, **kw):
-        utilities.setDefault(kw, background = bg, borderwidth = 0, highlightthickness = 0, relief = Tkinter.FLAT)
+        utilities.setDefault(kw, background=bg, borderwidth=0,
+                             highlightthickness=0, relief=Tkinter.FLAT)
         Frame.__init__(self, parent, *args, **kw)
+
         def showFunc():
-            self.vscrollbar.pack(fill = Tkinter.Y, side = Tkinter.RIGHT, expand = Tkinter.FALSE)
+            self.vscrollbar.pack(fill=Tkinter.Y,
+                                 side=Tkinter.RIGHT, expand=Tkinter.FALSE)
+
         def hideFunc():
             self.vscrollbar.pack_forget()
-        self.vscrollbar = GScrollbar(self, orient = Tkinter.VERTICAL)
-        self.vscrollbar.pack(fill = Tkinter.Y, side = Tkinter.RIGHT, expand = Tkinter.FALSE)
-        self.canvas = Tkinter.Canvas(self, kw, yscrollcommand = self.vscrollbar.set)
-        self.canvas.pack(side = Tkinter.LEFT, fill = Tkinter.BOTH, expand = Tkinter.TRUE)
-        self.vscrollbar.config(command = self.canvas.yview)
+        self.vscrollbar = GScrollbar(self, orient=Tkinter.VERTICAL)
+        self.vscrollbar.pack(
+            fill=Tkinter.Y, side=Tkinter.RIGHT, expand=Tkinter.FALSE)
+        self.canvas = Tkinter.Canvas(
+            self, kw, yscrollcommand=self.vscrollbar.set)
+        self.canvas.pack(
+            side=Tkinter.LEFT, fill=Tkinter.BOTH, expand=Tkinter.TRUE)
+        self.vscrollbar.config(command=self.canvas.yview)
         self.canvas.xview_moveto(0)
         self.canvas.yview_moveto(0)
         self.interior = interior = Frame(self.canvas, kw)
-        interior.pack(fill = Tkinter.BOTH, expand = Tkinter.TRUE)
-        interior_id = self.canvas.create_window(0, 0, window = interior,
-                                           anchor = Tkinter.NW)
+        interior.pack(fill=Tkinter.BOTH, expand=Tkinter.TRUE)
+        interior_id = self.canvas.create_window(0, 0, window=interior,
+                                                anchor=Tkinter.NW)
 
         def _configure_interior(event):
             size = (interior.winfo_reqwidth(), interior.winfo_reqheight())
-            self.canvas.config(scrollregion = "0 0 %s %s" % size)
+            self.canvas.config(scrollregion="0 0 %s %s" % size)
             if interior.winfo_reqwidth() != self.canvas.winfo_width():
-                self.canvas.config(width = interior.winfo_reqwidth())
+                self.canvas.config(width=interior.winfo_reqwidth())
         interior.bind('<Configure>', _configure_interior)
 
         def _configure_canvas(event):
             if interior.winfo_reqwidth() != self.canvas.winfo_width():
-                self.canvas.itemconfigure(interior_id, width = self.canvas.winfo_width())
+                self.canvas.itemconfigure(
+                    interior_id, width=self.canvas.winfo_width())
         self.canvas.bind('<Configure>', _configure_canvas)
 
 
@@ -750,7 +794,7 @@ class VerticalScrolledFrame(Frame):
 
 
 class Wizard(Notebook):
-    def __init__(self, master = None, *args, **kw):
+    def __init__(self, master=None, *args, **kw):
         self.master = master
         #self.pages = []
         #self.current = 0
@@ -770,17 +814,20 @@ class Wizard(Notebook):
             if hasattr(child, "btnframe"):
                 child.btnframe.pack_forget()
             child.btnframe = Frame(child)
-            child.btnframe.pack(side = "bottom", fill = "x", padx = 6, pady = 12)
-            nextbtn = Button(child.btnframe, text = _("Next"), command = self.next_page)
-            nextbtn.pack(side = "right", anchor = "e", padx = 6)
-            quitbtn = Button(child.btnframe, text = _("Quit"), command = self.close)
-            quitbtn.pack(side = "left", anchor = "w", padx = 6)
+            child.btnframe.pack(
+                side="bottom", fill="x", padx=6, pady=12)
+            nextbtn = Button(
+                child.btnframe, text=_("Next"), command=self.next_page)
+            nextbtn.pack(side="right", anchor="e", padx=6)
+            quitbtn = Button(
+                child.btnframe, text=_("Quit"), command=self.close)
+            quitbtn.pack(side="left", anchor="w", padx=6)
             if indx > 0:
-                prevbtn = Button(child.btnframe, text = _("Previous"),
-                    command = self.prev_page)
-                prevbtn.pack(side = "right", anchor = "e", padx = 6)
+                prevbtn = Button(child.btnframe, text=_("Previous"),
+                                 command=self.prev_page)
+                prevbtn.pack(side="right", anchor="e", padx=6)
                 if indx == len(self.pages) - 1:
-                    nextbtn.config(text = "Finish")
+                    nextbtn.config(text="Finish")
                     nextbtn.command = self.close
             '''progressframe = Tkinter.Frame(child)
             progressframe.pack(side="bottom", fill="x", padx=6)
@@ -802,7 +849,8 @@ class Wizard(Notebook):
         exitprog()
 
     '''def add_empty_page(self):
-        self.pages.append(Tkinter.Frame(self, background=bg, borderwidth=0, highlightthickness=0))
+        self.pages.append(Tkinter.Frame(
+            self, background=bg, borderwidth=0, highlightthickness=0))
 
     def add_tab(self):
         self.add_empty_page()
@@ -828,9 +876,9 @@ class FileSelector(Frame):
             self.savefunc = kw.pop("savefunc")
         Frame.__init__(self, *args, **kw)
         self.entry = Entry(self)
-        self.button = Button(self, text = "...", command = self._on_button)
-        self.button.grid(row = 0, column = 1)
-        self.entry.grid(row = 0, column = 0)
+        self.button = Button(self, text="...", command=self._on_button)
+        self.button.grid(row=0, column=1)
+        self.entry.grid(row=0, column=0)
 
     def set(self, value):
         self.entry.set(value)
@@ -858,12 +906,14 @@ class YesNo(Frame):
             self.savefunc = kw.pop("savefunc")
         Frame.__init__(self, *args, **kw)
         self.v = Tkinter.IntVar()
-        self.y = Radiobutton(self, text = _("Yes"), variable = self.v, value = 1)
+        self.y = Radiobutton(
+            self, text=_("Yes"), variable=self.v, value=1)
         self.y.variable.trace("w", self.save)
-        self.y.grid(row = 0, column = 0)
-        self.n = Radiobutton(self, text = _("No"), variable = self.v, value = 2)
+        self.y.grid(row=0, column=0)
+        self.n = Radiobutton(
+            self, text=_("No"), variable=self.v, value=2)
         self.n.variable.trace("w", self.save)
-        self.n.grid(row = 0, column = 1)
+        self.n.grid(row=0, column=1)
 
     def set(self, bools):
         if bools is True:
@@ -901,12 +951,12 @@ class Choice(Frame):
         Frame.__init__(self, parent, *args, **kw)
         self.cb = Combobox(self, choices)
         self.entry = Entry(self)
-        self.cb.grid(row = 0, column = 0)
+        self.cb.grid(row=0, column=0)
         self.cb.bind("<<ComboboxSelected>>", self._on_changed)
 
     def _on_changed(self, *args):
         if self.cb.get() == configutils.custom:
-            self.entry.grid(row = 1, column = 0)
+            self.entry.grid(row=1, column=0)
         else:
             self.entry.grid_remove()
         self.save()
@@ -935,11 +985,13 @@ class Multiple(Frame):
 
     def addEntry(self, row):
         self.entries.insert(row, Entry(self))
-        self.pluses.insert(row, Button(self, text = "+", command = lambda: self._plus(row)))
-        self.minuses.insert(row, Button(self, text = "-", command = lambda: self._minus(row)))
-        self.entries[row].grid(row = row, column = 0)
-        self.minuses[row].grid(row = row, column = 1)
-        self.pluses[row].grid(row = row, column = 2)
+        self.pluses.insert(
+            row, Button(self, text="+", command=lambda: self._plus(row)))
+        self.minuses.insert(
+            row, Button(self, text="-", command=lambda: self._minus(row)))
+        self.entries[row].grid(row=row, column=0)
+        self.minuses[row].grid(row=row, column=1)
+        self.pluses[row].grid(row=row, column=2)
         self.entries[row].bind("<Key>", lambda event: self.save(event, True))
         self.entries[row].bind("<FocusOut>", self.save)
         self._rePack()
@@ -977,9 +1029,9 @@ class Multiple(Frame):
         print("R")
         self.pluses[c].command = lambda: self._plus(c)
         self.minuses[c].command = lambda: self._minus(c)
-        self.entries[c].grid(row = c, column = 0)
-        self.minuses[c].grid(row = c, column = 1)
-        self.pluses[c].grid(row = c, column = 2)
+        self.entries[c].grid(row=c, column=0)
+        self.minuses[c].grid(row=c, column=1)
+        self.pluses[c].grid(row=c, column=2)
 
     def _rePack(self):
         for c in list(range(len(self.entries))):
@@ -1007,10 +1059,11 @@ class Multiple(Frame):
 
 class Progressbar(Tkinter.Canvas):
     def __init__(self, parent, *args, **kw):
-        utilities.setDefault(kw, border = 0, highlightthickness = 1, bg = bg, highlightbackground = "black",
-                    height = 15)
+        utilities.setDefault(
+            kw, border=0, highlightthickness=1, bg=bg, highlightbackground="black",
+            height=15)
         Tkinter.Canvas.__init__(self, parent, *args, **kw)
-        self.progressbar = self.create_rectangle(0, 0, 0, 0, fill = lightbg)
+        self.progressbar = self.create_rectangle(0, 0, 0, 0, fill=lightbg)
         self.currprogress = 0
         self.setProgress(0)
 
@@ -1027,10 +1080,10 @@ class Progressbar(Tkinter.Canvas):
         return self.currprogress
 
 
-
 class Splash(Tkinter.Toplevel):
     def __init__(self, master, func):
-        Tkinter.Toplevel.__init__(self, master, relief = Tkinter.SOLID, highlightthickness = 1, highlightcolor = fg)
+        Tkinter.Toplevel.__init__(self, master, relief=Tkinter.SOLID,
+                                  highlightthickness=1, highlightcolor=fg)
         self.root = master
         self.root.withdraw()
         self.overrideredirect(Tkinter.TRUE)
@@ -1041,27 +1094,31 @@ class Splash(Tkinter.Toplevel):
             self.images = []
             for i in range(0, 11):
                 percent = float(float(i) / 10)
-                self.images.append(ImageTk.PhotoImage(Image.blend(self.image1, self.image2, percent)))
+                self.images.append(ImageTk.PhotoImage(
+                    Image.blend(self.image1, self.image2, percent)))
             #self.image = ImageTk.PhotoImage(Image.blend(self.image1, self.image2, 0.0))
             self.image = self.images[0]
             self.imgw = self.image.width()
             self.imgh = self.image.height()
         else:
-            self.image = Tkinter.PhotoImage(file = config.relinuxdir + "/splash.ppm")
+            self.image = Tkinter.PhotoImage(
+                file=config.relinuxdir + "/splash.ppm")
             self.imgw = self.image.width()
             self.imgh = self.image.height()
         self.textvar = Tkinter.StringVar()
-        self.progresstext = Label(self, textvariable = self.textvar,
-                                  height = 15, width = 480, anchor = Tkinter.W)
+        self.progresstext = Label(self, textvariable=self.textvar,
+                                  height=15, width=480, anchor=Tkinter.W)
         self.w = self.imgw
         self.h = self.imgh + 32
         self.x = self.root.winfo_screenwidth() / 2 - self.w / 2
         self.y = self.root.winfo_screenheight() / 2 - self.h / 2
         self.geometry("%dx%d+%d+%d" % (self.w, self.h, self.x, self.y))
-        self.panel = Label(self, image = self.image)
-        self.panel.pack(side = Tkinter.TOP, fill = Tkinter.BOTH, expand = True)
-        self.progress.pack(side = Tkinter.BOTTOM, fill = Tkinter.X, expand = True)
-        self.progresstext.pack(side = Tkinter.BOTTOM, fill = Tkinter.X, expand = True)
+        self.panel = Label(self, image=self.image)
+        self.panel.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=True)
+        self.progress.pack(
+            side=Tkinter.BOTTOM, fill=Tkinter.X, expand=True)
+        self.progresstext.pack(
+            side=Tkinter.BOTTOM, fill=Tkinter.X, expand=True)
         self.update()
         self.thread = FuncThread(func, self.endSplash, self)
         self.thread.start()
@@ -1078,7 +1135,7 @@ class Splash(Tkinter.Toplevel):
             percent = float(float(progress) / 100)
             self.image = self.images[progress / 10]
             #self.image = ImageTk.PhotoImage(Image.blend(self.image1, self.image2, percent))
-            self.panel.configure(image = self.image)
+            self.panel.configure(image=self.image)
         self.update()
 
     def endSplash(self):
@@ -1092,14 +1149,15 @@ class GUI:
     def __init__(self, master):
         self.root = master
         self.root.title(config.product)
-        self.wizard = Wizard(self.root, npages = 2)
+        self.wizard = Wizard(self.root, npages=2)
         self.wizard.master.minsize(400, 350)
         self.wizard.master.maxsize(800, 700)
         self.page1 = Notebook(self.wizard.page(1))
-        self.page0 = Label(self.wizard.page(0), text = _("Welcome to relinux 0.4!\nClick next to get started"))
+        self.page0 = Label(self.wizard.page(0), text=_(
+            "Welcome to relinux 0.4!\nClick next to get started"))
         self.wizard.add_page_body(0, _("Welcome"), self.page0)
         self.wizard.add_page_body(1, _("Configure"), self.page1)
-        self.wizard.pack(fill = "both", expand = True)
+        self.wizard.pack(fill="both", expand=True)
 
     def savefunc(self, var, val):
         config.Configuration[var[0]][var[1]][configutils.value] = val
@@ -1116,12 +1174,13 @@ class GUI:
             #curr = Tkinter.Frame(cur.interior)
             #curr.pack(side="top", fill="both", expand=1)
             secs = Notebook(cur)
-            secs.pack(side = "top", fill = "both", expand = 1)
+            secs.pack(side="top", fill="both", expand=1)
             c1 = 0
             subtabs = {}
             for x in configs[i]:
                 curr = None
-                category = configutils.getValueP(configs[i][x], configutils.category)
+                category = configutils.getValueP(
+                    configs[i][x], configutils.category)
                 found = False
                 for y in subtabs.keys():
                     if y == category:
@@ -1129,15 +1188,16 @@ class GUI:
                         curr = subtabs[category].interior
                 if found is False:
                     ids = secs.add_tab()
-                    frame = VerticalScrolledFrame(secs.page(ids), background = bg, borderwidth = 0,
-                                                  highlightthickness = 0)
+                    frame = VerticalScrolledFrame(
+                        secs.page(ids), background=bg, borderwidth=0,
+                        highlightthickness=0)
                     subtabs[category] = frame
                     secs.add_page_body(ids, category, subtabs[category])
                     #secs.tab(subtabs[category], text=category)
                     curr = subtabs[category].interior
-                l = Label(curr, text = configutils.getValueP(configs[i][x],
+                l = Label(curr, text=configutils.getValueP(configs[i][x],
                                                            configutils.name))
-                l.grid(row = c1, sticky = Tkinter.W)
+                l.grid(row=c1, sticky=Tkinter.W)
                 types = configutils.getValueP(configs[i][x], configutils.types)
                 value = configutils.getValueP(configs[i][x], configutils.value)
                 choices = configutils.getChoices(types)
@@ -1148,24 +1208,27 @@ class GUI:
                     #r.grid(row=c1, column=1)
                     #r2 = ttk.Radiobutton(curr, text="No", variable=v, value=2)
                     #r2.grid(row=c1, column=2)
-                    r = YesNo(curr, savevar = (i, x), savefunc = self.savefunc)
-                    r.grid(row = c1, column = 1)
+                    r = YesNo(curr, savevar=(i, x), savefunc = self.savefunc)
+                    r.grid(row=c1, column=1)
                     r.set(value)
                 elif choices is not None and len(choices) > 0:
-                    cb = Choice(curr, choices, savevar = (i, x), savefunc = self.savefunc)
-                    cb.grid(row = c1, column = 1)
+                    cb = Choice(curr, choices,
+                                savevar=(i, x), savefunc = self.savefunc)
+                    cb.grid(row=c1, column=1)
                     cb.cb.set(value)
                 elif types == configutils.filename:
-                    e = FileSelector(curr, savevar = (i, x), savefunc = self.savefunc)
-                    e.grid(row = c1, column = 1)
+                    e = FileSelector(
+                        curr, savevar=(i, x), savefunc = self.savefunc)
+                    e.grid(row=c1, column=1)
                     e.set(value)
                 elif types == configutils.multiple:
-                    e = Multiple(curr, savevar = (i, x), savefunc = self.savefunc)
-                    e.grid(row = c1, column = 1)
+                    e = Multiple(
+                        curr, savevar=(i, x), savefunc = self.savefunc)
+                    e.grid(row=c1, column=1)
                     e.set(multiple)
                 else:
-                    e = Entry(curr, savevar = (i, x), savefunc = self.savefunc)
-                    e.grid(row = c1, column = 1)
+                    e = Entry(curr, savevar=(i, x), savefunc = self.savefunc)
+                    e.grid(row=c1, column=1)
                     e.set(value)
                 c1 = c1 + 1
             c = c + 1

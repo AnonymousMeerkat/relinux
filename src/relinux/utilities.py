@@ -100,7 +100,7 @@ def checkMatched(m):
 
 
 # Returns a buffer from a file
-def getBuffer(files, strip = True):
+def getBuffer(files, strip=True):
     returnme = []
     for line in files:
         if not line or line is None:
@@ -120,6 +120,8 @@ def remDuplicates(arr):
     return returnme
 
 # Event-based StringIO
+
+
 class eventStringIO(io.StringIO):
     def __init__(self):
         io.StringIO.__init__(self)
@@ -138,12 +140,16 @@ class eventStringIO(io.StringIO):
                 self.writefunc(msg)
 
 # Float division for Python 2
+
+
 def floatDivision(p, p1):
     if config.python3:
         return p / p1
     return float(float(p) / float(p1))
 
 # Percent calculation
+
+
 def calcPercent(first, second):
     if config.python3:
         return first / second * 100
@@ -154,15 +160,19 @@ def calcPercent(first, second):
 def sort(l):
     convert = lambda text: int(text) if text.isdigit() else text
     alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
-    l.sort(key = alphanum_key)
+    l.sort(key=alphanum_key)
     return l
 
 # ASCIIbetical Sorting
+
+
 def normal_sort(l):
     l.sort()
     return l
 
 # Event-based variable (based on Tkinter's {String,Int}Var)
+
+
 class eventVar():
     def __init__(self, **kw):
         self.__value__ = None  # NEVER access this variable unless get() doesn't work

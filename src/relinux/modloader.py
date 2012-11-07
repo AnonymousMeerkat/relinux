@@ -17,7 +17,7 @@ tn = logger.genTN("ModLoader")
 def isModule(module):
     if (hasattr(module, "relinuxmodule") and hasattr(module, "relinuxmoduleapi") and
         module.relinuxmodule is True and hasattr(module, "run") and
-        isinstance(getattr(module, "run"), collections.Callable)):
+            isinstance(getattr(module, "run"), collections.Callable)):
         return True
     return False
 
@@ -48,9 +48,11 @@ def getModules():
         if not isCompatible(module):
             loadme = False
         if loadme:
-            returnme.append({"name": i, "file": file, "path": pathname, "desc": desc})
+            returnme.append(
+                {"name": i, "file": file, "path": pathname, "desc": desc})
         else:
-            logger.logI(tn, logger.W, _("Module") + " " + module.modulename + " " + _("will not be loaded"))
+            logger.logI(tn, logger.W, _("Module") + " " +
+                        module.modulename + " " + _("will not be loaded"))
     return returnme
 
 

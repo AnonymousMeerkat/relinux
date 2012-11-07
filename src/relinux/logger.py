@@ -74,7 +74,7 @@ VV = "VV"
 
 # Writes in all files in list (plus formats the text)
 def writeAll(status, lists, tn, importance, text, **options):
-    if tn == "" or tn == None or not status:
+    if tn == "" or tn is None or not status:
         return
     text_ = "[" + tn + "] "
     if importance == E:

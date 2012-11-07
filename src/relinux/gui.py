@@ -13,14 +13,17 @@ from relinux import config, configutils, logger
 
 tn = logger.genTN("GUI")
 
+
 def quitProg(app):
     sys.exit(app.exec_())
+
 
 def saveFunc(var, val):
     if isinstance(val, QtCore.QString):
         val = str(val)
     config.Configuration[str(var[0])][str(var[1])][configutils.value] = val
     configutils.saveBuffer(config.Configuration)
+
 
 class RelinuxSplash(QtGui.QSplashScreen):
     def __init__(self, *args):
@@ -140,8 +143,9 @@ class FileName(QtGui.QWidget):
         self.setLayout(self.gridlayout)
 
     def onbtnclicked(self, *args):
-        f = str(QtGui.QFileDialog.getOpenFileName(self, config.product, config.homedir))
-        if f != None and f != "":
+        f = str(QtGui.QFileDialog.getOpenFileName(
+            self, config.product, config.homedir))
+        if f is not None and f != "":
             self.entry.setText(f)
             self.save()
 
@@ -156,17 +160,19 @@ class ConfigWidget():
     def __init__(self, widget, thevar):
         self.widget = widget
         self.widget.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding,
-                                                        QtGui.QSizePolicy.Fixed)
+                                  QtGui.QSizePolicy.Fixed)
+
         def temp(s):
             saveFunc(thevar, s)
         if isinstance(widget, QtGui.QCheckBox):
             # State > 0 = Checked (1 = partially checked, 2 = checked)
-            widget.stateChanged.connect(lambda s: temp(True if s > 0 else False))
+            widget.stateChanged.connect(
+                lambda s: temp(True if s > 0 else False))
         elif isinstance(widget, QtGui.QComboBox):
             # As Qt documents that currentIndexChanged can either send an int or a QString,
             # we'll add support for both
             widget.currentIndexChanged.connect(
-                            lambda s: temp(widget.itemText(s) if isinstance(s, int) else s))
+                lambda s: temp(widget.itemText(s) if isinstance(s, int) else s))
         elif isinstance(widget, QtGui.QLineEdit):
             # No fancy lambda's are needed here
             widget.textEdited.connect(temp)
@@ -219,7 +225,8 @@ class GUI(QtGui.QMainWindow):
         self.chTab(-1)
 
     def chTab(self, amt):
-        self.ui.moduleNotebook.setCurrentIndex(self.ui.moduleNotebook.currentIndex() + amt)
+        self.ui.moduleNotebook.setCurrentIndex(
+            self.ui.moduleNotebook.currentIndex() + amt)
 
     def isLast(self):
         return self.ui.moduleNotebook.count() - 1 <= self.ui.moduleNotebook.currentIndex()
@@ -239,27 +246,31 @@ class GUI(QtGui.QMainWindow):
         c = category
         fw = QtGui.QWidget(self.configTab.notebook1.__dict__[i].nbook)
         vb = QtGui.QVBoxLayout(fw)
-        self.configTab.notebook1.__dict__[i].nbook.__dict__[c] = QtGui.QScrollArea(fw)
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[
+            c] = QtGui.QScrollArea(fw)
         vb.addWidget(self.configTab.notebook1.__dict__[i].nbook.__dict__[c])
-        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].setWidgetResizable(True)
-        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout = QtGui.QFormLayout()
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[
+            c].setWidgetResizable(True)
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[
+            c].flayout = QtGui.QFormLayout()
         #self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setSizeConstraint(
         #                                            QtGui.QLayout.SetFixedSize)
         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setFieldGrowthPolicy(
-                                            QtGui.QFormLayout.ExpandingFieldsGrow)
+            QtGui.QFormLayout.ExpandingFieldsGrow)
         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setLabelAlignment(
-                                            QtCore.Qt.AlignLeft)
+            QtCore.Qt.AlignLeft)
         #self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.setFormAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop);
-        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC = QtGui.QWidget()
+        self.configTab.notebook1.__dict__[i].nbook.__dict__[
+            c].flayoutC = QtGui.QWidget()
         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC.setLayout(
-        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout)
+            self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout)
         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC.setSizePolicy(
-                                                    QtGui.QSizePolicy.MinimumExpanding,
-                                            QtGui.QSizePolicy.Preferred)
+            QtGui.QSizePolicy.MinimumExpanding,
+            QtGui.QSizePolicy.Preferred)
         self.configTab.notebook1.__dict__[i].nbook.__dict__[c].setWidget(
-                self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC)
+            self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayoutC)
         self.configTab.notebook1.__dict__[i].nbook.addTab(
-                            fw, c)
+            fw, c)
 
     def fillConfiguration(self, configs, widget):
         # TODO: Clean this mess, or at least comment it
@@ -270,12 +281,13 @@ class GUI(QtGui.QMainWindow):
             if not i in self.configTab.notebook1.__dict__:
                 self.configTab.notebook1.__dict__[i] = QtGui.QWidget()
                 self.configTab.notebook1.__dict__[i].vlayout = QtGui.QVBoxLayout(
-                                                                self.configTab.notebook1.__dict__[i])
+                    self.configTab.notebook1.__dict__[i])
                 self.configTab.notebook1.__dict__[i].nbook = QtGui.QTabWidget(
-                                                                self.configTab.notebook1.__dict__[i])
+                    self.configTab.notebook1.__dict__[i])
                 self.configTab.notebook1.__dict__[i].vlayout.addWidget(
-                                                        self.configTab.notebook1.__dict__[i].nbook)
-                self.configTab.notebook1.addTab(self.configTab.notebook1.__dict__[i], i)
+                    self.configTab.notebook1.__dict__[i].nbook)
+                self.configTab.notebook1.addTab(
+                    self.configTab.notebook1.__dict__[i], i)
             for c in configutils.getValue(configs[i][configutils.categories]):
                 self.addCategory(i, c)
             for x in configs[i].keys():
@@ -293,48 +305,63 @@ class GUI(QtGui.QMainWindow):
                 if not c in self.configTab.notebook1.__dict__[i].nbook.__dict__:
                     self.addCategory(i, c)
                 # Add the dictionary
-                self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n] = {}
+                self.configTab.notebook1.__dict__[
+                    i].nbook.__dict__[c].__dict__[n] = {}
                 # Add the label
-                self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l] = QtGui.QLabel()
-                self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l].setText(n)
-                self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l].setToolTip(d)
+                self.configTab.notebook1.__dict__[
+                    i].nbook.__dict__[c].__dict__[n][l] = QtGui.QLabel()
+                self.configTab.notebook1.__dict__[
+                    i].nbook.__dict__[c].__dict__[n][l].setText(n)
+                self.configTab.notebook1.__dict__[
+                    i].nbook.__dict__[c].__dict__[n][l].setToolTip(d)
                 # Add the value
                 if t == configutils.yesno:
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = ConfigWidget(QtGui.QCheckBox(), var)
                     if v_:
-                        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.setChecked(True)
+                        self.configTab.notebook1.__dict__[i].nbook.__dict__[
+                            c].__dict__[n][v].widget.setChecked(True)
                 elif c_ is not None and len(c_) > 0:
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = ConfigWidget(QtGui.QComboBox(), var)
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.clear()
+                    self.configTab.notebook1.__dict__[
+                        i].nbook.__dict__[c].__dict__[n][v].widget.clear()
                     c__ = 0
                     for y in c_:
-                        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.addItem(y)
+                        self.configTab.notebook1.__dict__[i].nbook.__dict__[
+                            c].__dict__[n][v].widget.addItem(y)
                         if y == v_:
                             self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.setCurrentIndex(c__)
                         c__ += 1
                 elif t == configutils.multiple:
                     if not isinstance(v_, list):
                         # Wut?
-                        logger.logE(self.tn, logger.E, _("Something went wrong"))
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = MultipleValues(var)
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].set(v_)
+                        logger.logE(
+                            self.tn, logger.E, _("Something went wrong"))
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[
+                        c].__dict__[n][v] = MultipleValues(var)
+                    self.configTab.notebook1.__dict__[
+                        i].nbook.__dict__[c].__dict__[n][v].set(v_)
                     uw = False
                 elif t == configutils.filename:
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = FileName(var)
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].set(v_)
+                    self.configTab.notebook1.__dict__[
+                        i].nbook.__dict__[c].__dict__[n][v] = FileName(var)
+                    self.configTab.notebook1.__dict__[
+                        i].nbook.__dict__[c].__dict__[n][v].set(v_)
                     uw = False
                 else:
                     self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v] = ConfigWidget(QtGui.QLineEdit(), var)
-                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.setText(v_)
+                    self.configTab.notebook1.__dict__[
+                        i].nbook.__dict__[c].__dict__[n][v].widget.setText(v_)
                 #self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget.setSizePolicy(
                 #                    QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding))
                 if uw:
-                    p = self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v].widget
+                    p = self.configTab.notebook1.__dict__[
+                        i].nbook.__dict__[c].__dict__[n][v].widget
                 else:
-                    p = self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][v]
+                    p = self.configTab.notebook1.__dict__[
+                        i].nbook.__dict__[c].__dict__[n][v]
                 p.setToolTip(d)
                 self.configTab.notebook1.__dict__[i].nbook.__dict__[c].flayout.addRow(
-                        self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l], p)
+                    self.configTab.notebook1.__dict__[i].nbook.__dict__[c].__dict__[n][l], p)
 
     def addTab(self, *args):
         self.ui.moduleNotebook.addTab(*args)
@@ -354,9 +381,11 @@ if __name__ == "__main__":
     import os
     app = QtGui.QApplication([])
     app.setStyleSheet(open("./stylesheet.css", "r").read())
-    splash = QtGui.QSplashScreen(QtGui.QPixmap(config.relinuxdir + "splash_light.png"))
+    splash = QtGui.QSplashScreen(
+        QtGui.QPixmap(config.relinuxdir + "splash_light.png"))
     splash.show()
-    splash.showMessage("Loading...", QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+    splash.showMessage(
+        "Loading...", QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
     app.processEvents()
     modules = []
     modulemetas = modloader.getModules()
@@ -365,7 +394,8 @@ if __name__ == "__main__":
     configfiles = [config.relinuxdir + "/relinux.conf"]
     for i in range(len(modulemetas)):
         for x in modules[i].moduleconfig:
-            configfiles.append(os.path.join(os.path.dirname(modulemetas[i]["path"]), x))
+            configfiles.append(
+                os.path.join(os.path.dirname(modulemetas[i]["path"]), x))
     cbuffer = configutils.parseFiles(configfiles)
     config.Configuration = cbuffer
     configutils.saveBuffer(config.Configuration)

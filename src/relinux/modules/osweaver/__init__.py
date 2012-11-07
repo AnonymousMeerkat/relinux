@@ -51,37 +51,44 @@ def run(*args):
     page = gui.Frame(ourgui.wizard.page(pagenum))
     ourgui.wizard.add_page_body(pagenum, _("OSWeaver"), page)
     page.frame = gui.Frame(page)
-    page.details = gui.VerticalScrolledFrame(page, borderwidth = 1, relief = Tkinter.SOLID)
+    page.details = gui.VerticalScrolledFrame(
+        page, borderwidth = 1, relief = Tkinter.SOLID)
     page.details.output = gui.Label(page.details.interior, text = config.GUIStream.getvalue(), anchor = Tkinter.NW, justify = Tkinter.LEFT)
     def onWrite():
         page.details.output.config(text = config.GUIStream.getvalue())
         page.details.canvas.yview_moveto(1.0)
     config.GUIStream.writefunc.append(onWrite)
-    page.details.output.pack(fill = Tkinter.BOTH, expand = True, anchor = Tkinter.NW, side = Tkinter.LEFT)
-    page.details.pack(fill = Tkinter.BOTH, expand = True, side = Tkinter.BOTTOM, anchor = Tkinter.SW)
+    page.details.output.pack(fill = Tkinter.BOTH, expand = True,
+                             anchor = Tkinter.NW, side = Tkinter.LEFT)
+    page.details.pack(fill = Tkinter.BOTH, expand = True,
+                      side = Tkinter.BOTTOM, anchor = Tkinter.SW)
     \'''page.details.buttonstate = True
     def showDetails():
         if page.details.buttonstate:
-            page.details.output.pack(fill=Tkinter.BOTH, expand=True, anchor=Tkinter.NW, side=Tkinter.LEFT)
+            page.details.output.pack(fill=Tkinter.BOTH, expand=True,
+                                     anchor=Tkinter.NW, side=Tkinter.LEFT)
             page.showdetails.config(text="<< Hide details")
             page.details.buttonstate = False
         else:
             page.details.output.pack_forget()
             page.showdetails.config(text="Show details >>")
             page.details.buttonstate = True
-    page.showdetails = gui.Button(page, text="Show details >>", command=showDetails)
+    page.showdetails = gui.Button(
+        page, text="Show details >>", command=showDetails)
     page.showdetails.pack(side=Tkinter.BOTTOM, anchor=Tkinter.SW)\'''
     page.progress = gui.Progressbar(page)
     page.progress.pack(fill = Tkinter.X, expand = True, side = Tkinter.BOTTOM,
                           anchor = Tkinter.S)
-    page.frame.pack(fill = Tkinter.BOTH, expand = True, anchor = Tkinter.CENTER)
+    page.frame.pack(
+        fill = Tkinter.BOTH, expand = True, anchor = Tkinter.CENTER)
     page.chframe = gui.VerticalScrolledFrame(page.frame)
     page.chframe.pack(fill = Tkinter.BOTH, expand = True, anchor = Tkinter.N)
     page.chframe.boxes = []
     page.chframe.dispthreads = []
     x = 0
     y = 0
-    usedeps = gui.Checkbutton(page.chframe.interior, text = "Ignore dependencies")
+    usedeps = gui.Checkbutton(
+        page.chframe.interior, text = "Ignore dependencies")
     usedeps.grid(row = y, column = x)
     y += 1
     label = gui.Label(page.chframe.interior, text = "Select threads to run:")
@@ -135,17 +142,21 @@ def run(*args):
         for i in range(len(threads)):
             page.chframe.boxes[i].ignoreauto = True
             page.chframe.boxes[i].value.set(val)
-    selall = gui.Button(page.chframe.interior, text = "Select all", command = lambda: selBoxes(True))
+    selall = gui.Button(page.chframe.interior, text = "Select all",
+                        command = lambda: selBoxes(True))
     selall.grid(row = y, column = x)
     x += 1
-    selnone = gui.Button(page.chframe.interior, text = "Select none", command = lambda: selBoxes(False))
+    selnone = gui.Button(page.chframe.interior, text = "Select none",
+                         command = lambda: selBoxes(False))
     selnone.grid(row = y, column = x)
     x += 1
-    togglesel = gui.Button(page.chframe.interior, text = "Toggle", command = lambda: selBoxes(None))
+    togglesel = gui.Button(page.chframe.interior, text = "Toggle",
+                           command = lambda: selBoxes(None))
     togglesel.grid(row = y, column = x)
     y += 1
     x = 0
-    threadsrunninglabel = gui.Label(page.chframe.interior, text = "Threads running:")
+    threadsrunninglabel = gui.Label(
+        page.chframe.interior, text = "Threads running:")
     threadsrunninglabel.grid(row = y, column = x, columnspan = 3)
     y += 1
     page.progress.threads = {}
@@ -184,15 +195,18 @@ def run(*args):
             page.progress.threads[tn] = progress
             totprogress = 0
             for i in page.progress.threads.keys():
-                totprogress += utilities.floatDivision(float(page.progress.threads[i]), 100)
-            page.progress.setProgress(utilities.calcPercent(totprogress, numthreads))
+                totprogress += utilities.floatDivision(
+                    float(page.progress.threads[i]), 100)
+            page.progress.setProgress(
+                utilities.calcPercent(totprogress, numthreads))
         def postEnd(threadid, threadsrunning, threads):
             tn = threadmanager.getThread(threadid, threads)["tn"]
             setProgress(tn, 100)
             postStart(threadid, threadsrunning, threads)
         runThreads(threads, deps = tfdeps, poststart = postStart, postend = postEnd, threadargs = {"setProgress": setProgress})
         # lambda: runThreads(threads)
-    page.button = gui.Button(page.frame, text = "Start!", command = startThreads)
+    page.button = gui.Button(
+        page.frame, text = "Start!", command = startThreads)
     page.button.pack()
     page.isnotroot = gui.Label(page.frame, text = "You are not root!")'''
     page = {}
@@ -208,10 +222,12 @@ def run(*args):
     # QTextLine: Can't set a line width while not layouting.
     if not configutils.getValue(config.Configuration["Relinux"]["EXPERIMENTFEATURES"]):
         ui.terminal.hide()
+
     class customMsgBox(QtGui.QMessageBox):
         @QtCore.pyqtSlot(QtCore.QString)
         def realSetText(self, text):
             self.setText(text)
+
         @QtCore.pyqtSlot(QtCore.QString)
         def setImportance(self, importance):
             icon = None
@@ -226,18 +242,20 @@ def run(*args):
             self.setIcon(icon)
     ui.msgbox = customMsgBox()
     #ui.terminal.hide()
+
     class customCheck(QtGui.QCheckBox):
         def __init__(self, *args):
             QtGui.QCheckBox.__init__(self, *args)
             self.ignoreauto = False
             self.id = len(page["boxes"])
-            self.value = utilities.eventVar(value = False)
+            self.value = utilities.eventVar(value=False)
             self.value.trace("w", self.set)
             self.clicked.connect(self.toggled_)
 
         def toggled_(self, *args):
             self.setChecked(not self.get())  # Toggle checked state
-            self.value.set(not self.get())  # Set the state that was wanted (not not)
+            self.value.set(
+                not self.get())  # Set the state that was wanted (not not)
 
         def set(self, newvalue):
             if newvalue == self.get():
@@ -273,6 +291,7 @@ def run(*args):
     #   True  - Select All
     #   False - Select None
     #   None  - Toggle Selected
+
     def tripleSel(threevalues):
         val = False
         tog = False
@@ -287,11 +306,13 @@ def run(*args):
             else:
                 page["boxes"][i].set(val)
     # Run when ui.nodepends is unchecked
+
     def ignoreDepends():
         for i in range(len(page["boxes"])):
             if page["boxes"][i].get():
                 page["boxes"][i].autoSelect()
     # Start running
+
     def startThreads(*args):
         if os.getuid() != 0:
             ui.notroot.show()
@@ -314,6 +335,7 @@ def run(*args):
         tfdeps = False
         if ui.nodepends.isChecked():
             tfdeps = True
+
         def onThreadAdded(threadid, threadsrunning, threads):
             rt = "Threads running: "
             c = 0
@@ -332,15 +354,18 @@ def run(*args):
                                             QtCore.Q_ARG("QString", rt))
             if ui.notroot.isHidden():
                 QtCore.QMetaObject.invokeMethod(ui.notroot, "show",
-                                            QtCore.Qt.QueuedConnection
-                                            )
+                                                QtCore.Qt.QueuedConnection
+                                                )
+
         def updateProgress():
             totprogress = 0
             for i in page["progress"]:
-                totprogress += utilities.floatDivision(float(page["progress"][i]), 100)
+                totprogress += utilities.floatDivision(
+                    float(page["progress"][i]), 100)
             QtCore.QMetaObject.invokeMethod(ui.progress, "setValue",
                                             QtCore.Qt.QueuedConnection,
-                                QtCore.Q_ARG("int", utilities.calcPercent(totprogress, numthreads2)))
+                                            QtCore.Q_ARG("int", utilities.calcPercent(totprogress, numthreads2)))
+
         def setProgress(tn, progress):
             ts = threadspans[tn]
             progress *= ts
@@ -350,39 +375,48 @@ def run(*args):
                 progress = 0
             page["progress"][tn] = progress
             updateProgress()
+
         def onThreadRemoved(threadid, threadsrunning, threads):
             tn = threadmanager.getThread(threadid, threads)["tn"]
             setProgress(tn, 100)
             onThreadAdded(threadid, threadsrunning, threads)
             page["boxes"][threadid].set(False)
+
         def showMessage(tn, importance, msg):
             logger.logI(tn, importance, msg)
-            QtCore.QMetaObject.invokeMethod(ui.msgbox, "setImportance", QtCore.Qt.QueuedConnection,
-                                            QtCore.Q_ARG("QString", importance))
-            QtCore.QMetaObject.invokeMethod(ui.msgbox, "realSetText", QtCore.Qt.QueuedConnection,
-                                            QtCore.Q_ARG("QString", msg))
-            QtCore.QMetaObject.invokeMethod(ui.msgbox, "exec", QtCore.Qt.QueuedConnection)
+            QtCore.QMetaObject.invokeMethod(
+                ui.msgbox, "setImportance", QtCore.Qt.QueuedConnection,
+                QtCore.Q_ARG("QString", importance))
+            QtCore.QMetaObject.invokeMethod(
+                ui.msgbox, "realSetText", QtCore.Qt.QueuedConnection,
+                QtCore.Q_ARG("QString", msg))
+            QtCore.QMetaObject.invokeMethod(
+                ui.msgbox, "exec", QtCore.Qt.QueuedConnection)
+
         def onThreadsEnd(threadids, threadsdone, threads):
             if len(threadsdone) >= numthreads and False:
                 pass
         for i in page["progress"]:
             page["progress"][i] = 0
         updateProgress()
-        runThreads(threads, deps = tfdeps, poststart = onThreadAdded, postend = onThreadRemoved, threadargs = {"setProgress": setProgress, "showMessage": showMessage},
-                   threadsend = onThreadsEnd)
+        runThreads(
+            threads, deps=tfdeps, poststart=onThreadAdded, postend=onThreadRemoved, threadargs={"setProgress": setProgress, "showMessage": showMessage},
+            threadsend=onThreadsEnd)
 
     def onWrite(msg):
         return  # Delete this if you want a GUI terminal (which might crash relinux)
-        ui.terminal.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+        ui.terminal.moveCursor(
+            QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
         QtCore.QMetaObject.invokeMethod(ui.terminal, "insertPlainText",
                                         QtCore.Qt.QueuedConnection,
-                            QtCore.Q_ARG("QString", msg.rstrip() + "\n"))
+                                        QtCore.Q_ARG("QString", msg.rstrip() + "\n"))
         #ui.terminal.setText(config.GUIStream.getvalue())
     tripleSel(True)
     config.GUIStream.writefunc.append(onWrite)
     ui.selall.clicked.connect(lambda *args: tripleSel(True))
     ui.selnone.clicked.connect(lambda *args: tripleSel(False))
     ui.togsel.clicked.connect(lambda *args: tripleSel(None))
-    ui.nodepends.clicked.connect(lambda *args: ignoreDepends() if not ui.nodepends.isChecked() else None)
+    ui.nodepends.clicked.connect(lambda *args: ignoreDepends(
+    ) if not ui.nodepends.isChecked() else None)
     ui.startbutton.clicked.connect(startThreads)
     ourgui.addTab(page_container, "OSWeaver")

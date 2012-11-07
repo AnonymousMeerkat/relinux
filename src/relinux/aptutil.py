@@ -27,7 +27,7 @@ class OpProgress(apt.progress.base.OpProgress):
         self.updatefunc = update
         self.finishfunc = finish
 
-    def update(self, percent = None):
+    def update(self, percent=None):
         apt.progress.base.OpProgress.update(self, percent)
         op = self.op
         if self.major_change and self.old_op:
@@ -45,12 +45,12 @@ class OpProgress(apt.progress.base.OpProgress):
 
 # AcquireProgress implementation
 class AcquireProgress(apt.progress.text.AcquireProgress):
-    def __init__(self, updatefunc=None, finishfunc = None):
+    def __init__(self, updatefunc=None, finishfunc=None):
         apt.progress.text.AcquireProgress.__init__(self)
         self.oldpercent = 0.0
         self.updatefunc = updatefunc
         self.finishfunc = finishfunc
-    
+
     def long(self, i):
         if config.python3:
             return i
@@ -59,19 +59,19 @@ class AcquireProgress(apt.progress.text.AcquireProgress):
 
     def start(self):
         apt.progress.base.AcquireProgress.start(self)
-    
+
     def pulse(self, owner):
         ### CODE COPIED FROM ORIGINAL CLASS ###
         apt.progress.base.AcquireProgress.pulse(self, owner)
         percent = (((self.current_bytes + self.current_items) * 100.0) /
-                        float(self.total_bytes + self.total_items))
+                   float(self.total_bytes + self.total_items))
 
         shown = False
         tval = '%i%%' % percent
         end = ""
         if self.current_cps:
             eta = self.long(float(self.total_bytes - self.current_bytes) /
-                        self.current_cps)
+                            self.current_cps)
             end = " %sB/s %s" % (apt.apt_pkg.size_to_str(self.current_cps),
                                  apt.apt_pkg.time_to_str(eta))
 
@@ -100,7 +100,7 @@ class AcquireProgress(apt.progress.text.AcquireProgress):
             # Add the total size and percent
             if worker.total_size and not worker.current_item.owner.complete:
                 val += "/%sB %i%%" % (apt.apt_pkg.size_to_str(worker.total_size),
-                                worker.current_size*100.0/worker.total_size)
+                                      worker.current_size * 100.0 / worker.total_size)
 
             val += ']'
 
@@ -137,7 +137,7 @@ class AcquireProgress(apt.progress.text.AcquireProgress):
 
 # InstallProgress implementation
 class InstallProgress(apt.progress.base.InstallProgress):
-    def __init__(self, updatefunc=None, finishfunc = None):
+    def __init__(self, updatefunc=None, finishfunc=None):
         apt.progress.base.InstallProgress.__init__(self)
         self.updatefunc = updatefunc
         self.finishfunc = finishfunc
@@ -148,7 +148,7 @@ class InstallProgress(apt.progress.base.InstallProgress):
         if not self.ran_finish:
             self.finishfunc()
             self.ran_finish = True
-    
+
     def status_change(self, pkg, percent, status):
         if self.updatefunc:
             self.updatefunc(percent)
@@ -167,7 +167,7 @@ def initApt():
 
 # Returns an APT cache
 # Note that this can take around 2-30 seconds
-def getCache(progress = None):
+def getCache(progress=None):
     if progress:
         return apt.cache.Cache(progress)
     else:
@@ -224,7 +224,9 @@ def compVersions(v1, v2, operation):
             return False
 
 # Installs a package
-def instPkg(package, upgrade = True):
+
+
+def instPkg(package, upgrade=True):
     if package.is_installed:
         if upgrade and package.is_upgradable:
             package.mark_upgrade()
@@ -237,9 +239,9 @@ def instPkg(package, upgrade = True):
 
 
 # Removes a package
-def remPkg(package, purge = True):
+def remPkg(package, purge=True):
     if (package.is_installed or package.marked_install or
-        package.marked_reinstall or package.marked_upgrade):
+            package.marked_reinstall or package.marked_upgrade):
         package.mark_delete(True, purge)
         return True
     else:

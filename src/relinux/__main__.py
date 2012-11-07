@@ -22,12 +22,13 @@ import gettext
 gettext.install(config.productunix, config.localedir, config.unicode)
 
 config.about_string = (config.product + _(" is a free and open-source Linux ") +
-_("distribution creation toolkit.\n\nRelinux ") + config.version +
-_(" is written and maintained by ") + config.author_string + _("."))
+                       _("distribution creation toolkit.\n\nRelinux ") + config.version +
+                       _(" is written and maintained by ") + config.author_string + _("."))
 
 
-def exitprog(exitcode = 0):
+def exitprog(exitcode=0):
     sys.exit(exitcode)
+
 
 def version():
     print(config.version_string)
@@ -36,6 +37,7 @@ def version():
 aptops = 4
 captop = 0
 minis = 0
+
 
 def main():
     def parsePyHex(string1):
@@ -72,21 +74,22 @@ def main():
     logger.veryverbose()
     config.GUIStream = utilities.eventStringIO()
     tn = logger.genTN("Main")
-    parser = ArgumentParser(prog = "relinux", usage = "%(prog)s [options]")
-    parser.add_argument("-V", "--version", action = "store_true",
-                      dest = "showversion",
-                      help = "show version information")
+    parser = ArgumentParser(prog="relinux", usage="%(prog)s [options]")
+    parser.add_argument("-V", "--version", action="store_true",
+                        dest="showversion",
+                        help="show version information")
     parser.add_argument("-q", "--quiet",
-                  action = "store_true", dest = "quiet", default = False,
-                  help = "log as little as possible to stdout")
+                        action="store_true", dest="quiet", default=False,
+                        help="log as little as possible to stdout")
     parser.add_argument("-v", "--verbose",
-                  action = "store_true", dest = "verbose", default = False,
-                  help = "log more to stdout")
+                        action="store_true", dest="verbose", default=False,
+                        help="log more to stdout")
     parser.add_argument("-vv", "--veryverbose",
-                  action = "store_true", dest = "veryverbose", default = False,
-                  help = "log even more to stdout")
-    parser.add_argument("--no-stylesheet", action = "store_true", dest = "nostylesheet", default = False,
-                        help = "don't use any stylesheets")
+                        action="store_true", dest="veryverbose", default=False,
+                        help="log even more to stdout")
+    parser.add_argument(
+        "--no-stylesheet", action="store_true", dest="nostylesheet", default=False,
+        help="don't use any stylesheets")
     args = parser.parse_args()
     config.EFiles.extend([config.GUIStream, sys.stdout])
     if args.showversion:
@@ -108,32 +111,38 @@ def main():
         spprog = 0
         def calcPercent(def2 = (spprog, spprogn)):
             return utilities.calcPercent(*def2)
-        splash.setProgress(calcPercent((spprog, spprogn)), "Loading modules...")
+        splash.setProgress(
+            calcPercent((spprog, spprogn)), "Loading modules...")
         modules = []
         modulemetas = modloader.getModules()
         for i in modulemetas:
             modules.append(modloader.loadModule(i))
         spprog += 1
-        splash.setProgress(calcPercent((spprog, spprogn)), "Parsing configuration...")
+        splash.setProgress(
+            calcPercent((spprog, spprogn)), "Parsing configuration...")
         #buffer1 = utilities.getBuffer(open(relinuxdir + "/relinux.conf"))
         #buffer2 = configutils.compress(buffer1)
         #cbuffer = configutils.parseCompressedBuffer(buffer2, relinuxdir + "/relinux.conf")
         configfiles = [relinuxdir + "/relinux.conf"]
         for i in range(len(modulemetas)):
             for x in modules[i].moduleconfig:
-                configfiles.append(os.path.join(os.path.dirname(modulemetas[i]["path"]), x))
+                configfiles.append(
+                    os.path.join(os.path.dirname(modulemetas[i]["path"]), x))
         cbuffer = configutils.parseFiles(configfiles)
         config.Configuration = cbuffer
         configutils.saveBuffer(config.Configuration)
         \'''for i in configutils.beautify(buffer1):
             print(i)\'''
         spprog += 1
-        splash.setProgress(calcPercent((spprog, spprogn)), "Reading APT Cache...")
+        splash.setProgress(
+            calcPercent((spprog, spprogn)), "Reading APT Cache...")
         def aptupdate(op, percent):
             global minis
             if percent != None:
                 minis += utilities.floatDivision(percent, 100)
-            splash.setProgress(calcPercent((utilities.floatDivision(minis + captop, aptops) + spprog, spprogn)),
+            splash.setProgress(
+                calcPercent((utilities.floatDivision(
+                    minis + captop, aptops) + spprog, spprogn)),
                                "Reading APT Cache... (" + op + ")")
         def aptdone(op):
             global minis, captop
@@ -142,13 +151,16 @@ def main():
         aptcache = aptutil.getCache(aptutil.OpProgress(aptupdate, aptdone))
         config.AptCache = aptcache
         spprog += 1
-        splash.setProgress(calcPercent((spprog, spprogn)), "Loading the GUI...")
+        splash.setProgress(
+            calcPercent((spprog, spprogn)), "Loading the GUI...")
         App = gui.GUI(root)
         spprog += 1
-        splash.setProgress(calcPercent((spprog, spprogn)), "Filling in configuration...")
+        splash.setProgress(
+            calcPercent((spprog, spprogn)), "Filling in configuration...")
         App.fillConfiguration(cbuffer)
         spprog += 1
-        splash.setProgress(calcPercent((spprog, spprogn)), "Running modules...")
+        splash.setProgress(
+            calcPercent((spprog, spprogn)), "Running modules...")
         for i in modules:
             modloader.runModule(i,
                                 {"gui": App, "config": cbuffer, "aptcache": aptcache})
@@ -158,11 +170,14 @@ def main():
     #root.overrideredirect(Tkinter.TRUE) # Coming soon!
     root.mainloop()'''
     App = QtGui.QApplication(sys.argv)
-    splash = QtGui.QSplashScreen(QtGui.QPixmap(relinuxdir + "/splash_light.png"))
+    splash = QtGui.QSplashScreen(
+        QtGui.QPixmap(relinuxdir + "/splash_light.png"))
     splash.show()
     App.processEvents()
+
     def showMessage(str_):
-        splash.showMessage(str_ + "...", QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+        splash.showMessage(
+            str_ + "...", QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         App.processEvents()
     showMessage(_("Loading modules"))
     modules = []
@@ -176,7 +191,8 @@ def main():
             if "RELINUXCONFDIR" in os.environ:
                 configfiles.append(os.path.join(relinuxdir, x))
             else:
-                configfiles.append(os.path.join(os.path.dirname(modulemetas[i]["path"]), x))
+                configfiles.append(
+                    os.path.join(os.path.dirname(modulemetas[i]["path"]), x))
     cbuffer = configutils.parseFiles(configfiles)
     config.Configuration = cbuffer
     configutils.saveBuffer(config.Configuration)
@@ -190,11 +206,13 @@ def main():
     logger.logI(tn, logger.I, "=== Started new session ===")
     logger.logI(tn, logger.I, "===========================")
     showMessage(_("Loading APT cache 0%"))
+
     def aptupdate(op, percent):
         global minis
         if percent:
             minis = int(percent)
-        showMessage(_("Loading APT cache") + " (" + op + ") " + str(minis) + "%")
+        showMessage(
+            _("Loading APT cache") + " (" + op + ") " + str(minis) + "%")
     aptcache = aptutil.getCache(aptutil.OpProgress(aptupdate, None))
     config.AptCache = aptcache
     if not args.nostylesheet:

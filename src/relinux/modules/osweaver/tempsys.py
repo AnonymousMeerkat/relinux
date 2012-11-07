@@ -24,42 +24,50 @@ configs = config.Configuration["OSWeaver"]
 
 # Generate the tree for the tempsys
 tmpsystree = {"deps": [], "tn": "TempSysTree"}
+
+
 class genTempSysTree(threadmanager.Thread):
     def progressfunc(self, progress):
         self.setProgress(self.tn, progress)
 
     def runthread(self):
-        logger.logI(self.tn, logger.I, _("Generating the tree for the temporary filesystem"))
+        logger.logI(self.tn, logger.I, _(
+            "Generating the tree for the temporary filesystem"))
         # Clean the TMPSYS tree, if it exists
         fsutil.rm(tmpsys)
         self.progressfunc(20)
         # Generate the tree
         fsutil.maketree([tmpsys + "etc", tmpsys + "dev",
-                          tmpsys + "proc", [tmpsys + "tmp", 0o1777],
-                          tmpsys + "sys", tmpsys + "mnt",
-                          tmpsys + "media/cdrom", tmpsys + "var", tmpsys + "home",
-                          tmpsys + "run"], self.tn, lambda p: self.progressfunc(20 + p / (5 / 3)))
+                         tmpsys + "proc", [tmpsys + "tmp", 0o1777],
+                         tmpsys + "sys", tmpsys + "mnt",
+                         tmpsys +
+                         "media/cdrom", tmpsys + "var", tmpsys + "home",
+                         tmpsys + "run"], self.tn, lambda p: self.progressfunc(20 + p / (5 / 3)))
         fsutil.chmod(tmpsys + "tmp", 0o1777, self.tn)
 tmpsystree["thread"] = genTempSysTree
 
 
 # Copy the contents of /etc/ and /var/ to the tempsys
-cpetcvar = {"deps": [tmpsystree], "tn": "EtcVar", "threadspan":-1}
+cpetcvar = {"deps": [tmpsystree], "tn": "EtcVar", "threadspan": -1}
+
+
 class copyEtcVar(threadmanager.Thread):
     def progressfunc(self, progress):
         self.setProgress(self.tn, progress)
 
     def runthread(self):
-        logger.logI(self.tn, logger.I, _("Copying files to the temporary filesystem"))
+        logger.logI(
+            self.tn, logger.I, _("Copying files to the temporary filesystem"))
         excludes = configutils.getValue(configs[configutils.excludes])
         varexcludes = excludes
         # Exclude all log files (*.log *.log.*), PID files (to show that no daemons are running),
         # backup and old files (for obvious reasons), and any .deb files that a person might have downloaded
-        varexcludes.extend(["*.log", "*.log.*", "*.pid", "*/pid", "*.bak", "*.[0-9].gz", "*.deb"])
+        varexcludes.extend(["*.log", "*.log.*", "*.pid", "*/pid",
+                           "*.bak", "*.[0-9].gz", "*.deb"])
         fsutil.fscopy("/etc", tmpsys + "etc", excludes, self.tn,
-                      progressfunc = lambda p: self.progressfunc(p / 2))
+                      progressfunc=lambda p: self.progressfunc(p / 2))
         fsutil.fscopy("/var", tmpsys + "var", varexcludes, self.tn,
-                      progressfunc = lambda p: self.progressfunc(50 + p / 2))
+                      progressfunc=lambda p: self.progressfunc(50 + p / 2))
         #logger.logV(self.tn, logger.I, _("Moving some directories to /run"))
         #fsutil.fscopy(tmpsys + "var/run/", tmpsys + "run/")
         #fsutil.rm(tmpsys + "var/run/")
@@ -72,6 +80,8 @@ cpetcvar["thread"] = copyEtcVar
 
 # Remove configuration files that can break the installed/live system
 remconfig = {"deps": [cpetcvar], "tn": "RemConfig"}
+
+
 class remConfig(threadmanager.Thread):
     def progressfunc(self, p):
         self.setProgress(self.tn, p)
@@ -79,37 +89,48 @@ class remConfig(threadmanager.Thread):
     def runthread(self):
         # Remove these files as they can conflict inside the installed system
         logger.logV(self.tn, logger.I, _("Removing personal configurations that can break the installed system"))
-        fsutil.rmfiles([tmpsys + "etc/X11/xorg.conf*", tmpsys + "etc/resolv.conf",
-                        tmpsys + "etc/hosts", tmpsys + "etc/hostname", tmpsys + "etc/timezone",
-                        tmpsys + "etc/mtab", tmpsys + "etc/fstab",
-                        tmpsys + "etc/udev/rules.d/70-persistent*",
-                        tmpsys + "etc/cups/ssl/server.crt", tmpsys + "etc/cups/ssl/server.key",
-                        tmpsys + "etc/ssh/ssh_host_rsa_key", tmpsys + "etc/ssh/ssh_host_dsa_key.pub",
-                        tmpsys + "etc/ssh/ssh_host_dsa_key", tmpsys + "etc/ssh/ssh_host_rsa_key.pub",
-#                        tmpsys + "etc/group", tmpsys + "etc/passwd", tmpsys + "etc/shadow",
-#                        tmpsys + "etc/shadow-", tmpsys + "etc/gshadow", tmpsys + "etc/gshadow-",
-                        tmpsys + "etc/wicd/wired-settings.conf",
-                        tmpsys + "etc/wicd/wireless-settings.conf", tmpsys + "etc/printcap",
-                        tmpsys + "etc/cups/printers.conf"], self.tn, self.progressfunc)
+        fsutil.rmfiles(
+            [tmpsys + "etc/X11/xorg.conf*", tmpsys + "etc/resolv.conf",
+             tmpsys + "etc/hosts", tmpsys +
+             "etc/hostname", tmpsys + "etc/timezone",
+             tmpsys + "etc/mtab", tmpsys + "etc/fstab",
+             tmpsys + "etc/udev/rules.d/70-persistent*",
+             tmpsys + "etc/cups/ssl/server.crt", tmpsys +
+             "etc/cups/ssl/server.key",
+             tmpsys + "etc/ssh/ssh_host_rsa_key", tmpsys +
+             "etc/ssh/ssh_host_dsa_key.pub",
+             tmpsys + "etc/ssh/ssh_host_dsa_key", tmpsys +
+             "etc/ssh/ssh_host_rsa_key.pub",
+             #                        tmpsys + "etc/group", tmpsys + "etc/passwd", tmpsys + "etc/shadow",
+             #                        tmpsys + "etc/shadow-", tmpsys + "etc/gshadow", tmpsys + "etc/gshadow-",
+             tmpsys + "etc/wicd/wired-settings.conf",
+             tmpsys + "etc/wicd/wireless-settings.conf", tmpsys +
+             "etc/printcap",
+             tmpsys + "etc/cups/printers.conf"], self.tn, self.progressfunc)
 remconfig["thread"] = remConfig
 
 
 # Remove cached lists
 remcachedlists = {"deps": [cpetcvar], "tn": "RemCachedLists"}
+
+
 class remCachedLists(threadmanager.Thread):
     def progressfunc(self, p):
         self.setProgress(self.tn, p)
 
     def runthread(self):
         logger.logV(self.tn, logger.I, _("Removing cached lists"))
-        fsutil.adrm(tmpsys + "var/lib/apt/lists/", excludes = ["*.gpg", "*lock*", "*partial*"],
-                    remdirs = False, remsymlink = True, remfullpath = False, remoriginal = False,
-                    tn = self.tn, progressfunc = self.progressfunc)
+        fsutil.adrm(
+            tmpsys + "var/lib/apt/lists/", excludes=["*.gpg", "*lock*", "*partial*"],
+            remdirs=False, remsymlink=True, remfullpath=False, remoriginal=False,
+            tn=self.tn, progressfunc=self.progressfunc)
 remcachedlists["thread"] = remCachedLists
 
 
 # Remove temporary files in /var
 remtempvar = {"deps": [cpetcvar], "tn": "RemTempVar"}
+
+
 class remTempVar(threadmanager.Thread):
     def progressfunc(self, p):
         self.setProgress(self.tn, p)
@@ -118,30 +139,34 @@ class remTempVar(threadmanager.Thread):
         logger.logV(self.tn, logger.I, _("Removing temporary files in /var"))
         # Remove all files in these directories (but not directories inside them)
         a = ["etc/NetworkManager/system-connections/", "var/run", "var/log", "var/mail",
-                  "var/spool", "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]
+             "var/spool", "var/lock", "var/backups", "var/tmp", "var/crash", "var/lib/ubiquity"]
         la = len(a)
         inc = 100 / la
         rinc = inc / 100
         for i in range(la):
-            fsutil.adrm(tmpsys + a[i], excludes = [], remdirs = False, remsymlink = False,
-                        remfullpath = False, remoriginal = False, tn = self.tn,
-                        progressfunc = lambda p: self.progressfunc(inc * i + p * rinc))
+            fsutil.adrm(
+                tmpsys + a[i], excludes=[], remdirs=False, remsymlink=False,
+                remfullpath=False, remoriginal=False, tn=self.tn,
+                progressfunc=lambda p: self.progressfunc(inc * i + p * rinc))
 remtempvar["thread"] = remTempVar
 
 
 # Generate logs in /var/log
 genvarlogs = {"deps": [cpetcvar], "tn": "GenVarLogs"}
+
+
 class genVarLogs(threadmanager.Thread):
     def runthread(self):
         # Create the logs
         logger.logV(self.tn, logger.I, _("Creating empty logs"))
         a = ["dpkg.log", "lastlog", "mail.log", "syslog", "auth.log", "daemon.log", "faillog",
-                          "lpr.log", "mail.warn", "user.log", "boot", "debug", "mail.err", "messages", "wtmp",
-                          "bootstrap.log", "dmesg", "kern.log", "mail.info"]
+             "lpr.log", "mail.warn", "user.log", "boot", "debug", "mail.err", "messages", "wtmp",
+             "bootstrap.log", "dmesg", "kern.log", "mail.info"]
         la = len(a)
         inc = 100 / la
         for i in range(la):
-            logger.logVV(self.tn, logger.I, logger.MTab + _("Creating") + " " + a[i])
+            logger.logVV(
+                self.tn, logger.I, logger.MTab + _("Creating") + " " + a[i])
             fsutil.touch(tmpsys + "var/log/" + a[i])
             self.setProgress(self.tn, (i + 1) * inc)
 genvarlogs["thread"] = genVarLogs
@@ -149,6 +174,8 @@ genvarlogs["thread"] = genVarLogs
 
 # Edit passwd and shadow files to remove users
 remusers = {"deps": [cpetcvar], "tn": "RemUsers"}
+
+
 class remUsers(threadmanager.Thread):
     # Helper function for changing the /etc/group file
     def _parseGroup(self, i, usrs):
@@ -200,7 +227,8 @@ class remUsers(threadmanager.Thread):
         max_uid = 1999
         sysrange = 500
         if not isinstance(nobody, dict):
-            logger.logV(self.tn, logger.E, _("User 'nobody' could not be found!"))
+            logger.logV(
+                self.tn, logger.E, _("User 'nobody' could not be found!"))
         else:
             nuid = int(nobody["uid"])
             if nuid <= 100:
@@ -222,11 +250,13 @@ class remUsers(threadmanager.Thread):
             else:
                 max_uid = 1999
                 sysrange = 555
-        usrs = pwdmanip.getPPByUID(numrange.gen_num_range(sysrange, max_uid), pe)
+        usrs = pwdmanip.getPPByUID(
+            numrange.gen_num_range(sysrange, max_uid), pe)
         if config.VVStatus is False:
             logger.logV(self.tn, logger.I, _("Removing them"))
         logger.logVV(self.tn, logger.I, _("Removing users in /etc/passwd"))
-        fsutil.ife(buffers, lambda line: [True, pwdmanip.PPtoEntry(line)] if not line in usrs else [False, ""])
+        fsutil.ife(buffers, lambda line: [True, pwdmanip.PPtoEntry(
+            line)] if not line in usrs else [False, ""])
         # Rewrite the password file
         #for i in ppe:
         #    if not i in usrs:
@@ -265,6 +295,8 @@ remusers["thread"] = remUsers
 
 # Edits casper.conf
 casperconf = {"deps": [cpetcvar], "tn": "casper.conf"}
+
+
 class CasperConfEditor(threadmanager.Thread):
     # Helper function
     def _varEditor(self, line, lists):
@@ -302,50 +334,55 @@ class CasperConfEditor(threadmanager.Thread):
         # Edit the casper.conf
         # Strangely enough, casper uses the "quiet" flag if the build system is either Debian or Ubuntu
         if config.VStatus is False:
-            logger.logI(self.tn, logger.I, _("Editing casper and LSB configuration files"))
+            logger.logI(self.tn, logger.I, _(
+                "Editing casper and LSB configuration files"))
         logger.logV(self.tn, logger.I, _("Editing casper.conf"))
         buildsys = "Ubuntu"
         if configutils.getValue(configs[configutils.casperquiet]) is False:
             buildsys = ""
         unionfs = configutils.getValue(configs[configutils.unionfs])
         if unionfs == "overlayfs" and aptutil.compVersions(aptutil.getPkgVersion(aptutil.getPkg("casper", aptcache)), "1.272", aptutil.lt):
-            logger.logI(self.tn, logger.W, _("Using DEFAULT instead of overlayfs"))
+            logger.logI(
+                self.tn, logger.W, _("Using DEFAULT instead of overlayfs"))
             unionfs = "DEFAULT"
         self.varEditor(tmpsys + "etc/casper.conf", {
-                                            "USERNAME": configutils.getValue(configs[configutils.username]),
-                                            "USERFULLNAME":
-                                                configutils.getValue(configs[configutils.userfullname]),
-                                            "HOST": configutils.getValue(configs[configutils.host]),
-                                            "BUILD_SYSTEM": buildsys,
-                                            "FLAVOUR": configutils.getValue(configs[configutils.flavour]),
-                                            "UNIONFS": unionfs})
-        logger.logI(self.tn, logger.I, _("Applying permissions to casper scripts"))
+            "USERNAME": configutils.getValue(configs[configutils.username]),
+            "USERFULLNAME":
+            configutils.getValue(configs[configutils.userfullname]),
+            "HOST": configutils.getValue(configs[configutils.host]),
+            "BUILD_SYSTEM": buildsys,
+            "FLAVOUR": configutils.getValue(configs[configutils.flavour]),
+            "UNIONFS": unionfs})
+        logger.logI(
+            self.tn, logger.I, _("Applying permissions to casper scripts"))
         # Make sure the casper scripts work
         cbs = "/usr/share/initramfs-tools/scripts/casper-bottom/"
         for i in fsutil.listdir(cbs):
             fsutil.chmod(i, 0o755, self.tn)
         logger.logV(self.tn, logger.I, _("Editing lsb-release"))
         self.varEditor(tmpsys + "etc/lsb-release", {
-                                    "DISTRIB_ID": configutils.getValue(configs[configutils.sysname]),
-                                    "DISTRIB_RELEASE": configutils.getValue(configs[configutils.sysversion]),
-                                    "DISTRIB_CODENAME": configutils.getValue(configs[configutils.codename]),
-                                    "DISTRIB_DESCRIPTION":
-        configutils.getValue(configs[configutils.description])})
+            "DISTRIB_ID": configutils.getValue(configs[configutils.sysname]),
+            "DISTRIB_RELEASE": configutils.getValue(configs[configutils.sysversion]),
+            "DISTRIB_CODENAME": configutils.getValue(configs[configutils.codename]),
+            "DISTRIB_DESCRIPTION":
+                       configutils.getValue(configs[configutils.description])})
 casperconf["thread"] = CasperConfEditor
 
 
 # Sets up Ubiquity
 ubiquitysetup = {"deps": [cpetcvar], "tn": "Ubiquity"}
+
+
 class UbiquitySetup(threadmanager.Thread):
     def runthread(self):
         # If the user-setup-apply file does not exist, and there is an alternative, we'll copy it over
         logger.logI(self.tn, logger.I, _("Setting up the installer"))
         if (os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply.orig") and not
-            os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply")):
+                os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply")):
             shutil.copy2("/usr/lib/ubiquity/user-setup/user-setup-apply.orig",
                          "/usr/lib/ubiquity/user-setup/user-setup-apply")
         if (True or
-            configutils.getValue(configs[configutils.aptlistchange])):
+                configutils.getValue(configs[configutils.aptlistchange])):
             if not os.path.exists("/usr/share/ubiquity/apt-setup.relinux-backup"):
                 os.rename("/usr/share/ubiquity/apt-setup",
                           "/usr/share/ubiquity/apt-setup.relinux-backup")
