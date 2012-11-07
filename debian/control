@@ -9,7 +9,7 @@ Vcs-Git: https://github.com/Anonymous Meerkat/relinux
 Vcs-Browser: https://github.com/Anonymous Meerkat/relinux
 
 Package: relinux
-Architecture: all
+Architecture: any
 Depends: ${misc:Depends}, python, perl, libdpkg-perl, python-qt4, python-apt
 Description: A free and open-source Linux distro creation toolkit
  Relinux 0.4 is a simple, fast, and easy way to create
