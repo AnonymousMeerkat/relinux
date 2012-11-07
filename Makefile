@@ -20,6 +20,20 @@ clean:
 	done
 	rm -f csrc/isatty*.so src/relinux/modules/osweaver/isatty*.so
 
+check:
+	@echo === Checking relinux executable ===
+	if [ ! -f ${dot}/relinux ];\
+	then\
+		echo Relinux executable does not exist >&2;\
+		exit 1;
+	fi
+	@grep -e "MAKEFILE_ENTER_CONF_DIR" -e "MAKEFILE_ENTER_LIB_DIR" ${dot}/relinux &>/dev/null
+	if [ $? -eq 0 ]; then \
+		echo Relinux executable has not been properly generated >&2; \
+		exit 1; \
+	fi;
+	@echo Done. No errors.
+
 mkdir_${CONFDIR}:
 ifeq ($(shell if [ ! -d ${CONFDIR} ];then echo Y;else echo N;fi),Y)
 	mkdir -p ${CONFDIR};
