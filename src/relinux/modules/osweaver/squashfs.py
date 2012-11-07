@@ -89,7 +89,7 @@ class genSFS(threadmanager.Thread):
                 if progress > oldprogress:
                     self.setProgress(tn, int(utilities.floatDivision(progress, 2)))
                     oldprogress = progress
-            else:
+            elif len(output.strip()) > 0:
                 logger.logI(tn, logger.I, output.rstrip(), noterm = True, nogui = True)
         sys.stdout.write("\n")
         logger.logI(tn, logger.I, _("Adding the rest of the system (this can take a while)"))
