@@ -14,25 +14,49 @@ BITS := $(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS | tr '\n' ' ' | sed 's: 
 
 all: csrc/isatty${BITS}.so src/relinux/modules/osweaver/isatty${BITS}.so relinux
 
-clean:
-	for i in $(shell find . -type d | grep -v __pycache__ | grep -v /.git) ; do \
-		(cd $$i; rm -rf *.pyc __pycache__); \
-	done
-	rm -f csrc/isatty*.so src/relinux/modules/osweaver/isatty*.so
+CLEAN_print_head:
+	@echo === Cleaning ===
+
+CLEAN_clean:
+	$(foreach i,$(shell find ${dot} -type d | grep -v __pycache__ | grep -v /.git),cd ${i}; rm -rf *.pyc __pycache__;${\n})
+	rm -f ${dot}/csrc/isatty*.so ${dot}/src/relinux/modules/osweaver/isatty*.so
+
+clean: CLEAN_print_head CLEAN_clean
+
+DISTCLEAN_print_head:
+	@echo === Distcleaning ===
+
+DISTCLEAN_clean:
+	rm -f ${dot}/relinux
+ifeq ($(shell if [ -d ${dot}/debian/relinux ];then echo Y;fi),Y)
+	rm -rf ${dot}/debian/relinux
+endif
+
+distclean: DISTCLEAN_print_head CLEAN_clean DISTCLEAN_clean
 
 check:
 	@echo === Checking relinux executable ===
-	if [ ! -f ${dot}/relinux ];\
-	then\
-		echo Relinux executable does not exist >&2;\
-		exit 1;
-	fi
-	@grep -e "MAKEFILE_ENTER_CONF_DIR" -e "MAKEFILE_ENTER_LIB_DIR" ${dot}/relinux &>/dev/null
-	if [ $? -eq 0 ]; then \
-		echo Relinux executable has not been properly generated >&2; \
-		exit 1; \
-	fi;
-	@echo Done. No errors.
+ifeq ($(shell ls ${dot}/relinux &>/dev/null && echo Y),)
+	@echo "Relinux executable does not exist" >&2;
+	@exit 1;
+endif
+ifeq ($(shell grep -e "MAKEFILE_ENTER_CONF_DIR" -e "MAKEFILE_ENTER_LIB_DIR" ${dot}/relinux &>/dev/null; echo $?),0)
+	@echo "Relinux executable has not been properly generated" >&2;
+	@exit 1;
+endif
+	@echo Done. No errors detected.
+	@echo === Checking isatty.so ===
+ifeq ($(shell ls src/relinux/modules/osweaver/isatty${BITS}.so &>/dev/null && echo Y),)
+	@echo "src/relinux/modules/osweaver/isatty${BITS}.so does not exist" >&2;
+	@exit 1;
+endif
+ifneq ($(shell ls src/relinux/modules/osweaver/isatty*.so 2>/dev/null | grep -v isatty${BITS}.so),)
+	@echo "These files should not exist:";
+	@ls src/relinux/modules/osweaver/isatty*.so 2>/dev/null | grep -v isatty${BITS}.so |\
+awk '{print "  "$$0}';
+	@exit 1;
+endif
+	@echo Done. No errors detected.
 
 mkdir_${CONFDIR}:
 ifeq ($(shell if [ ! -d ${CONFDIR} ];then echo Y;else echo N;fi),Y)
@@ -141,3 +165,5 @@ INSTSHARE_desktop:
 INST_share: INSTSHARE_print_head mkdir_${APPDIR} INSTSHARE_desktop
 
 install: check_root relinux INST_print_head INST_confdir INST_lib INST_share INST_bin
+
+.PHONY: all check_root clean distclean install
