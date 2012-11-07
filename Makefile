@@ -35,6 +35,16 @@ ifeq ($(shell if [ ! -d ${BINDIR} ];then echo Y;else echo N;fi),Y)
 	mkdir -p ${BINDIR};
 endif
 
+mkdir_${SHAREDIR}:
+ifeq ($(shell if [ ! -d ${SHAREDIR} ];then echo Y;else echo N;fi),Y)
+	mkdir -p ${SHAREDIR};
+endif
+
+mkdir_${APPDIR}:
+ifeq ($(shell if [ ! -d ${APPDIR} ];then echo Y;else echo N;fi),Y)
+	mkdir -p ${APPDIR};
+endif
+
 csrc/isatty${BITS}.so: csrc/isatty.c 
 	@echo "=== Generating isatty override library ==="
 	${CC} -shared -fPIC -o csrc/isatty${BITS}.so csrc/isatty.c
@@ -114,6 +124,6 @@ INSTSHARE_print_head:
 INSTSHARE_desktop:
 	install -m 644 ${dot}/relinux.desktop ${APPDIR}/relinux.desktop
 
-INST_share: INSTSHARE_print_head INSTSHARE_desktop
+INST_share: INSTSHARE_print_head mkdir_${APPDIR} INSTSHARE_desktop
 
 install: check_root relinux INST_print_head INST_confdir INST_lib INST_share INST_bin
