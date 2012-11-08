@@ -2,10 +2,10 @@
 Name=Relinux
 GenericName=Relinux
 Comment=Linux distro creation toolkit
-TryExec=relinux
-Exec=relinux
+TryExec=gksu relinux
+Exec=gksu relinux
 Icon=relinux
-Terminal=true
+Terminal=false
 Type=Application
 Categories=Accessories;System;
 Keywords=Linux;Distro;Toolkit;Creator;Creation;Free;

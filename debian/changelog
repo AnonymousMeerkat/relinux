@@ -1,3 +1,9 @@
+relinux (0.4a1-4) quantal; urgency=high
+
+  * Fix sudo bug.
+
+ -- Anonymous Meerkat <meerkatanonymous@gmail.com>  Wed, 07 Nov 2012 02:00:00 -0700
+
 relinux (0.4a1-3) quantal; urgency=high
 
   * Fix distribution bug.
