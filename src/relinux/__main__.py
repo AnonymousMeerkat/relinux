@@ -174,7 +174,6 @@ def main():
         QtGui.QPixmap(relinuxdir + "/splash_light.png"))
     splash.show()
     App.processEvents()
-
     def showMessage(str_):
         splash.showMessage(
             str_ + "...", QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
@@ -206,7 +205,6 @@ def main():
     logger.logI(tn, logger.I, "=== Started new session ===")
     logger.logI(tn, logger.I, "===========================")
     showMessage(_("Loading APT cache 0%"))
-
     def aptupdate(op, percent):
         global minis
         if percent:

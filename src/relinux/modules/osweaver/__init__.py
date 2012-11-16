@@ -218,7 +218,7 @@ def run(*args):
     ui.notroot.hide()
     # TODO: Figure out why the terminal is always crashing relinux!
     # Some random error messages that could help debug:
-    ##############################################
+    ###############################################################
     # QTextLine: Can't set a line width while not layouting.
     if not configutils.getValue(config.Configuration["Relinux"]["EXPERIMENTFEATURES"]):
         ui.terminal.hide()
@@ -291,7 +291,6 @@ def run(*args):
     #   True  - Select All
     #   False - Select None
     #   None  - Toggle Selected
-
     def tripleSel(threevalues):
         val = False
         tog = False
@@ -306,13 +305,11 @@ def run(*args):
             else:
                 page["boxes"][i].set(val)
     # Run when ui.nodepends is unchecked
-
     def ignoreDepends():
         for i in range(len(page["boxes"])):
             if page["boxes"][i].get():
                 page["boxes"][i].autoSelect()
     # Start running
-
     def startThreads(*args):
         if os.getuid() != 0:
             ui.notroot.show()
@@ -404,7 +401,8 @@ def run(*args):
             threadsend=onThreadsEnd)
 
     def onWrite(msg):
-        return  # Delete this if you want a GUI terminal (which might crash relinux)
+        if not configutils.getValue(config.Configuration["Relinux"]["EXPERIMENTFEATURES"]):
+            return
         ui.terminal.moveCursor(
             QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
         QtCore.QMetaObject.invokeMethod(ui.terminal, "insertPlainText",
@@ -412,7 +410,8 @@ def run(*args):
                                         QtCore.Q_ARG("QString", msg.rstrip() + "\n"))
         #ui.terminal.setText(config.GUIStream.getvalue())
     tripleSel(True)
-    config.GUIStream.writefunc.append(onWrite)
+    if configutils.getValue(config.Configuration["Relinux"]["EXPERIMENTFEATURES"]):
+        config.GUIStream.writefunc.append(onWrite)
     ui.selall.clicked.connect(lambda *args: tripleSel(True))
     ui.selnone.clicked.connect(lambda *args: tripleSel(False))
     ui.togsel.clicked.connect(lambda *args: tripleSel(None))
