@@ -5,12 +5,12 @@ Maintainer: Anonymous Meerkat <meerkatanonymous@gmail.com>
 Build-Depends: debhelper (>= 8.0.0), bash, sed, make, coreutils
 Standards-Version: 3.9.3
 Homepage: http://relinuxkit.org/
-Vcs-Git: https://github.com/Anonymous Meerkat/relinux
+Vcs-Git: https://github.com/Anonymous Meerkat/relinux.git
 Vcs-Browser: https://github.com/Anonymous Meerkat/relinux
 
 Package: relinux
 Architecture: any
-Depends: ${misc:Depends}, python, perl, libdpkg-perl, python-qt4, python-apt, gksu
+Depends: ${misc:Depends}, python, perl, libdpkg-perl, python-qt4, python-apt, gksu | kdesudo
 Description: A free and open-source Linux distro creation toolkit
  Relinux 0.4 is a simple, fast, and easy way to create
  your own Linux distribution.

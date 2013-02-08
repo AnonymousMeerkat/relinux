@@ -3,3 +3,4 @@
 *relinux.log
 /relinux
 isatty*.so
+*.swp

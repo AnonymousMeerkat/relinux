@@ -2,7 +2,7 @@
 Name=Relinux
 GenericName=Relinux
 Comment=Linux distro creation toolkit
-Exec=gksu relinux
+Exec=relinux
 Icon=relinux
 Terminal=false
 Type=Application

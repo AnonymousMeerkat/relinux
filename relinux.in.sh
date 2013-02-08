@@ -39,6 +39,17 @@ then
 	echo "Relinux was not properly installed. Try reinstalling"
 	exit 1
 fi
+export SUDO=""
+if [ `id -u` -ne 0 ]
+then
+	which kdesudo &>/dev/null
+	if [ $? -eq 0 ]
+	then
+		SUDO="kdesudo "
+	else
+		SUDO="gksu "
+	fi
+fi
 
 function get_pyver() {
 	PYVER=`$PYEXEC -c 'import sys; print(sys.version_info[0])'`
@@ -68,7 +79,7 @@ then
 	if [ $? -ne 0 ]
 	then
 		echo "Relinux needs python3-apt. Please wait while relinux tries to install this"
-		sudo apt-get install -y python3-apt
+		$SUDO apt-get install -y python3-apt
 		if [ $? -ne 0 ]
 		then
 			echo "An error has occurred while trying to install python3-apt"
@@ -77,4 +88,4 @@ then
 	fi
 fi
 
-$PYEXEC $RELINUXEXECFILE $@
+$SUDO $PYEXEC $RELINUXEXECFILE $@
