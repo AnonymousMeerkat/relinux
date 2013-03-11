@@ -255,3 +255,4 @@ def commitChanges(cache, ap, ip):
     s = cache.commit(ap, ip)
     cache.open(None)
     return s
+
