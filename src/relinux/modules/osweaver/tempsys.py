@@ -390,10 +390,12 @@ class UbiquitySetup(threadmanager.Thread):
                 os.rename("/usr/share/ubiquity/apt-setup",
                           "/usr/share/ubiquity/apt-setup.relinux-backup")
             aptsetup = open("/usr/share/ubiquity/apt-setup", "w")
-            aptsetup.write("# do nothing\n")
+            aptsetup.write("\n")
             aptsetup.close()
+            fsutil.chmod("/usr/share/ubiquity/apt-setup", 0o755, self.tn)
         elif os.path.exists("/usr/share/ubiquity/apt-setup.relinux-backup"):
-            os.remove("/usr/share/ubiquity/apt-setup")
+            # TODO: Fix the 40cdrom bug?
+            fsutil.rm("/usr/share/ubiquity/apt-setup", False, self.tn)
             os.rename("/usr/share/ubiquity/apt-setup.relinux-backup",
                           "/usr/share/ubiquity/apt-setup")
 ubiquitysetup["thread"] = UbiquitySetup
