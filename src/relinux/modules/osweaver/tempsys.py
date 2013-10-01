@@ -381,15 +381,21 @@ class UbiquitySetup(threadmanager.Thread):
                 os.path.isfile("/usr/lib/ubiquity/user-setup/user-setup-apply")):
             shutil.copy2("/usr/lib/ubiquity/user-setup/user-setup-apply.orig",
                          "/usr/lib/ubiquity/user-setup/user-setup-apply")
-        if (True or
-                configutils.getValue(configs[configutils.aptlistchange])):
+        # If the user requested to make sure that the installer does _not_ change the apt sources,
+        #  make sure that relinux obeys this.
+        # However, if the user changed his/her mind, we want to make sure that relinux
+        #  work with that too
+        if not configutils.getValue(configs[configutils.aptlistchange]):
             if not os.path.exists("/usr/share/ubiquity/apt-setup.relinux-backup"):
                 os.rename("/usr/share/ubiquity/apt-setup",
                           "/usr/share/ubiquity/apt-setup.relinux-backup")
             aptsetup = open("/usr/share/ubiquity/apt-setup", "w")
-            aptsetup.write("#!/bin/sh\n")
-            aptsetup.write("exit\n")
+            aptsetup.write("# do nothing\n")
             aptsetup.close()
+        else if os.path.exists("/usr/share/ubiquity/apt-setup.relinux-backup"):
+            os.remove("/usr/share/ubiquity/apt-setup")
+            os.rename("/usr/share/ubiquity/apt-setup.relinux-backup",
+                          "/usr/share/ubiquity/apt-setup")
 ubiquitysetup["thread"] = UbiquitySetup
 
 
