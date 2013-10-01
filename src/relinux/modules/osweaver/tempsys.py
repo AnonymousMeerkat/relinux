@@ -392,7 +392,7 @@ class UbiquitySetup(threadmanager.Thread):
             aptsetup = open("/usr/share/ubiquity/apt-setup", "w")
             aptsetup.write("# do nothing\n")
             aptsetup.close()
-        else if os.path.exists("/usr/share/ubiquity/apt-setup.relinux-backup"):
+        elif os.path.exists("/usr/share/ubiquity/apt-setup.relinux-backup"):
             os.remove("/usr/share/ubiquity/apt-setup")
             os.rename("/usr/share/ubiquity/apt-setup.relinux-backup",
                           "/usr/share/ubiquity/apt-setup")
