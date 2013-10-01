@@ -299,7 +299,7 @@ casperconf = {"deps": [cpetcvar], "tn": "casper.conf"}
 
 class CasperConfEditor(threadmanager.Thread):
     # Helper function
-    def _varEditor(self, line, lists, export_str="export "):
+    def _varEditor(self, line, lists, export_str="export ", quote_str="\""):
         patt = re.compile("^.*? *([A-Za-z_-]*?)=.*$")
         m = patt.match(line)
         if utilities.checkMatched(m):
@@ -307,7 +307,7 @@ class CasperConfEditor(threadmanager.Thread):
                 if m.group(1) == i:
                     bak = copy.copy(lists[i])
                     lists[i] = None
-                    return [True, export_str + i + "=\"" + bak + "\"\n"]
+                    return [True, export_str + i + "=" + quote_str + bak + quote_str + "\n"]
         patt = re.compile("^ *#.*$")
         m = patt.match(line)
         if utilities.checkMatched(m):
@@ -320,14 +320,14 @@ class CasperConfEditor(threadmanager.Thread):
 
     # Casper Variable Editor
     # lists - Dictionary containing all options needed
-    def varEditor(self, files, lists, export_str="export "):
+    def varEditor(self, files, lists, export_str="export ", quote_str="\""):
         buffers = fsutil.ife_getbuffers(files)
-        fsutil.ife(buffers, lambda line: self._varEditor(line, lists, export_str))
+        fsutil.ife(buffers, lambda line: self._varEditor(line, lists, export_str, quote_str))
         # In case the file is broken, we'll add the lines needed
         buffers = open(files, "a")
         for i in lists:
             if lists[i] is not None:
-                buffers.write(export_str + i + "=\"" + lists[i] + "\"\n")
+                buffers.write(export_str + i + "=" + quote_str + lists[i] + quote_str + "\n")
         buffers.close()
 
     def runthread(self):
@@ -365,7 +365,7 @@ class CasperConfEditor(threadmanager.Thread):
             "DISTRIB_RELEASE": configutils.getValue(configs[configutils.sysversion]),
             "DISTRIB_CODENAME": configutils.getValue(configs[configutils.codename]),
             "DISTRIB_DESCRIPTION":
-                       configutils.getValue(configs[configutils.description])}, "")
+                       configutils.getValue(configs[configutils.description])}, "", "")
 casperconf["thread"] = CasperConfEditor
 
 
