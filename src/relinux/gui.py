@@ -72,6 +72,9 @@ class MultipleValues(QtGui.QWidget):
         self._rePack()
 
     def remEntry(self, row):
+        if len(self.entries) == 1:
+            self.entries[row].setText("")
+            return
         self.gridlayout.removeWidget(self.entries[row])
         self.gridlayout.removeWidget(self.minuses[row])
         self.gridlayout.removeWidget(self.pluses[row])
